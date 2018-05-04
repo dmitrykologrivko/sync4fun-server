@@ -18,6 +18,7 @@
   "homepage": "https://github.com/dmitrykologrivko/sync4fun-server#readme",
   "dependencies": {
     "express": "^4.16.3",
+    "express3-handlebars": "^0.5.2",
     "socket.io": "^2.1.0"
   }
 }

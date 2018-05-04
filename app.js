@@ -1,9 +1,17 @@
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const handlebars = require('express3-handlebars').create();
+
+// Set template engine
+app.engine('handlebars', handlebars.engine);
+app.set('view engine', 'handlebars');
+
+// Set static route
+app.use(require('express').static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
-    res.send('It works!');
+    res.render('home');
 });
 
 io.on('connection', (socket) => {
