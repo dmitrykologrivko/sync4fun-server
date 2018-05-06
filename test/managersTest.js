@@ -66,6 +66,25 @@ describe('Room manager test', () => {
         });
     });
 
+    describe('#removeWatcher()', () => {
+        it('when watcher use room should remove watcher', () => {
+            const room = this.roomManager.getRooms().get('#1');
+            const watcher = room.getWatchers().get('ID:1');
+
+            assert.equal(true, room.getWatchers().has(watcher.getId()));
+
+            this.roomManager.removeWatcher(watcher);
+
+            assert.equal(false, room.getWatchers().has(watcher.getId()));
+        });
+
+        it('when watcher not use any rooms should not do any changes', () => {
+            const watcher = WatchersFactory.makeWatcher('123', 'Some name');
+            // TODO: Improve checking?
+            this.roomManager.removeWatcher(watcher);
+        });
+    });
+
     describe('#findWatcherRoom()', () => {
         it('when watcher use room should return room', () => {
             const room = this.roomManager.getRooms().get('#1');

@@ -37,6 +37,11 @@ class RoomManager {
         }
     }
 
+    removeWatcher(watcher) {
+        const room = this.findWatcherRoom(watcher);
+        if (room) room.removeWatcher(watcher);
+    }
+
     findWatcherRoom(searchableWatcher) {
         for (const room of this._rooms.values()) {
             for (const watcher of room.getWatchers().values()) {
