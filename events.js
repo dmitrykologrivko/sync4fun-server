@@ -13,7 +13,7 @@ module.exports = (io, socket, roomManager) => {
         let watcher = new Watcher(socket.handshake.sessionId, user.name);
 
         try {
-            roomManager.addWatcherToRoom(watcher, room.name);
+            roomManager.addWatcher(watcher, room.name);
 
             socket.emit('you joined to room', {});
             socket.to(room.name).emit('user joined to room', {});

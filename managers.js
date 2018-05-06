@@ -19,7 +19,7 @@ class RoomManager {
         return this._rooms;
     }
 
-    addWatcherToRoom(watcher, roomName) {
+    addWatcher(watcher, roomName) {
         const room = this.findWatcherRoom(watcher);
 
         if (room) {

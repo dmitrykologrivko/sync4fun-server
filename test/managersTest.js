@@ -20,12 +20,12 @@ describe('Room manager test', () => {
         this.roomManager.setRooms(rooms);
     });
 
-    describe('#addWatcherToRoom()', () => {
+    describe('#addWatcher()', () => {
         it('when watcher use provided room should throw error', () => {
             const room = this.roomManager.getRooms().get('#1');
             const watcher = room.getWatchers().get('ID:1');
 
-            expect(() => {this.roomManager.addWatcherToRoom(watcher, room.getName())})
+            expect(() => {this.roomManager.addWatcher(watcher, room.getName())})
                 .to
                 .throw(WatcherUseThisRoomError);
         });
@@ -34,7 +34,7 @@ describe('Room manager test', () => {
             const room = this.roomManager.getRooms().get('#2');
             const watcher = this.roomManager.getRooms().get('#1').getWatchers().get('ID:1');
 
-            expect(() => {this.roomManager.addWatcherToRoom(watcher, room.getName())})
+            expect(() => {this.roomManager.addWatcher(watcher, room.getName())})
                 .to
                 .throw(WatcherUseAnotherRoomError);
         });
@@ -45,7 +45,7 @@ describe('Room manager test', () => {
 
             assert.equal(false, room.getWatchers().has(watcher.getId()));
 
-            this.roomManager.addWatcherToRoom(watcher, room.getName());
+            this.roomManager.addWatcher(watcher, room.getName());
 
             assert.equal(true, room.getWatchers().has(watcher.getId()));
         });
@@ -56,7 +56,7 @@ describe('Room manager test', () => {
 
             assert.equal(false, this.roomManager.getRooms().has(room.getName()));
 
-            this.roomManager.addWatcherToRoom(watcher, room.getName());
+            this.roomManager.addWatcher(watcher, room.getName());
 
             assert.equal(true, this.roomManager.getRooms().has(room.getName()));
 
