@@ -12,6 +12,10 @@ class Room {
         return this._watchers;
     }
 
+    setWatchers(watchers) {
+        this._watchers = watchers;
+    }
+
     addWatcher(watcher) {
         this._watchers.set(watcher.getId(), watcher);
     }
@@ -49,5 +53,6 @@ class Watcher {
     }
 }
 
-module.exports.Room = Room;
-module.exports.Watcher = Watcher;
+module.exports = {
+    Room, Watcher
+};
