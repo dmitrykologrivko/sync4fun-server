@@ -14,13 +14,11 @@ app.set('view engine', 'handlebars');
 // Set static route
 app.use(require('express').static(__dirname + '/public'));
 
-app.get('/', (req, res) => {
-    res.render('home');
-});
+// Setup controllers
+require('./controllers')(app);
 
-io.on('connection', (socket) => {
-    require('./events')(io, socket, roomManager);
-});
+// Setup events
+require('./events')(io, roomManager);
 
 server.listen(process.env.PORT || 8000, () => {
     console.log('Server has been started');

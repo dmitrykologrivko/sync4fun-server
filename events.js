@@ -4,7 +4,7 @@ const {
     WatcherUseAnotherRoomError
 } = require('./managers');
 
-module.exports = (io, socket, roomManager) => {
+function setupEvents(io, socket, roomManager) {
 
     socket.on('user join room', (req) => {
         let user = req.user;
@@ -17,15 +17,19 @@ module.exports = (io, socket, roomManager) => {
 
             socket.emit('you joined to room', {});
             socket.to(room.name).emit('user joined to room', {});
-        } catch (e if e instanceof WatcherUseThisRoomError) {
-            socket.emit('you re-connected to room', {});
-            socket.to(room.name).emit('user re-connected to room', {});
-        } catch (e if e instanceof WatcherUseAnotherRoomError) {
-            roomManager.moveWatcher(watcher, room.name);
+        } catch (e) {
+            if (e instanceof WatcherUseThisRoomError) {
+                socket.emit('you re-connected to room', {});
+                socket.to(room.name).emit('user re-connected to room', {});
+            } else if (e instanceof WatcherUseAnotherRoomError) {
+                roomManager.moveWatcher(watcher, room.name);
 
-            socket.emit('you joined to room', {});
-            // TODO: Implement group emit
-            socket.to('').emit('user left room', {});
+                socket.emit('you joined to room', {});
+                // TODO: Implement group emit
+                socket.to('').emit('user left room', {});
+            } else {
+                console.error(e);
+            }
         }
     });
 
@@ -56,4 +60,13 @@ module.exports = (io, socket, roomManager) => {
     socket.on('user change play state to stop', (req) => {
 
     });
+
+}
+
+module.exports = (io, roomManager) => {
+
+    io.on('connection', (socket) => {
+        setupEvents(io, socket, roomManager);
+    });
+
 };
