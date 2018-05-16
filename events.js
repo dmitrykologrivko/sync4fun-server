@@ -18,10 +18,14 @@ module.exports = (io, socket, roomManager) => {
             socket.emit('you joined to room', {});
             socket.to(room.name).emit('user joined to room', {});
         } catch (e if e instanceof WatcherUseThisRoomError) {
-            socket.emit('you joined to room', {});
+            socket.emit('you re-connected to room', {});
             socket.to(room.name).emit('user re-connected to room', {});
         } catch (e if e instanceof WatcherUseAnotherRoomError) {
-            socket.emit('you use another room', {});
+            roomManager.moveWatcher(watcher, room.name);
+
+            socket.emit('you joined to room', {});
+            // TODO: Implement group emit
+            socket.to('').emit('user left room', {});
         }
     });
 

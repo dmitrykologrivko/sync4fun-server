@@ -85,6 +85,20 @@ describe('Room manager test', () => {
         });
     });
 
+    describe('#moveWatcher()', () => {
+        it('when watcher use another room and provided room exists should move watcher', () => {
+            throw Error('Not implemented test');
+        });
+
+        it('when watcher use another room and provided room not exist should add room and move watcher', () => {
+            throw Error('Not implemented test');
+        });
+
+        it('when watcher not use any rooms should not do any changes', () => {
+            throw Error('Not implemented test');
+        });
+    });
+
     describe('#findWatcherRoom()', () => {
         it('when watcher use room should return room', () => {
             const room = this.roomManager.getRooms().get('#1');
