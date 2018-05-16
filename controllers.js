@@ -4,8 +4,8 @@ module.exports = (app) => {
         res.render('home');
     });
 
-    app.get('/room', (req, res) => {
-        res.render('room');
+    app.get('/app', (req, res) => {
+        res.render('app');
     });
 
 };
