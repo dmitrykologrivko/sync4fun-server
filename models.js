@@ -29,14 +29,38 @@ class Room {
     }
 }
 
+class File {
+    constructor(name, size) {
+        this._name = name;
+        this._size = size;
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    set name(name) {
+        this._name = name;
+    }
+
+    get size() {
+        return this._size;
+    }
+
+    set size(size) {
+        this._size = size;
+    }
+}
+
 class Watcher {
-    constructor(id, name) {
+    constructor(id, name, file) {
         if (!id) throw new Error('Required param "ID" is missed!');
         if (!name) throw new Error('Required param "Name" is missed!');
+        // TODO: File is required param
 
         this._id = id;
         this._name = name;
-        this._file = null;
+        this._file = file;
     }
 
     getId() {
@@ -57,5 +81,5 @@ class Watcher {
 }
 
 module.exports = {
-    Room, Watcher
+    Room, File, Watcher
 };

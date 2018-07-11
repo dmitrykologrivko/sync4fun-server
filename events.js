@@ -1,4 +1,5 @@
 const Watcher = require('./models').Watcher;
+const File = require('./models').File;
 const {
     WatcherUseThisRoomError,
     WatcherUseAnotherRoomError
@@ -10,7 +11,8 @@ function setupEvents(io, socket, roomManager) {
         let user = req.user;
         let room = req.room;
 
-        let watcher = new Watcher(socket.id, user.name);
+        let file = new File(req.file.name, req.file.size);
+        let watcher = new Watcher(socket.id, user.name, file);
 
         try {
             roomManager.addWatcher(watcher, room.name);
@@ -24,6 +26,10 @@ function setupEvents(io, socket, roomManager) {
                 },
                 room: {
                     name: roomManager.findWatcherRoom(watcher).getName()
+                },
+                file: {
+                    name: file.name,
+                    size: file.size
                 }
             });
 
@@ -42,6 +48,10 @@ function setupEvents(io, socket, roomManager) {
                     },
                     room: {
                         name: roomManager.findWatcherRoom(watcher).getName()
+                    },
+                    file: {
+                        name: file.name,
+                        size: file.size
                     }
                 });
 
@@ -76,6 +86,10 @@ function setupEvents(io, socket, roomManager) {
                     },
                     room: {
                         name: roomManager.findWatcherRoom(watcher).getName()
+                    },
+                    file: {
+                        name: file.name,
+                        size: file.size
                     }
                 });
 

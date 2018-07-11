@@ -6,14 +6,19 @@ $(function () {
 
     /* Module functions */
 
-    function updateRoomInformation(user, room) {
+    function updateRoomInformation(user, room, file) {
         $('#roomTitle').html('Room: <span class="badge badge-success">' + room.name + '</span> <a id="leaveRoom" href="/">Leave</a>');
         $('#roomWatcherName').html('Watcher: <span class="badge badge-success">' + user.name + '</span>');
+        $('#roomWatcherFile').html('File: <span class="badge badge-success">' + file.name +'</span>');
 
         // setup leave room click
         $('#leaveRoom').click(function () {
             client.leaveRoom();
         });
+    }
+
+    function updateVideoPlayer(url) {
+        $('#videoPlayer').attr("src", url);
     }
 
     function addRoomEvent(user, message) {
@@ -26,7 +31,7 @@ $(function () {
         return {
             notify(res) {
                 $('#joinRoomModal').modal('hide');
-                updateRoomInformation(res.user, res.room);
+                updateRoomInformation(res.user, res.room, res.file);
                 addRoomEvent(res.user, 'Connected to room');
             }
         }
@@ -36,7 +41,7 @@ $(function () {
         return {
             notify(res) {
                 $('#joinRoomModal').modal('hide');
-                updateRoomInformation(res.user, res.room);
+                updateRoomInformation(res.user, res.room, res.file);
                 addRoomEvent(res.user, 'Re-connected to room');
             }
         }
@@ -93,14 +98,22 @@ $(function () {
 
     // setup join to room click
     $('#joinRoom').click(function () {
+        var file = $('#watcher-file')[0].files[0];
+
         client.joinUserToRoom({
             user: {
                 name: $('#watcher-name').val()
             },
             room: {
                 name: $('#room-name').val()
+            },
+            file: {
+                name: file.name,
+                size: file.size
             }
         });
+
+        updateVideoPlayer(URL.createObjectURL(file));
     });
 
 });
