@@ -56,6 +56,8 @@ function setupEvents(io, socket, roomManager) {
             } else if (e instanceof WatcherUseAnotherRoomError) {
                 let previousRoom = roomManager.findWatcherRoom(watcher);
 
+                roomManager.moveWatcher(watcher, previousRoom.name);
+
                 socket.leave(previousRoom.getName());
 
                 socket.to(previousRoom.name).emit('user left room', {
@@ -90,15 +92,25 @@ function setupEvents(io, socket, roomManager) {
     });
 
     socket.on('user leave room', (req) => {
-        let user = req.user;
+        let watcher = roomManager.findWatcherById(socket.id);
+        if (!watcher) {
+            return;
+        }
 
-        let watcher = new Watcher(socket.id, user.name);
+        let room = roomManager.findWatcherRoom(watcher);
 
         roomManager.removeWatcher(watcher);
 
+        socket.leave(room.getName());
+
         socket.emit('you left room', {});
-        // TODO: Implement group emit
-        socket.to('').emit('user left room', {});
+
+        socket.to(room.getName()).emit('user left room', {
+            user: {
+                id: watcher.getId(),
+                name: watcher.getName()
+            }
+        });
     });
 
     socket.on('user updates file information', (req) => {
@@ -115,6 +127,28 @@ function setupEvents(io, socket, roomManager) {
 
     socket.on('user change play state to stop', (req) => {
 
+    });
+
+    socket.on('disconnect', () => {
+        let watcher = roomManager.findWatcherById(socket.id);
+        if (!watcher) {
+            return;
+        }
+
+        let room = roomManager.findWatcherRoom(watcher);
+
+        roomManager.removeWatcher(watcher);
+
+        socket.leave(room.getName());
+
+        socket.emit('you left room', {});
+
+        socket.to(room.getName()).emit('user left room', {
+            user: {
+                id: watcher.getId(),
+                name: watcher.getName()
+            }
+        });
     });
 
 }

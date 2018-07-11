@@ -68,6 +68,20 @@ class RoomManager {
 
         return null;
     }
+
+    findWatcherById(watcherId) {
+        if (!watcherId) return null;
+
+        for (const room of this._rooms.values()) {
+            for (const watcher of room.getWatchers().values()) {
+                if (watcherId === watcher.getId()) {
+                    return watcher;
+                }
+            }
+        }
+
+        return null;
+    }
 }
 
 module.exports = {

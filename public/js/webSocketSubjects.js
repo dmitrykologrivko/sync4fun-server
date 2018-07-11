@@ -36,6 +36,14 @@ var YouReConnectedToRoomSubject = function () {
 
 YouReConnectedToRoomSubject.prototype = Object.create(BaseSubject.prototype);
 
+/* You Left Room */
+
+var YouLeftRoomSubject = function () {
+    Object.getPrototypeOf(YouLeftRoomSubject.prototype).constructor.call(this);
+};
+
+YouLeftRoomSubject.prototype = Object.create(BaseSubject.prototype);
+
 /* User Joined To Room */
 
 var UserJoinedToRoomSubject = function () {
@@ -52,11 +60,21 @@ var UserReConnectedToRoomSubject = function() {
 
 UserReConnectedToRoomSubject.prototype = Object.create(BaseSubject.prototype);
 
+/* User Left Room */
+
+var UserLeftRoomSubject = function() {
+    Object.getPrototypeOf(UserLeftRoomSubject.prototype).constructor.call(this);
+};
+
+UserLeftRoomSubject.prototype = Object.create(BaseSubject.prototype);
+
 /* Export subjects */
 
 window.subjects = {
     youJoinedToRoom: new YouJoinedToRoomSubject(),
     youReConnectedToRoom: new YouReConnectedToRoomSubject(),
+    youLeftRoom: new YouLeftRoomSubject(),
     userReConnectedToRoom: new UserReConnectedToRoomSubject(),
-    userJoinedToRoom: new UserJoinedToRoomSubject()
+    userJoinedToRoom: new UserJoinedToRoomSubject(),
+    userLeftRoom: new UserLeftRoomSubject()
 };

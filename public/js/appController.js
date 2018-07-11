@@ -7,8 +7,13 @@ $(function () {
     /* Module functions */
 
     function updateRoomInformation(user, room) {
-        $('#roomTitle').html('Room: <span class="badge badge-success">' + room.name + '</span> <a href="/">Leave</a>');
+        $('#roomTitle').html('Room: <span class="badge badge-success">' + room.name + '</span> <a id="leaveRoom" href="/">Leave</a>');
         $('#roomWatcherName').html('Watcher: <span class="badge badge-success">' + user.name + '</span>');
+
+        // setup leave room click
+        $('#leaveRoom').click(function () {
+            client.leaveRoom();
+        });
     }
 
     function addRoomEvent(user, message) {
@@ -37,6 +42,14 @@ $(function () {
         }
     };
 
+    var YouLeftRoomObserver = function () {
+        return {
+            notify(res) {
+                console.log('You have left the room');
+            }
+        }
+    };
+
     var UserJoinedToRoomObserver = function () {
         return {
             notify(res) {
@@ -53,12 +66,22 @@ $(function () {
         }
     };
 
+    var UserLeftRoomObserver = function() {
+        return {
+            notify(res) {
+                addRoomEvent(res.user, 'Left room');
+            }
+        }
+    };
+
     /* Subscribe observers */
 
     window.subjects.youJoinedToRoom.subscribe(new YouJoinedToRoomObserver());
     window.subjects.youReConnectedToRoom.subscribe(new YouReConnectedToRoomObserver());
+    window.subjects.youLeftRoom.subscribe(new YouLeftRoomObserver());
     window.subjects.userJoinedToRoom.subscribe(new UserJoinedToRoomObserver());
     window.subjects.userReConnectedToRoom.subscribe(new UserReConnectedToRoomObserver());
+    window.subjects.userLeftRoom.subscribe(new UserLeftRoomObserver());
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
