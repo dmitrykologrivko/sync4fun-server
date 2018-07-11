@@ -36,9 +36,27 @@ var YouReConnectedToRoomSubject = function () {
 
 YouReConnectedToRoomSubject.prototype = Object.create(BaseSubject.prototype);
 
+/* User Joined To Room */
+
+var UserJoinedToRoomSubject = function () {
+    Object.getPrototypeOf(UserJoinedToRoomSubject.prototype).constructor.call(this);
+};
+
+UserJoinedToRoomSubject.prototype = Object.create(BaseSubject.prototype);
+
+/* User Re-Connected To Room */
+
+var UserReConnectedToRoomSubject = function() {
+    Object.getPrototypeOf(UserReConnectedToRoomSubject.prototype).constructor.call(this);
+};
+
+UserReConnectedToRoomSubject.prototype = Object.create(BaseSubject.prototype);
+
 /* Export subjects */
 
 window.subjects = {
     youJoinedToRoom: new YouJoinedToRoomSubject(),
-    youReConnectedToRoom: new YouReConnectedToRoomSubject()
+    youReConnectedToRoom: new YouReConnectedToRoomSubject(),
+    userReConnectedToRoom: new UserReConnectedToRoomSubject(),
+    userJoinedToRoom: new UserJoinedToRoomSubject()
 };

@@ -31,6 +31,9 @@ class Room {
 
 class Watcher {
     constructor(id, name) {
+        if (!id) throw new Error('Required param "ID" is missed!');
+        if (!name) throw new Error('Required param "Name" is missed!');
+
         this._id = id;
         this._name = name;
         this._file = null;

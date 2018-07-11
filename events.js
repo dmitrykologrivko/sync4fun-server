@@ -10,10 +10,12 @@ function setupEvents(io, socket, roomManager) {
         let user = req.user;
         let room = req.room;
 
-        let watcher = new Watcher(socket.handshake.sessionId, user.name);
+        let watcher = new Watcher(socket.id, user.name);
 
         try {
             roomManager.addWatcher(watcher, room.name);
+
+            socket.join(room.name);
 
             socket.emit('you joined to room', {
                 user: {
@@ -25,7 +27,12 @@ function setupEvents(io, socket, roomManager) {
                 }
             });
 
-            socket.to(room.name).emit('user joined to room', {});
+            socket.to(room.name).emit('user joined to room', {
+                user: {
+                    id: watcher.getId(),
+                    name: watcher.getName()
+                }
+            });
         } catch (e) {
             if (e instanceof WatcherUseThisRoomError) {
                 socket.emit('you re-connected to room', {
@@ -38,13 +45,44 @@ function setupEvents(io, socket, roomManager) {
                     }
                 });
 
-                socket.to(room.name).emit('user re-connected to room', {});
-            } else if (e instanceof WatcherUseAnotherRoomError) {
-                roomManager.moveWatcher(watcher, room.name);
+                socket.join(room.name);
 
-                socket.emit('you joined to room', {});
-                // TODO: Implement group emit
-                socket.to('').emit('user left room', {});
+                socket.to(room.name).emit('user re-connected to room', {
+                    user: {
+                        id: watcher.getId(),
+                        name: watcher.getName()
+                    }
+                });
+            } else if (e instanceof WatcherUseAnotherRoomError) {
+                let previousRoom = roomManager.findWatcherRoom(watcher);
+
+                socket.leave(previousRoom.getName());
+
+                socket.to(previousRoom.name).emit('user left room', {
+                    user: {
+                        id: watcher.getId(),
+                        name: watcher.getName()
+                    }
+                });
+
+                socket.join(room.name);
+
+                socket.emit('you joined to room', {
+                    user: {
+                        id: watcher.getId(),
+                        name: watcher.getName()
+                    },
+                    room: {
+                        name: roomManager.findWatcherRoom(watcher).getName()
+                    }
+                });
+
+                socket.to(room.name).emit('user joined to room', {
+                    user: {
+                        id: watcher.getId(),
+                        name: watcher.getName()
+                    }
+                });
             } else {
                 console.error(e);
             }
@@ -54,7 +92,7 @@ function setupEvents(io, socket, roomManager) {
     socket.on('user leave room', (req) => {
         let user = req.user;
 
-        let watcher = new Watcher(socket.handshake.sessionId, user.name);
+        let watcher = new Watcher(socket.id, user.name);
 
         roomManager.removeWatcher(watcher);
 

@@ -37,10 +37,28 @@ $(function () {
         }
     };
 
+    var UserJoinedToRoomObserver = function () {
+        return {
+            notify(res) {
+                addRoomEvent(res.user, 'Connected to room');
+            }
+        }
+    };
+
+    var UserReConnectedToRoomObserver = function() {
+        return {
+            notify(res) {
+                addRoomEvent(res.user, 'Re-connected to room');
+            }
+        }
+    };
+
     /* Subscribe observers */
 
     window.subjects.youJoinedToRoom.subscribe(new YouJoinedToRoomObserver());
     window.subjects.youReConnectedToRoom.subscribe(new YouReConnectedToRoomObserver());
+    window.subjects.userJoinedToRoom.subscribe(new UserJoinedToRoomObserver());
+    window.subjects.userReConnectedToRoom.subscribe(new UserReConnectedToRoomObserver());
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
