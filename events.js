@@ -15,11 +15,29 @@ function setupEvents(io, socket, roomManager) {
         try {
             roomManager.addWatcher(watcher, room.name);
 
-            socket.emit('you joined to room', {});
+            socket.emit('you joined to room', {
+                user: {
+                    id: watcher.getId(),
+                    name: watcher.getName()
+                },
+                room: {
+                    name: roomManager.findWatcherRoom(watcher).getName()
+                }
+            });
+
             socket.to(room.name).emit('user joined to room', {});
         } catch (e) {
             if (e instanceof WatcherUseThisRoomError) {
-                socket.emit('you re-connected to room', {});
+                socket.emit('you re-connected to room', {
+                    user: {
+                        id: watcher.getId(),
+                        name: watcher.getName()
+                    },
+                    room: {
+                        name: roomManager.findWatcherRoom(watcher).getName()
+                    }
+                });
+
                 socket.to(room.name).emit('user re-connected to room', {});
             } else if (e instanceof WatcherUseAnotherRoomError) {
                 roomManager.moveWatcher(watcher, room.name);
