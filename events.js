@@ -132,15 +132,18 @@ function setupEvents(io, socket, roomManager) {
     });
 
     socket.on('user change play state to play', (req) => {
-
+        let room = req.room;
+        socket.to(room.name).emit('user changed play state to play', {});
     });
 
     socket.on('user change play state to pause', (req) => {
-
+        let room = req.room;
+        socket.to(room.name).emit('user changed play state to pause', {});
     });
 
     socket.on('user change play state to stop', (req) => {
-
+        let room = req.room;
+        socket.to(room.name).emit('user changed play state to stop', {});
     });
 
     socket.on('disconnect', () => {

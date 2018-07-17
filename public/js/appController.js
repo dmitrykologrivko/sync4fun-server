@@ -79,6 +79,30 @@ $(function () {
         }
     };
 
+    var UserChangedPlayStateToPlayObserver = function() {
+        return {
+            notify(res) {
+                $('#videoPlayer').trigger('play');
+            }
+        }
+    };
+
+    var UserChangedPlayStateToPauseObserver = function() {
+        return {
+            notify(res) {
+                $('#videoPlayer').trigger('pause');
+            }
+        }
+    };
+
+    var UserChangedPlayStateToStopObserver = function() {
+        return {
+            notify(res) {
+                $('#videoPlayer').trigger('stop');
+            }
+        }
+    };
+
     /* Subscribe observers */
 
     window.subjects.youJoinedToRoom.subscribe(new YouJoinedToRoomObserver());
@@ -87,6 +111,9 @@ $(function () {
     window.subjects.userJoinedToRoom.subscribe(new UserJoinedToRoomObserver());
     window.subjects.userReConnectedToRoom.subscribe(new UserReConnectedToRoomObserver());
     window.subjects.userLeftRoom.subscribe(new UserLeftRoomObserver());
+    window.subjects.userChangedPlayStateToPlay.subscribe(new UserChangedPlayStateToPlayObserver());
+    window.subjects.userChangedPlayStateToPause.subscribe(new UserChangedPlayStateToPauseObserver());
+    window.subjects.userChangedPlayStateToStop.subscribe(new UserChangedPlayStateToStopObserver());
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,6 +141,21 @@ $(function () {
         });
 
         updateVideoPlayer(URL.createObjectURL(file));
+    });
+
+    $('#videoPlayer').on('play', function () {
+        console.log('play');
+        client.play({room: {name: 'test'}}); // TODO: Change this hardcoded object
+    });
+
+    $('#videoPlayer').on('pause', function () {
+        console.log('pause');
+        client.pause({room: {name: 'test'}}); // TODO: Change this hardcoded object
+    });
+
+    $('#videoPlayer').on('stop', function () {
+        console.log('stop');
+        client.stop({room: {name: 'test'}}); // TODO: Change this hardcoded object
     });
 
 });

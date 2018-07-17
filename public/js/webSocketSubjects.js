@@ -68,6 +68,30 @@ var UserLeftRoomSubject = function() {
 
 UserLeftRoomSubject.prototype = Object.create(BaseSubject.prototype);
 
+/* User Changed Play State To Play */
+
+var UserChangedPlayStateToPlaySubject = function() {
+    Object.getPrototypeOf(UserChangedPlayStateToPlaySubject.prototype).constructor.call(this);
+};
+
+UserChangedPlayStateToPlaySubject.prototype = Object.create(BaseSubject.prototype);
+
+/* User Changed Play State To Pause */
+
+var UserChangedPlayStateToPauseSubject = function() {
+    Object.getPrototypeOf(UserChangedPlayStateToPauseSubject.prototype).constructor.call(this);
+};
+
+UserChangedPlayStateToPauseSubject.prototype = Object.create(BaseSubject.prototype);
+
+/* User Changed Play State To Stop */
+
+var UserChangedPlayStateToStopSubject = function() {
+    Object.getPrototypeOf(UserChangedPlayStateToStopSubject.prototype).constructor.call(this);
+};
+
+UserChangedPlayStateToStopSubject.prototype = Object.create(BaseSubject.prototype);
+
 /* Export subjects */
 
 window.subjects = {
@@ -76,5 +100,8 @@ window.subjects = {
     youLeftRoom: new YouLeftRoomSubject(),
     userReConnectedToRoom: new UserReConnectedToRoomSubject(),
     userJoinedToRoom: new UserJoinedToRoomSubject(),
-    userLeftRoom: new UserLeftRoomSubject()
+    userLeftRoom: new UserLeftRoomSubject(),
+    userChangedPlayStateToPlay: new UserChangedPlayStateToPlaySubject(),
+    userChangedPlayStateToPause: new UserChangedPlayStateToPauseSubject(),
+    userChangedPlayStateToStop: new UserChangedPlayStateToStopSubject()
 };
