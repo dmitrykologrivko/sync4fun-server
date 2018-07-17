@@ -25,6 +25,24 @@ $(function () {
         $('.events-list').append('<li><span class="badge badge-info">' + user.name + '</span> ' + message + '</li>');
     }
 
+    // TODO: Make function as module lever
+    window.playVideo = function () {
+        $('#videoPlayer').trigger('play');
+        client.play({room: {name: 'test'}}); // TODO: Change this hardcoded object
+    };
+
+    // TODO: Make function as module lever
+    window.pauseVideo = function() {
+        $('#videoPlayer').trigger('pause');
+        client.pause({room: {name: 'test'}}); // TODO: Change this hardcoded object
+    };
+
+    // TODO: Make function as module lever
+    window.stopVideo = function () {
+        $('#videoPlayer').trigger('stop');
+        client.stop({room: {name: 'test'}}); // TODO: Change this hardcoded object
+    };
+
     /* Module observers */
 
     var YouJoinedToRoomObserver = function () {
@@ -83,6 +101,7 @@ $(function () {
         return {
             notify(res) {
                 $('#videoPlayer').trigger('play');
+                addRoomEvent('?', 'Start playing a video');
             }
         }
     };
@@ -91,6 +110,7 @@ $(function () {
         return {
             notify(res) {
                 $('#videoPlayer').trigger('pause');
+                addRoomEvent('?', 'Paused playing a video');
             }
         }
     };
@@ -99,6 +119,7 @@ $(function () {
         return {
             notify(res) {
                 $('#videoPlayer').trigger('stop');
+                addRoomEvent('?', 'Stopped playing a video');
             }
         }
     };
@@ -141,21 +162,6 @@ $(function () {
         });
 
         updateVideoPlayer(URL.createObjectURL(file));
-    });
-
-    $('#videoPlayer').on('play', function () {
-        console.log('play');
-        client.play({room: {name: 'test'}}); // TODO: Change this hardcoded object
-    });
-
-    $('#videoPlayer').on('pause', function () {
-        console.log('pause');
-        client.pause({room: {name: 'test'}}); // TODO: Change this hardcoded object
-    });
-
-    $('#videoPlayer').on('stop', function () {
-        console.log('stop');
-        client.stop({room: {name: 'test'}}); // TODO: Change this hardcoded object
     });
 
 });
