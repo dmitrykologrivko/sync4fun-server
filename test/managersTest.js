@@ -78,24 +78,72 @@ describe('Room manager test', () => {
             assert.equal(false, room.users.has(user.id));
         });
 
-        it('when user is not in any rooms should not do any changes', () => {
+        it('when user is not in any rooms should not remove any users', () => {
             const user = UsersFactory.makeUser('123', 'Some name');
-            // TODO: Improve checking?
+
             roomManager.removeUser(user);
+
+            assert.equal(roomManager.rooms.size, 2);
+
+            const room1 = roomManager.rooms.get('#1');
+            const room2 = roomManager.rooms.get('#2');
+
+            assert.equal(room1.users.size, 2);
+            assert.equal(room2.users.size, 0);
         });
     });
 
     describe('#moveUser()', () => {
         it('when user is in another room and provided room exists should move user', () => {
-            throw Error('Not implemented test');
+            const room1 = roomManager.rooms.get('#1');
+            const room2 = roomManager.rooms.get('#2');
+            const user = room1.users.get('ID:1');
+
+            assert.equal(roomManager.rooms.size, 2);
+            assert.equal(room1.users.size, 2);
+            assert.equal(room2.users.size, 0);
+
+            roomManager.moveUser(user, room2.name);
+
+            assert.equal(roomManager.rooms.size, 2);
+            assert.equal(room1.users.size, 1);
+            assert.equal(room2.users.size, 1);
+            assert.equal(room2.users.has(user.id), true);
         });
 
         it('when user is in another room and provided room not exist should add room and move user', () => {
-            throw Error('Not implemented test');
+            const room1 = roomManager.rooms.get('#1');
+            const room2 = roomManager.rooms.get('#2');
+            const user = room1.users.get('ID:1');
+
+            assert.equal(roomManager.rooms.size, 2);
+            assert.equal(room1.users.size, 2);
+            assert.equal(room2.users.size, 0);
+
+            roomManager.moveUser(user, '#3');
+
+            assert.equal(roomManager.rooms.size, 3);
+            assert.equal(room1.users.size, 1);
+            assert.equal(room2.users.size, 0);
+
+            const room3 = roomManager.rooms.get('#3');
+
+            assert.equal(room3.users.size, 1);
+            assert.equal(room3.users.has(user.id), true);
         });
 
-        it('when user is not in any rooms should not do any changes', () => {
-            throw Error('Not implemented test');
+        it('when user is not in any rooms should not move any users', () => {
+            const user = UsersFactory.makeUser('123', 'Some name');
+
+            roomManager.moveUser(user, '#3');
+
+            assert.equal(roomManager.rooms.size, 2);
+
+            const room1 = roomManager.rooms.get('#1');
+            const room2 = roomManager.rooms.get('#2');
+
+            assert.equal(room1.users.size, 2);
+            assert.equal(room2.users.size, 0);
         });
     });
 
@@ -113,4 +161,31 @@ describe('Room manager test', () => {
         });
     });
 
+    describe('#setRooms()', () => {
+        it('when argument rooms is not defined should throw error', () => {
+            expect(() => (roomManager.rooms = undefined))
+                .to
+                .throw('Required argument "rooms" is not a "Map" class instance!');
+        });
+
+        it('when argument rooms is not instance of Map class should throw error', () => {
+            expect(() => (roomManager.rooms = new Error()))
+                .to
+                .throw('Required argument "rooms" is not a "Map" class instance!');
+        });
+
+        it('when rooms list contains item not of Room class instance should throw error', () => {
+            const rooms = roomManager.rooms;
+            rooms.set('#3', {});
+
+            expect(() => (roomManager.rooms = rooms))
+                .to
+                .throw('Item with key "#3" is not a "Room" class instance!');
+        });
+
+        it('when argument rooms is instance of Map class should set rooms list', () => {
+            roomManager.rooms = RoomsFactory.makeRooms(2);
+            assert.equal(roomManager.rooms.size, 2);
+        });
+    });
 });
