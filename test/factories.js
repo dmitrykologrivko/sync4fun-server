@@ -27,7 +27,7 @@ class UsersFactory {
         return new User(id, name, FilesFactory.makeFile());
     }
 
-    static makeWatchers(size) {
+    static makeUsers(size) {
         let watchers = new Map();
 
         for (let i = 1; i < size + 1; i++) {

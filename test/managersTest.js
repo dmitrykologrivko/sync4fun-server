@@ -2,114 +2,114 @@ const {assert, expect} = require('chai');
 
 const {
     RoomManager,
-    WatcherUseThisRoomError,
-    WatcherUseAnotherRoomError
+    UserInThisRoomError,
+    UserInAnotherRoomError
 } = require('../managers');
 
-const {RoomsFactory, WatchersFactory} = require('./factories');
+const {RoomsFactory, UsersFactory} = require('./factories');
 
 describe('Room manager test', () => {
+    let roomManager;
 
     beforeEach(() => {
         const rooms = RoomsFactory.makeRooms(2);
-        const watchers = WatchersFactory.makeWatchers(2);
 
-        rooms.get('#1').setWatchers(watchers);
+        rooms.get('#1').users = UsersFactory.makeUsers(2);
 
-        this.roomManager = new RoomManager();
-        this.roomManager.setRooms(rooms);
+        roomManager = new RoomManager();
+        roomManager.rooms = rooms;
     });
 
-    describe('#addWatcher()', () => {
-        it('when watcher use provided room should throw error', () => {
-            const room = this.roomManager.getRooms().get('#1');
-            const watcher = room.getWatchers().get('ID:1');
+    describe('#addUser()', () => {
+        it('when user is in the provided room should throw error', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
 
-            expect(() => {this.roomManager.addWatcher(watcher, room.getName())})
+            expect(() => {roomManager.addUser(user, room.name)})
                 .to
-                .throw(WatcherUseThisRoomError);
+                .throw(UserInThisRoomError);
         });
 
-        it('when watcher use another room should throw error', () => {
-            const room = this.roomManager.getRooms().get('#2');
-            const watcher = this.roomManager.getRooms().get('#1').getWatchers().get('ID:1');
+        it('when user is in another room should throw error', () => {
+            const room = roomManager.rooms.get('#2');
+            const user = roomManager.rooms.get('#1').users.get('ID:1');
 
-            expect(() => {this.roomManager.addWatcher(watcher, room.getName())})
+            expect(() => {roomManager.addUser(user, room.name)})
                 .to
-                .throw(WatcherUseAnotherRoomError);
+                .throw(UserInAnotherRoomError);
         });
 
-        it('when watcher not use any rooms and provided room exists should add watcher to existing room', () => {
-            const room = this.roomManager.getRooms().get('#2');
-            const watcher = WatchersFactory.makeWatcher('123', 'Some name');
+        it('when user is not in any rooms and provided room exists should add user to existing room', () => {
+            const room = roomManager.rooms.get('#2');
+            const user = UsersFactory.makeUser('123', 'Some name');
 
-            assert.equal(false, room.getWatchers().has(watcher.getId()));
+            assert.equal(false, room.users.has(user.id));
 
-            this.roomManager.addWatcher(watcher, room.getName());
+            roomManager.addUser(user, room.name);
 
-            assert.equal(true, room.getWatchers().has(watcher.getId()));
+            assert.equal(true, room.users.has(user.id));
         });
 
-        it('when watcher not use any rooms and provided room not exist should add room and watcher', () => {
+        it('when user is not in any rooms and provided room not exist should add room and user', () => {
             let room = RoomsFactory.makeRoom('Some room');
-            let watcher = WatchersFactory.makeWatcher('123', 'Some name');
+            let user = UsersFactory.makeUser('123', 'Some name');
 
-            assert.equal(false, this.roomManager.getRooms().has(room.getName()));
+            assert.equal(false, roomManager.rooms.has(room.name));
 
-            this.roomManager.addWatcher(watcher, room.getName());
+            roomManager.addUser(user, room.name);
 
-            assert.equal(true, this.roomManager.getRooms().has(room.getName()));
+            assert.equal(true, roomManager.rooms.has(room.name));
 
-            room = this.roomManager.getRooms().get(room.getName());
+            room = roomManager.rooms.get(room.name);
 
-            assert.equal(true, room.getWatchers().has(watcher.getId()));
+            assert.equal(true, room.users.has(user.id));
         });
     });
 
-    describe('#removeWatcher()', () => {
-        it('when watcher use room should remove watcher', () => {
-            const room = this.roomManager.getRooms().get('#1');
-            const watcher = room.getWatchers().get('ID:1');
+    describe('#removeUser()', () => {
+        it('when user is in room should remove user', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
 
-            assert.equal(true, room.getWatchers().has(watcher.getId()));
+            assert.equal(true, room.users.has(user.id));
 
-            this.roomManager.removeWatcher(watcher);
+            roomManager.removeUser(user);
 
-            assert.equal(false, room.getWatchers().has(watcher.getId()));
+            assert.equal(false, room.users.has(user.id));
         });
 
-        it('when watcher not use any rooms should not do any changes', () => {
-            const watcher = WatchersFactory.makeWatcher('123', 'Some name');
+        it('when user is not in any rooms should not do any changes', () => {
+            const user = UsersFactory.makeUser('123', 'Some name');
             // TODO: Improve checking?
-            this.roomManager.removeWatcher(watcher);
+            roomManager.removeUser(user);
         });
     });
 
-    describe('#moveWatcher()', () => {
-        it('when watcher use another room and provided room exists should move watcher', () => {
+    describe('#moveUser()', () => {
+        it('when user is in another room and provided room exists should move user', () => {
             throw Error('Not implemented test');
         });
 
-        it('when watcher use another room and provided room not exist should add room and move watcher', () => {
+        it('when user is in another room and provided room not exist should add room and move user', () => {
             throw Error('Not implemented test');
         });
 
-        it('when watcher not use any rooms should not do any changes', () => {
+        it('when user is not in any rooms should not do any changes', () => {
             throw Error('Not implemented test');
         });
     });
 
-    describe('#findWatcherRoom()', () => {
-        it('when watcher use room should return room', () => {
-            const room = this.roomManager.getRooms().get('#1');
-            const watcher = room.getWatchers().get('ID:1');
+    describe('#findRoomByUser()', () => {
+        it('when user is in room should return room', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
 
-            assert.equal(room, this.roomManager.findWatcherRoom(watcher));
+            assert.equal(room, roomManager.findRoomByUser(user));
         });
 
-        it('when watcher not use room should return null', () => {
-            const watcher = WatchersFactory.makeWatcher('123', 'Some name');
-            assert.isNull(this.roomManager.findWatcherRoom(watcher));
+        it('when user in not in room should return null', () => {
+            const user = UsersFactory.makeUser('123', 'Some name');
+            assert.isNull(roomManager.findRoomByUser(user));
         });
     });
 

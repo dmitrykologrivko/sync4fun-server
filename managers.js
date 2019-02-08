@@ -1,9 +1,9 @@
-const {Room, Watcher} = require('./models');
+const {Room, User} = require('./models');
 
-class WatcherUseThisRoomError extends Error {
+class UserInThisRoomError extends Error {
 }
 
-class WatcherUseAnotherRoomError extends Error {
+class UserInAnotherRoomError extends Error {
 }
 
 class RoomManager {
@@ -11,56 +11,65 @@ class RoomManager {
         this._rooms = new Map();
     }
 
-    setRooms(rooms) {
-        this._rooms = rooms;
-    }
-
-    getRooms() {
+    get rooms() {
         return this._rooms;
     }
 
-    addWatcher(watcher, roomName) {
-        const room = this.findWatcherRoom(watcher);
+    set rooms(rooms) {
+        if (!rooms || !(rooms instanceof Map))
+            throw new Error('Required argument "rooms" is not a "Map" class instance!');
+
+        for (const [key, value] of rooms) {
+            if (!(value instanceof Room)) {
+                throw new Error(`Item with key "${key}" is not a "Room" class instance!`);
+            }
+        }
+
+        this._rooms = rooms;
+    }
+
+    addUser(user, roomName) {
+        const room = this.findRoomByUser(user);
 
         if (room) {
-            if (room.getName() === roomName)
-                throw new WatcherUseThisRoomError();
+            if (room.name === roomName)
+                throw new UserInThisRoomError();
             else
-                throw new WatcherUseAnotherRoomError();
+                throw new UserInAnotherRoomError();
         }
 
         if (this._rooms.has(roomName)) {
-            this._rooms.get(roomName).addWatcher(watcher);
+            this._rooms.get(roomName).addUser(user);
         } else {
             this._rooms.set(roomName, new Room(roomName));
-            this._rooms.get(roomName).addWatcher(watcher);
+            this._rooms.get(roomName).addUser(user);
         }
     }
 
-    removeWatcher(watcher) {
-        const room = this.findWatcherRoom(watcher);
-        if (room) room.removeWatcher(watcher);
+    removeUser(user) {
+        const room = this.findRoomByUser(user);
+        if (room) room.removeUser(user);
     }
 
-    moveWatcher(watcher, roomName) {
-        const room = this.findWatcherRoom(watcher);
+    moveUser(user, roomName) {
+        const room = this.findRoomByUser(user);
 
         if (room) {
-            room.removeWatcher(watcher);
+            room.removeUser(user);
 
             if (this._rooms.has(roomName)) {
-                this._rooms.get(roomName).addWatcher(watcher);
+                this._rooms.get(roomName).addUser(user);
             } else {
                 this._rooms.set(roomName, new Room(roomName));
-                this._rooms.get(roomName).addWatcher(watcher);
+                this._rooms.get(roomName).addUser(user);
             }
         }
     }
 
-    findWatcherRoom(searchableWatcher) {
+    findRoomByUser(user) {
         for (const room of this._rooms.values()) {
-            for (const watcher of room.getWatchers().values()) {
-                if (watcher.getId() === searchableWatcher.getId()) {
+            for (const [key, value] of room.users) {
+                if (key === user.id) {
                     return room;
                 }
             }
@@ -69,13 +78,13 @@ class RoomManager {
         return null;
     }
 
-    findWatcherById(watcherId) {
-        if (!watcherId) return null;
+    findUserById(userId) {
+        if (!userId) return null;
 
         for (const room of this._rooms.values()) {
-            for (const watcher of room.getWatchers().values()) {
-                if (watcherId === watcher.getId()) {
-                    return watcher;
+            for (const [key, value] of room.users) {
+                if (key === userId) {
+                    return value;
                 }
             }
         }
@@ -86,6 +95,6 @@ class RoomManager {
 
 module.exports = {
     RoomManager,
-    WatcherUseThisRoomError,
-    WatcherUseAnotherRoomError
+    UserInThisRoomError,
+    UserInAnotherRoomError
 };
