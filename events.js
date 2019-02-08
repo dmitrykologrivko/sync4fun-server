@@ -71,8 +71,8 @@ async function joinUserToRoom(req, socket, roomManager) {
         });
     }
 
-    let file = new File(req.user.file.name, req.user.file.size);
-    let user = new User(socket.id, req.user.name, file);
+    const file = new File(req.user.file.name, req.user.file.size);
+    const user = new User(socket.id, req.user.name, file);
 
     try {
         roomManager.addUser(user, req.room.name);
@@ -125,7 +125,7 @@ async function joinUserToRoom(req, socket, roomManager) {
             });
         }
         if (error instanceof UserInAnotherRoomError) {
-            let previousRoom = roomManager.findRoomByUser(user);
+            const previousRoom = roomManager.findRoomByUser(user);
 
             roomManager.moveUser(user, req.room.name);
 
@@ -167,12 +167,12 @@ async function joinUserToRoom(req, socket, roomManager) {
 }
 
 function leaveUserFromRoom(req, socket, roomManager) {
-    let user = roomManager.findUserById(socket.id);
+    const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_LEAVING_USER_FROM_ROOM, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findRoomByUser(user);
+    const room = roomManager.findRoomByUser(user);
 
     roomManager.removeUser(user);
 
@@ -189,12 +189,12 @@ function leaveUserFromRoom(req, socket, roomManager) {
 }
 
 function changePlayStateToPlay(req, socket, roomManager) {
-    let user = roomManager.findUserById(socket.id);
+    const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findRoomByUser(user);
+    const room = roomManager.findRoomByUser(user);
 
     return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PLAY, {
         user: {
@@ -205,12 +205,12 @@ function changePlayStateToPlay(req, socket, roomManager) {
 }
 
 function changePlayStateToPause(req, socket, roomManager) {
-    let user = roomManager.findUserById(socket.id);
+    const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findRoomByUser(user);
+    const room = roomManager.findRoomByUser(user);
 
     return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PAUSE, {
         user: {
@@ -221,12 +221,12 @@ function changePlayStateToPause(req, socket, roomManager) {
 }
 
 function changePlayStateToStop(req, socket, roomManager) {
-    let user = roomManager.findUserById(socket.id);
+    const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findRoomByUser(user);
+    const room = roomManager.findRoomByUser(user);
 
     return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_STOP, {
         user: {
@@ -237,12 +237,12 @@ function changePlayStateToStop(req, socket, roomManager) {
 }
 
 function disconnect(socket, roomManager) {
-    let user = roomManager.findUserById(socket.id);
+    const user = roomManager.findUserById(socket.id);
     if (!user) {
         return;
     }
 
-    let room = roomManager.findRoomByUser(user);
+    const room = roomManager.findRoomByUser(user);
 
     roomManager.removeUser(user);
 
