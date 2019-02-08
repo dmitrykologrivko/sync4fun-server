@@ -1,179 +1,268 @@
-const Watcher = require('./models').Watcher;
-const File = require('./models').File;
+const validate = require("validate.js");
+
+const {Watcher, File} = require('./models');
 const {
     WatcherUseThisRoomError,
     WatcherUseAnotherRoomError
 } = require('./managers');
 
-function setupEvents(io, socket, roomManager) {
+const {
+    CONNECTION,
+    DISCONNECT,
+    JOIN_USER_TO_ROOM,
+    YOU_JOINED_ROOM,
+    USER_JOINED_ROOM,
+    YOU_RECONNECTED_TO_ROOM,
+    USER_RECONNECTED_TO_ROOM,
+    ERROR_OF_JOINING_USER_TO_ROOM,
+    LEAVE_USER_FROM_ROOM,
+    YOU_LEFT_ROOM,
+    USER_LEFT_ROOM,
+    ERROR_OF_LEAVING_USER_FROM_ROOM,
+    CHANGE_PLAY_STATE_TO_PLAY,
+    CHANGED_PLAY_STATE_TO_PLAY,
+    ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY,
+    CHANGE_PLAY_STATE_TO_PAUSE,
+    CHANGED_PLAY_STATE_TO_PAUSE,
+    ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE,
+    CHANGE_PLAY_STATE_TO_STOP,
+    CHANGED_PLAY_STATE_TO_STOP,
+    ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
+} = require('./constants').events;
 
-    socket.on('user join room', (req) => {
-        let user = req.user;
-        let room = req.room;
+async function joinUserToRoom(req, socket, roomManager) {
+    const constraints = {
+        'user': {
+            presence: true,
+            type: "object"
+        },
+        'user.name': {
+            presence: true,
+            type: "string"
+        },
+        'user.file': {
+            presence: true,
+            type: "object"
+        },
+        'user.file.name': {
+            presence: true,
+            type: "string"
+        },
+        'user.file.size': {
+            presence: true,
+            type: "number"
+        },
+        'room': {
+            presence: true,
+            type: "object"
+        },
+        'room.name': {
+            presence: true,
+            type: "string"
+        }
+    };
 
-        let file = new File(req.file.name, req.file.size);
-        let watcher = new Watcher(socket.id, user.name, file);
+    try {
+        await validate.async(req, constraints);
+    } catch (error) {
+        return socket.emit(ERROR_OF_JOINING_USER_TO_ROOM, {
+            message: 'Validation error',
+            fields: error
+        });
+    }
 
-        try {
-            roomManager.addWatcher(watcher, room.name);
+    let file = new File(req.user.file.name, req.user.file.size);
+    let watcher = new Watcher(socket.id, req.user.name, file);
 
-            socket.join(room.name);
+    try {
+        roomManager.addWatcher(watcher, req.room.name);
 
-            socket.emit('you joined to room', {
-                user: {
-                    id: watcher.getId(),
-                    name: watcher.getName()
-                },
-                room: {
-                    name: roomManager.findWatcherRoom(watcher).getName()
-                },
+        socket.join(req.room.name);
+
+        socket.emit(YOU_JOINED_ROOM, {
+            user: {
+                id: watcher.getId(),
+                name: watcher.getName(),
                 file: {
                     name: file.name,
                     size: file.size
                 }
+            },
+            room: {
+                name: req.room.name
+            }
+        });
+
+        return socket.to(req.room.name).emit(USER_JOINED_ROOM, {
+            user: {
+                id: watcher.getId(),
+                name: watcher.getName()
+            },
+        });
+    } catch (error) {
+        if (error instanceof WatcherUseThisRoomError) {
+            socket.emit(YOU_RECONNECTED_TO_ROOM, {
+                user: {
+                    id: watcher.getId(),
+                    name: watcher.getName(),
+                    file: {
+                        name: file.name,
+                        size: file.size
+                    }
+                },
+                room: {
+                    name: req.room.name
+                }
             });
 
-            socket.to(room.name).emit('user joined to room', {
+            socket.join(req.room.name);
+
+            return socket.to(req.room.name).emit(USER_RECONNECTED_TO_ROOM, {
+                user: {
+                    id: watcher.getId(),
+                    name: watcher.getName()
+                },
+            });
+        }
+        if (error instanceof WatcherUseAnotherRoomError) {
+            let previousRoom = roomManager.findWatcherRoom(watcher);
+
+            roomManager.moveWatcher(watcher, req.room.name);
+
+            socket.leave(previousRoom.getName());
+
+            socket.to(previousRoom.getName()).emit(USER_LEFT_ROOM, {
                 user: {
                     id: watcher.getId(),
                     name: watcher.getName()
                 }
             });
-        } catch (e) {
-            if (e instanceof WatcherUseThisRoomError) {
-                socket.emit('you re-connected to room', {
-                    user: {
-                        id: watcher.getId(),
-                        name: watcher.getName()
-                    },
-                    room: {
-                        name: roomManager.findWatcherRoom(watcher).getName()
-                    },
+
+            socket.join(req.room.name);
+
+            socket.emit(YOU_JOINED_ROOM, {
+                user: {
+                    id: watcher.getId(),
+                    name: watcher.getName(),
                     file: {
                         name: file.name,
                         size: file.size
                     }
-                });
+                },
+                room: {
+                    name: req.room.name
+                }
+            });
 
-                socket.join(room.name);
-
-                socket.to(room.name).emit('user re-connected to room', {
-                    user: {
-                        id: watcher.getId(),
-                        name: watcher.getName()
-                    }
-                });
-            } else if (e instanceof WatcherUseAnotherRoomError) {
-                let previousRoom = roomManager.findWatcherRoom(watcher);
-
-                roomManager.moveWatcher(watcher, previousRoom.name);
-
-                socket.leave(previousRoom.getName());
-
-                socket.to(previousRoom.name).emit('user left room', {
-                    user: {
-                        id: watcher.getId(),
-                        name: watcher.getName()
-                    }
-                });
-
-                socket.join(room.name);
-
-                socket.emit('you joined to room', {
-                    user: {
-                        id: watcher.getId(),
-                        name: watcher.getName()
-                    },
-                    room: {
-                        name: roomManager.findWatcherRoom(watcher).getName()
-                    },
-                    file: {
-                        name: file.name,
-                        size: file.size
-                    }
-                });
-
-                socket.to(room.name).emit('user joined to room', {
-                    user: {
-                        id: watcher.getId(),
-                        name: watcher.getName()
-                    }
-                });
-            } else {
-                console.error(e);
-            }
-        }
-    });
-
-    socket.on('user leave room', (req) => {
-        let watcher = roomManager.findWatcherById(socket.id);
-        if (!watcher) {
-            return;
+            return socket.to(req.room.name).emit(USER_JOINED_ROOM, {
+                user: {
+                    id: watcher.getId(),
+                    name: watcher.getName()
+                }
+            });
         }
 
-        let room = roomManager.findWatcherRoom(watcher);
+        return socket.emit(ERROR_OF_JOINING_USER_TO_ROOM, {message: 'Internal server error'});
+    }
+}
 
-        roomManager.removeWatcher(watcher);
+function leaveUserFromRoom(req, socket, roomManager) {
+    let watcher = roomManager.findWatcherById(socket.id);
+    if (!watcher) {
+        return socket.emit(ERROR_OF_LEAVING_USER_FROM_ROOM, {message: 'You are not in any of the rooms'});
+    }
 
-        socket.leave(room.getName());
+    let room = roomManager.findWatcherRoom(watcher);
 
-        socket.emit('you left room', {});
+    roomManager.removeWatcher(watcher);
 
-        socket.to(room.getName()).emit('user left room', {
-            user: {
-                id: watcher.getId(),
-                name: watcher.getName()
-            }
-        });
-    });
+    socket.leave(room.getName());
 
-    socket.on('user updates file information', (req) => {
+    socket.emit(YOU_LEFT_ROOM, {});
 
-    });
-
-    socket.on('user change play state to play', (req) => {
-        let room = req.room;
-        socket.to(room.name).emit('user changed play state to play', {});
-    });
-
-    socket.on('user change play state to pause', (req) => {
-        let room = req.room;
-        socket.to(room.name).emit('user changed play state to pause', {});
-    });
-
-    socket.on('user change play state to stop', (req) => {
-        let room = req.room;
-        socket.to(room.name).emit('user changed play state to stop', {});
-    });
-
-    socket.on('disconnect', () => {
-        let watcher = roomManager.findWatcherById(socket.id);
-        if (!watcher) {
-            return;
+    return socket.to(room.getName()).emit(USER_LEFT_ROOM, {
+        user: {
+            id: watcher.getId(),
+            name: watcher.getName()
         }
-
-        let room = roomManager.findWatcherRoom(watcher);
-
-        roomManager.removeWatcher(watcher);
-
-        socket.leave(room.getName());
-
-        socket.emit('you left room', {});
-
-        socket.to(room.getName()).emit('user left room', {
-            user: {
-                id: watcher.getId(),
-                name: watcher.getName()
-            }
-        });
     });
+}
 
+function changePlayStateToPlay(req, socket, roomManager) {
+    let watcher = roomManager.findWatcherById(socket.id);
+    if (!watcher) {
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, {message: 'You are not in any of the rooms'});
+    }
+
+    let room = roomManager.findWatcherRoom(watcher);
+
+    return socket.to(room.getName()).emit(CHANGED_PLAY_STATE_TO_PLAY, {
+        user: {
+            id: watcher.getId(),
+            name: watcher.getName()
+        }
+    });
+}
+
+function changePlayStateToPause(req, socket, roomManager) {
+    let watcher = roomManager.findWatcherById(socket.id);
+    if (!watcher) {
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, {message: 'You are not in any of the rooms'});
+    }
+
+    let room = roomManager.findWatcherRoom(watcher);
+
+    return socket.to(room.getName()).emit(CHANGED_PLAY_STATE_TO_PAUSE, {
+        user: {
+            id: watcher.getId(),
+            name: watcher.getName()
+        }
+    });
+}
+
+function changePlayStateToStop(req, socket, roomManager) {
+    let watcher = roomManager.findWatcherById(socket.id);
+    if (!watcher) {
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, {message: 'You are not in any of the rooms'});
+    }
+
+    let room = roomManager.findWatcherRoom(watcher);
+
+    return socket.to(room.getName()).emit(CHANGED_PLAY_STATE_TO_STOP, {
+        user: {
+            id: watcher.getId(),
+            name: watcher.getName()
+        }
+    });
+}
+
+function disconnect(socket, roomManager) {
+    let watcher = roomManager.findWatcherById(socket.id);
+    if (!watcher) {
+        return;
+    }
+
+    let room = roomManager.findWatcherRoom(watcher);
+
+    roomManager.removeWatcher(watcher);
+
+    socket.leave(room.getName());
+
+    return socket.to(room.getName()).emit(USER_LEFT_ROOM, {
+        user: {
+            id: watcher.getId(),
+            name: watcher.getName()
+        }
+    });
 }
 
 module.exports = (io, roomManager) => {
-
-    io.on('connection', (socket) => {
-        setupEvents(io, socket, roomManager);
+    io.on(CONNECTION, (socket) => {
+        socket.on(JOIN_USER_TO_ROOM, req => (joinUserToRoom(req, socket, roomManager)));
+        socket.on(LEAVE_USER_FROM_ROOM, req => (leaveUserFromRoom(req, socket, roomManager)));
+        socket.on(CHANGE_PLAY_STATE_TO_PLAY, req => (changePlayStateToPlay(req, socket, roomManager)));
+        socket.on(CHANGE_PLAY_STATE_TO_PAUSE, req => (changePlayStateToPause(req, socket, roomManager)));
+        socket.on(CHANGE_PLAY_STATE_TO_STOP, req => (changePlayStateToStop(req, socket, roomManager)));
+        socket.on(DISCONNECT, () => (disconnect(socket, roomManager)));
     });
-
 };
