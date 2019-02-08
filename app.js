@@ -1,18 +1,24 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const handlebars = require('express3-handlebars').create();
+const RoomManager = require('./managers').RoomManager;
 
-const app = express();
-const server = http.Server(app);
-const io = socketIo(server);
+// Create room manager instance
+const roomManager = new RoomManager();
 
-app.get('/', (req, res) => {
-    res.send('It works!');
-});
+// Set template engine
+app.engine('handlebars', handlebars.engine);
+app.set('view engine', 'handlebars');
 
-io.on('connection', (socket) => {
-    console.log('Connected to WS');
-});
+// Set static route
+app.use(require('express').static(__dirname + '/public'));
+
+// Setup controllers
+require('./controllers')(app);
+
+// Setup events
+require('./events')(io, roomManager);
 
 server.listen(process.env.PORT || 8000, () => {
     console.log('Server has been started');
