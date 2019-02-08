@@ -1,4 +1,4 @@
-const {Room, Watcher} = require('../models');
+const {Room, User, File} = require('../models');
 
 class RoomsFactory {
     static makeRoom(name) {
@@ -16,16 +16,22 @@ class RoomsFactory {
     }
 }
 
-class WatchersFactory {
-    static makeWatcher(id, name) {
-        return new Watcher(id, name);
+class FilesFactory {
+    static makeFile() {
+        return new File('rabbit.mp4', 125789);
+    }
+}
+
+class UsersFactory {
+    static makeUser(id, name) {
+        return new User(id, name, FilesFactory.makeFile());
     }
 
     static makeWatchers(size) {
         let watchers = new Map();
 
         for (let i = 1; i < size + 1; i++) {
-            watchers.set(`ID:${i}`, this.makeWatcher(`ID:${i}`, `Name:${i}`));
+            watchers.set(`ID:${i}`, this.makeUser(`ID:${i}`, `Name:${i}`));
         }
 
         return watchers;
@@ -34,5 +40,6 @@ class WatchersFactory {
 
 module.exports = {
     RoomsFactory,
-    WatchersFactory
+    FilesFactory,
+    UsersFactory
 };

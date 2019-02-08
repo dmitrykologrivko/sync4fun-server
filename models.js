@@ -1,31 +1,46 @@
 class Room {
     constructor(name) {
         this._name = name;
-        this._watchers = new Map();
+        this._users = new Map();
     }
 
-    getName() {
+    get name() {
         return this._name;
     }
 
-    getWatchers() {
-        return this._watchers;
+    get users() {
+        return this._users;
     }
 
-    setWatchers(watchers) {
-        this._watchers = watchers;
+    set users(users) {
+        if (!users || !(users instanceof Map))
+            throw new Error('Required argument "users" is not a "Map" class instance!');
+
+        for (const [key, value] of users) {
+            if (!(value instanceof User)) {
+                throw new Error(`Item with key "${key}" is not a "User" class instance!`);
+            }
+        }
+
+        this._users = users;
     }
 
-    addWatcher(watcher) {
-        this._watchers.set(watcher.getId(), watcher);
+    addUser(user) {
+        if (!(user instanceof User))
+            throw new Error('Required argument "user" is not a "User" class instance!');
+
+        this._users.set(user.id, user);
     }
 
-    removeWatcher(watcher) {
-        this._watchers.delete(watcher.getId());
+    removeUser(user) {
+        if (!(user instanceof User))
+            throw new Error('Required argument "user" is not a "User" class instance!');
+
+        this._users.delete(user.id);
     }
 
     isEmpty() {
-        return this._watchers.size === 0;
+        return this._users.size === 0;
     }
 }
 
@@ -52,34 +67,33 @@ class File {
     }
 }
 
-class Watcher {
+class User {
     constructor(id, name, file) {
-        if (!id) throw new Error('Required param "ID" is missed!');
-        if (!name) throw new Error('Required param "Name" is missed!');
-        // TODO: File is required param
+        if (!id)
+            throw new Error('Required argument "id" is not defined!');
+        if (!name)
+            throw new Error('Required argument "name" is not defined!');
+        if (!(file instanceof File))
+            throw new Error('Required argument "file" is not a "File" class instance!');
 
         this._id = id;
         this._name = name;
         this._file = file;
     }
 
-    getId() {
+    get id() {
         return this._id;
     }
 
-    getName() {
+    get name() {
         return this._name;
     }
 
-    getFile() {
+    get file() {
         return this._file;
-    }
-
-    setFile(file) {
-        this._file = file;
     }
 }
 
 module.exports = {
-    Room, File, Watcher
+    Room, File, User
 };

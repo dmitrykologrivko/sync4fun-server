@@ -4,8 +4,6 @@ const {RoomManager} = require('../managers');
 
 const {
     CONNECT,
-    CONNECTION,
-    DISCONNECT,
     JOIN_USER_TO_ROOM,
     YOU_JOINED_ROOM,
     USER_JOINED_ROOM,
@@ -35,7 +33,6 @@ describe('Events test', () => {
     let socketClient2;
     let socketClient3;
     let roomManager;
-    let events;
 
     before(done => {
         httpServer = require('http').createServer().listen(() => {
