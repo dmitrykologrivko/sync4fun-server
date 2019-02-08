@@ -1,9 +1,9 @@
 const validate = require("validate.js");
 
-const {Watcher, File} = require('./models');
+const {User, File} = require('./models');
 const {
-    WatcherUseThisRoomError,
-    WatcherUseAnotherRoomError
+    UserInThisRoomError,
+    UserInAnotherRoomError
 } = require('./managers');
 
 const {
@@ -72,17 +72,17 @@ async function joinUserToRoom(req, socket, roomManager) {
     }
 
     let file = new File(req.user.file.name, req.user.file.size);
-    let watcher = new Watcher(socket.id, req.user.name, file);
+    let user = new User(socket.id, req.user.name, file);
 
     try {
-        roomManager.addWatcher(watcher, req.room.name);
+        roomManager.addUser(user, req.room.name);
 
         socket.join(req.room.name);
 
         socket.emit(YOU_JOINED_ROOM, {
             user: {
-                id: watcher.getId(),
-                name: watcher.getName(),
+                id: user.id,
+                name: user.name,
                 file: {
                     name: file.name,
                     size: file.size
@@ -95,16 +95,16 @@ async function joinUserToRoom(req, socket, roomManager) {
 
         return socket.to(req.room.name).emit(USER_JOINED_ROOM, {
             user: {
-                id: watcher.getId(),
-                name: watcher.getName()
+                id: user.id,
+                name: user.name
             },
         });
     } catch (error) {
-        if (error instanceof WatcherUseThisRoomError) {
+        if (error instanceof UserInThisRoomError) {
             socket.emit(YOU_RECONNECTED_TO_ROOM, {
                 user: {
-                    id: watcher.getId(),
-                    name: watcher.getName(),
+                    id: user.id,
+                    name: user.name,
                     file: {
                         name: file.name,
                         size: file.size
@@ -119,22 +119,22 @@ async function joinUserToRoom(req, socket, roomManager) {
 
             return socket.to(req.room.name).emit(USER_RECONNECTED_TO_ROOM, {
                 user: {
-                    id: watcher.getId(),
-                    name: watcher.getName()
+                    id: user.id,
+                    name: user.name
                 },
             });
         }
-        if (error instanceof WatcherUseAnotherRoomError) {
-            let previousRoom = roomManager.findWatcherRoom(watcher);
+        if (error instanceof UserInAnotherRoomError) {
+            let previousRoom = roomManager.findRoomByUser(user);
 
-            roomManager.moveWatcher(watcher, req.room.name);
+            roomManager.moveUser(user, req.room.name);
 
-            socket.leave(previousRoom.getName());
+            socket.leave(previousRoom.name);
 
-            socket.to(previousRoom.getName()).emit(USER_LEFT_ROOM, {
+            socket.to(previousRoom.name).emit(USER_LEFT_ROOM, {
                 user: {
-                    id: watcher.getId(),
-                    name: watcher.getName()
+                    id: user.id,
+                    name: user.name
                 }
             });
 
@@ -142,8 +142,8 @@ async function joinUserToRoom(req, socket, roomManager) {
 
             socket.emit(YOU_JOINED_ROOM, {
                 user: {
-                    id: watcher.getId(),
-                    name: watcher.getName(),
+                    id: user.id,
+                    name: user.name,
                     file: {
                         name: file.name,
                         size: file.size
@@ -156,8 +156,8 @@ async function joinUserToRoom(req, socket, roomManager) {
 
             return socket.to(req.room.name).emit(USER_JOINED_ROOM, {
                 user: {
-                    id: watcher.getId(),
-                    name: watcher.getName()
+                    id: user.id,
+                    name: user.name
                 }
             });
         }
@@ -167,91 +167,91 @@ async function joinUserToRoom(req, socket, roomManager) {
 }
 
 function leaveUserFromRoom(req, socket, roomManager) {
-    let watcher = roomManager.findWatcherById(socket.id);
-    if (!watcher) {
+    let user = roomManager.findUserById(socket.id);
+    if (!user) {
         return socket.emit(ERROR_OF_LEAVING_USER_FROM_ROOM, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findWatcherRoom(watcher);
+    let room = roomManager.findRoomByUser(user);
 
-    roomManager.removeWatcher(watcher);
+    roomManager.removeUser(user);
 
-    socket.leave(room.getName());
+    socket.leave(room.name);
 
     socket.emit(YOU_LEFT_ROOM, {});
 
-    return socket.to(room.getName()).emit(USER_LEFT_ROOM, {
+    return socket.to(room.name).emit(USER_LEFT_ROOM, {
         user: {
-            id: watcher.getId(),
-            name: watcher.getName()
+            id: user.id,
+            name: user.name
         }
     });
 }
 
 function changePlayStateToPlay(req, socket, roomManager) {
-    let watcher = roomManager.findWatcherById(socket.id);
-    if (!watcher) {
+    let user = roomManager.findUserById(socket.id);
+    if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findWatcherRoom(watcher);
+    let room = roomManager.findRoomByUser(user);
 
-    return socket.to(room.getName()).emit(CHANGED_PLAY_STATE_TO_PLAY, {
+    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PLAY, {
         user: {
-            id: watcher.getId(),
-            name: watcher.getName()
+            id: user.id,
+            name: user.name
         }
     });
 }
 
 function changePlayStateToPause(req, socket, roomManager) {
-    let watcher = roomManager.findWatcherById(socket.id);
-    if (!watcher) {
+    let user = roomManager.findUserById(socket.id);
+    if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findWatcherRoom(watcher);
+    let room = roomManager.findRoomByUser(user);
 
-    return socket.to(room.getName()).emit(CHANGED_PLAY_STATE_TO_PAUSE, {
+    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PAUSE, {
         user: {
-            id: watcher.getId(),
-            name: watcher.getName()
+            id: user.id,
+            name: user.name
         }
     });
 }
 
 function changePlayStateToStop(req, socket, roomManager) {
-    let watcher = roomManager.findWatcherById(socket.id);
-    if (!watcher) {
+    let user = roomManager.findUserById(socket.id);
+    if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, {message: 'You are not in any of the rooms'});
     }
 
-    let room = roomManager.findWatcherRoom(watcher);
+    let room = roomManager.findRoomByUser(user);
 
-    return socket.to(room.getName()).emit(CHANGED_PLAY_STATE_TO_STOP, {
+    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_STOP, {
         user: {
-            id: watcher.getId(),
-            name: watcher.getName()
+            id: user.id,
+            name: user.name
         }
     });
 }
 
 function disconnect(socket, roomManager) {
-    let watcher = roomManager.findWatcherById(socket.id);
-    if (!watcher) {
+    let user = roomManager.findUserById(socket.id);
+    if (!user) {
         return;
     }
 
-    let room = roomManager.findWatcherRoom(watcher);
+    let room = roomManager.findRoomByUser(user);
 
-    roomManager.removeWatcher(watcher);
+    roomManager.removeUser(user);
 
-    socket.leave(room.getName());
+    socket.leave(room.name);
 
-    return socket.to(room.getName()).emit(USER_LEFT_ROOM, {
+    return socket.to(room.name).emit(USER_LEFT_ROOM, {
         user: {
-            id: watcher.getId(),
-            name: watcher.getName()
+            id: user.id,
+            name: user.name
         }
     });
 }
