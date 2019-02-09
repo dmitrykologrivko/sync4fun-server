@@ -54,6 +54,7 @@ describe('Events test', () => {
     beforeEach(done => {
         const socketURL = `http://[${httpServerAddr.address}]:${httpServerAddr.port}`;
         const socketConfig = {
+            'reconnect': false,
             'reconnection delay': 0,
             'reopen delay': 0,
             'force new connection': true,
