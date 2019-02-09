@@ -7,9 +7,8 @@
     "npm": "^=6.4.1"
   },
   "description": "The very simple implementation of service for watching video content together at the same time.",
-  "main": "app.js",
   "scripts": {
-    "start": "node .",
+    "start": "node app.js",
     "test": "mocha",
     "build": "webpack --config webpack.config.js"
   },
@@ -33,6 +32,7 @@
     "validate.js": "https://github.com/ansman/validate.js.git#c7553ffe9df4a3474e604a3f354cbc9d17190259"
   },
   "devDependencies": {
-    "webpack": "^4.29.3"
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3"
   }
 }
