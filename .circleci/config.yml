@@ -8,6 +8,7 @@ jobs:
     branches:
       only:
         - master
+        - fix_build
 
     docker:
       # specify the version you desire here
