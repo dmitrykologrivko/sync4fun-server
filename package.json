@@ -9,8 +9,10 @@
   "description": "The very simple implementation of service for watching video content together at the same time.",
   "scripts": {
     "start": "node app.js",
+    "start-dev": "concurrently \"npm run start\" \"npm run watch\"",
     "test": "mocha",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --config webpack.config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -32,6 +34,10 @@
     "validate.js": "https://github.com/ansman/validate.js.git#c7553ffe9df4a3474e604a3f354cbc9d17190259"
   },
   "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
+    "concurrently": "^4.1.0",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.2.3"
   }
