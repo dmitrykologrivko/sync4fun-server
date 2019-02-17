@@ -2,6 +2,7 @@ const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const handlebars = require('express3-handlebars').create();
+const manifest = require('express-rev');
 const RoomManager = require('./managers').RoomManager;
 
 // Create room manager instance
@@ -13,6 +14,12 @@ app.set('view engine', 'handlebars');
 
 // Set static route
 app.use(require('express').static(__dirname + '/public'));
+
+// Set assets manifest
+app.use(manifest({
+    manifest: __dirname + '/public/manifest.json',
+    prepend: ''
+}));
 
 // Setup controllers
 require('./controllers')(app);

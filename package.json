@@ -7,10 +7,13 @@
     "npm": "^=6.4.1"
   },
   "description": "The very simple implementation of service for watching video content together at the same time.",
-  "main": "app.js",
   "scripts": {
-    "start": "node .",
-    "test": "mocha"
+    "postinstall": "npm run build",
+    "start": "node app.js",
+    "start-dev": "concurrently \"npm run watch\" \"npm run start\"",
+    "test": "mocha",
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --config webpack.config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -23,12 +26,28 @@
   },
   "homepage": "https://github.com/dmitrykologrivko/sync4fun-server#readme",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "chai": "^4.1.2",
     "express": "^4.16.3",
+    "express-rev": "^0.1.2",
     "express3-handlebars": "^0.5.2",
     "mocha": "^5.1.1",
     "socket.io": "^2.1.0",
     "socket.io-client": "^2.2.0",
     "validate.js": "https://github.com/ansman/validate.js.git#c7553ffe9df4a3474e604a3f354cbc9d17190259"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
+    "clean-webpack-plugin": "^1.0.1",
+    "concurrently": "^4.1.0",
+    "css-loader": "^2.1.0",
+    "file-loader": "^3.0.1",
+    "mini-css-extract-plugin": "^0.5.0",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3",
+    "webpack-manifest-plugin": "^2.0.4"
   }
 }
