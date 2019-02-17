@@ -10,7 +10,8 @@ module.exports = {
     mode: process.env.NODE_ENV || 'development',
     context: CONTEXT_PATH,
     entry: {
-        app: './app/app.js'
+        app: './app/app.js',
+        home: './home/home.js'
     },
     output: {
         filename: '[name].[chunkhash].bundle.js',
