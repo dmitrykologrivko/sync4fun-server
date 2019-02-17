@@ -1,7 +1,7 @@
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-const handlebars = require('express3-handlebars').create();
+const handlebars = require('express-handlebars');
 const manifest = require('express-rev');
 const RoomManager = require('./managers').RoomManager;
 
@@ -9,7 +9,7 @@ const RoomManager = require('./managers').RoomManager;
 const roomManager = new RoomManager();
 
 // Set template engine
-app.engine('handlebars', handlebars.engine);
+app.engine('handlebars', handlebars());
 app.set('view engine', 'handlebars');
 
 // Set static route
