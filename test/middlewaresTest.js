@@ -5,7 +5,7 @@ const request = require('supertest');
 
 const middlewares = require('../middlewares');
 
-describe('rev manifest middleware test', () => {
+describe('Rev manifest middleware test', () => {
     let app;
     let server;
 
