@@ -1,5 +1,5 @@
 class BaseSubject {
-    constructor(observers) {
+    constructor(observers = []) {
         this._observers = observers;
     }
 
@@ -33,14 +33,14 @@ export class UserLeftRoomSubject extends BaseSubject {}
 
 export class ErrorOfLeavingRoomSubject extends BaseSubject {}
 
-export class CangedPlayStateToPlaySubject extends BaseSubject {}
+export class ChangedPlayStateToPlaySubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateToPlaySubject extends BaseSubject {}
 
-export class CangedPlayStateToPauseSubject extends BaseSubject {}
+export class ChangedPlayStateToPauseSubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateToPauseSubject extends BaseSubject {}
 
-export class CangedPlayStateToStopSubject extends BaseSubject {}
+export class ChangedPlayStateToStopSubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateToStopSubject extends BaseSubject {}
