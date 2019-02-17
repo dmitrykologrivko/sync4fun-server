@@ -46,7 +46,7 @@ export default class WebSocketClient {
         });
 
         this._socket.once(ERROR_OF_JOINING_USER_TO_ROOM, res => {
-            this._subjectsManager.errorOfJoiningUserToRoomSubject
+            this._subjectsManager.errorOfJoiningUserToRoomSubject.publish(res);
         });
 
         this._socket.once(YOU_LEFT_ROOM, res => {
