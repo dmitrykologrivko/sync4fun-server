@@ -6,14 +6,14 @@ export default class AppController {
     constructor(webSocketClient, subjectsManager) {
         this._client = webSocketClient;
         this._subjects = subjectsManager;
-        this._joinRoomDialog = new JoinRoomDialog(this._client, this._subjects, this._handleYouJoinedRoomEvent.bind(this));
+        this._joinRoomDialog = new JoinRoomDialog(this._client, this._subjects, this._onSuccessJoinToRoom.bind(this));
 
         $('#roomTitle').html('<span>This is span</span>');
 
         this._joinRoomDialog.showDialog();
     }
 
-    _handleYouJoinedRoomEvent(res) {
+    _onSuccessJoinToRoom(res) {
 
     }
 }

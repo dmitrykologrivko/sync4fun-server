@@ -3,10 +3,10 @@ import $ from 'jquery';
 import {Observer} from './subjects';
 
 export default class JoinRoomDialog {
-    constructor(webSocketClient, subjectsManager, onYouJoinedRoomCallback) {
+    constructor(webSocketClient, subjectsManager, onSuccessCallback) {
         this._client = webSocketClient;
         this._subjects = subjectsManager;
-        this._onYouJoinedRoomCallback = onYouJoinedRoomCallback;
+        this._onSuccessCallback = onSuccessCallback;
 
         // Find elements
         this._root = $('#modalJoinRoom');
@@ -20,9 +20,11 @@ export default class JoinRoomDialog {
 
         // Subscribe observers on events
         this._youJoinedRoomObserver = new Observer(this._handleYouJoinedRoomEvent.bind(this));
+        this._youReconnectedRoomObserver = new Observer(this._handleYouReconectedToRoomEvent.bind(this));
         this._errorOfJoiningUserToRoomObserver = new Observer(this._handleErrorOfJoiningUserToRoomEvent.bind(this));
 
         this._subjects.youJoinedRoomSubject.subscribe(this._youJoinedRoomObserver);
+        this._subjects.youReconnectedToRoomSubject.subscribe(this._youReconnectedRoomObserver);
         this._subjects.errorOfJoiningUserToRoomSubject.subscribe(this._errorOfJoiningUserToRoomObserver);
 
         // Set listeners
@@ -30,6 +32,7 @@ export default class JoinRoomDialog {
 
         this._root.on('hidden.bs.modal', () => {
             this._subjects.youJoinedRoomSubject.unsubscribe(this._youJoinedRoomObserver);
+            this._subjects.youReconnectedToRoomSubject.unsubscribe(this._youReconnectedRoomObserver);
             this._subjects.errorOfJoiningUserToRoomSubject.unsubscribe(this._errorOfJoiningUserToRoomObserver);
         });
     }
@@ -103,7 +106,12 @@ export default class JoinRoomDialog {
     }
 
     _handleYouJoinedRoomEvent(res) {
-        this._onYouJoinedRoomCallback(res);
+        this._onSuccessCallback(res);
+        this.hideDialog();
+    }
+
+    _handleYouReconectedToRoomEvent(res) {
+        this._onSuccessCallback(res);
         this.hideDialog();
     }
 
