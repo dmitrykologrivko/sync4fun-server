@@ -1,15 +1,39 @@
+import randomstring from 'randomstring';
+
+export class Observer {
+    constructor(onNotifyCallback) {
+        const ID_LENGTH = 7;
+
+        this._id = randomstring.generate(ID_LENGTH);
+        this._onNotifyCallback = onNotifyCallback;
+    }
+
+    get id() {
+        return this._id;
+    }
+
+    notify(res) {
+        this._onNotifyCallback(res);
+    }
+}
+
+
 class BaseSubject {
-    constructor(observers = []) {
+    constructor(observers = new Map()) {
         this._observers = observers;
     }
 
     subscribe(observer) {
-        this._observers.push(observer);
+        if (!observer instanceof Observer) throw new Error('Argument should be observer instance');
+        this._observers.set(observer.id, observer);
     }
 
     unsubscribe(observer) {
-        const index = this._observers.indexOf(observer);
-        if (index > -1) this._observers.slice(index);
+        if (!observer instanceof Observer) throw new Error('Argument should be observer instance');
+
+        if (this._observers.has(observer.id)) {
+            this._observers.delete(observer.id);
+        }
     }
 
     publish(res) {
