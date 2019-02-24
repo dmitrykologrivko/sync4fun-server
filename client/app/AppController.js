@@ -4,7 +4,7 @@ import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
 
 export default class AppController {
-    constructor(webSocketClient, subjectsManager) {
+    constructor(webSocketClient, subjectsManager, player) {
         this._client = webSocketClient;
         this._subjects = subjectsManager;
         this._joinRoomDialog = new JoinRoomDialog(this._client, this._subjects, this._onSuccessJoinToRoom.bind(this));
@@ -16,6 +16,7 @@ export default class AppController {
         this._lableUserName = $('#labelUserName');
         this._labelFileName = $('#labelFileName');
         this._listEvents = $('.events-list');
+        this._player = player('my-video');
 
         // Subscribe observers on events
         this._userJoinedRoomObserver = new Observer(this._handleUserJoinedRoomEvent.bind(this));
