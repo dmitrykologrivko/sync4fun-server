@@ -1,0 +1,11 @@
+.main {
+    max-height: 465px;
+}
+
+.main__events-list {
+    max-height: 264px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: scroll;
+}
