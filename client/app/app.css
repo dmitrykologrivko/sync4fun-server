@@ -1,16 +1,11 @@
-html, body {
-    /*height: 100%;*/
+.main {
+    max-height: 465px;
 }
 
-video {
-    width: 100%;
-    height: 100%;
-}
-
-.events-list {
+.main__events-list {
+    max-height: 264px;
     margin: 0;
     padding: 0;
     list-style: none;
-    max-height: 280px;
     overflow-y: scroll;
 }

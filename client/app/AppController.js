@@ -15,11 +15,11 @@ export default class AppController {
         this._room = {};
 
         // Find elements
-        this._player = videojs('my-video');
+        this._player = videojs('videoPlayer', {fluid: true});
         this._lableRoomName = $('#labelRoomName');
         this._lableUserName = $('#labelUserName');
         this._labelFileName = $('#labelFileName');
-        this._listEvents = $('.events-list');
+        this._listEvents = $('.main__events-list');
 
         // Subscribe observers on events
         this._userJoinedRoomObserver = new Observer(this._handleUserJoinedRoomEvent.bind(this));

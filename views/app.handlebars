@@ -52,38 +52,34 @@
     </div>
 </div>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-9 col-sm-12">
-            <!--&lt;!&ndash;TODO: Remove dummy video&ndash;&gt;-->
-            <!--&lt;!&ndash;src="rabbit.mp4"&ndash;&gt;-->
-            <!--<video id="videoPlayer" controls></video>-->
-            <video id='my-video' class='video-js' controls preload='auto' width='640' height='264' data-setup='{}'>
-                <p class='vjs-no-js'>
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
-                </p>
-            </video>
-        </div>
-        <div class="col-md-3 col-sm-12">
-            <br/>
+<main class="main">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9 col-sm-12">
+                <video id='videoPlayer' class='video-js' controls preload='auto'>
+                    <p class='vjs-no-js'>
+                        To view this video please enable JavaScript, and consider upgrading to a web browser that
+                        <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                    </p>
+                </video>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <br/>
 
-            <h5 id="labelRoomName"></h5>
-            <h5 id="labelUserName"></h5>
-            <h5 id="labelFileName"></h5>
+                <h5 id="labelRoomName"></h5>
+                <h5 id="labelUserName"></h5>
+                <h5 id="labelFileName"></h5>
 
-            <br/>
-            <h6>Lasted events:</h6>
-            <ul class="events-list"></ul>
+                <br/>
+                <h6>Lasted events:</h6>
+                <ul class="main__events-list"></ul>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
 <!--App-->
 <script src={{assetPath 'vendor.js'}}></script>
 <script src={{assetPath 'app.js'}}></script>
-<!--<script src="js/appController.js"></script>-->
-<!--<script src="js/webSocketSubjects.js"></script>-->
-<!--<script src="js/webSocketClient.js"></script>-->
 </body>
 </html>
