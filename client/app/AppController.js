@@ -48,12 +48,13 @@ export default class AppController {
 
         // Set listeners
         this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
+        this._player.bigPlayButton.on('click', this._playToggleButtonClick.bind(this));
         this._player.tech_.on('mousedown', this._playToggleButtonClick.bind(this));
 
         this._joinRoomDialog.showDialog();
     }
 
-    _onSuccessJoinToRoom(res) {
+    _onSuccessJoinToRoom(res, selectedFile) {
         this._user = res.user;
         this._room = res.room;
 
@@ -61,7 +62,10 @@ export default class AppController {
         this._lableUserName.html(`User: <span class="badge badge-success">${this._user.name}</span>`);
         this._labelFileName.html(`File: <span class="badge badge-success">${this._user.file.name}</span>`);
 
-        this._player.src('rabbit.mp4');
+        this._player.src({
+            type: selectedFile.type,
+            src: URL.createObjectURL(selectedFile)
+        });
     }
 
     _addEventToList(userName, message) {

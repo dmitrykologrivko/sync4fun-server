@@ -1,12 +1,14 @@
 import $ from 'jquery';
 
 import {Observer} from './subjects';
+import {ALLOWED_VIDEO_TYPES} from "./constants";
 
 export default class JoinRoomDialog {
     constructor(webSocketClient, subjectsManager, onSuccessCallback) {
         this._client = webSocketClient;
         this._subjects = subjectsManager;
         this._onSuccessCallback = onSuccessCallback;
+        this._selectedFile = null;
 
         // Find elements
         this._root = $('#modalJoinRoom');
@@ -79,15 +81,22 @@ export default class JoinRoomDialog {
             isValid = false;
 
             this._inputUserFile.addClass('is-invalid');
-            this._blockErrorsRoomName.text('Please provide room name.');
+            this._blockErrorsUserFile.text('Please provide room name.');
+        } else if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+            isValid = false;
+
+            this._inputUserFile.addClass('is-invalid');
+            this._blockErrorsUserFile.text('Please select mp4 or webm file');
         } else {
             this._inputUserFile.removeClass('is-invalid');
-            this._blockErrorsRoomName.empty();
+            this._blockErrorsUserFile.empty();
         }
 
         if (!isValid) {
             return;
         }
+
+        this._selectedFile = file;
 
         const user = {
             name: userName,
@@ -106,12 +115,12 @@ export default class JoinRoomDialog {
     }
 
     _handleYouJoinedRoomEvent(res) {
-        this._onSuccessCallback(res);
+        this._onSuccessCallback(res, this._selectedFile);
         this.hideDialog();
     }
 
     _handleYouReconectedToRoomEvent(res) {
-        this._onSuccessCallback(res);
+        this._onSuccessCallback(res, this._selectedFile);
         this.hideDialog();
     }
 

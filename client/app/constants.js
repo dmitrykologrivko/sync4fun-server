@@ -21,3 +21,5 @@ export const ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE = 'error_of_changing_play_sta
 export const CHANGE_PLAY_STATE_TO_STOP = 'change_play_state_to_stop';
 export const CHANGED_PLAY_STATE_TO_STOP = 'changed_play_state_to_stop';
 export const ERROR_OF_CHANGING_PLAY_STATE_TO_STOP = 'error_of_changing_play_state_to_stop';
+
+export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
