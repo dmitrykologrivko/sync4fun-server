@@ -1,10 +1,13 @@
 import $ from 'jquery';
+import videojs from 'video.js';
+
+import 'video.js/dist/video-js.min.css';
 
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
 
 export default class AppController {
-    constructor(webSocketClient, subjectsManager, player) {
+    constructor(webSocketClient, subjectsManager) {
         this._client = webSocketClient;
         this._subjects = subjectsManager;
         this._joinRoomDialog = new JoinRoomDialog(this._client, this._subjects, this._onSuccessJoinToRoom.bind(this));
@@ -12,11 +15,11 @@ export default class AppController {
         this._room = {};
 
         // Find elements
+        this._player = videojs('my-video');
         this._lableRoomName = $('#labelRoomName');
         this._lableUserName = $('#labelUserName');
         this._labelFileName = $('#labelFileName');
         this._listEvents = $('.events-list');
-        this._player = player('my-video');
 
         // Subscribe observers on events
         this._userJoinedRoomObserver = new Observer(this._handleUserJoinedRoomEvent.bind(this));
@@ -43,6 +46,10 @@ export default class AppController {
         this._subjects.cangedPlayStateToStopSubject.subscribe(this._cangedPlayStateToStopObserver);
         this._subjects.errorOfChangingPlayStateToStopSubject.subscribe(this._errorOfChangingPlayStateToStopObserver);
 
+        // Set listeners
+        this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
+        this._player.tech_.on('mousedown', this._playToggleButtonClick.bind(this));
+
         this._joinRoomDialog.showDialog();
     }
 
@@ -53,10 +60,22 @@ export default class AppController {
         this._lableRoomName.html(`Room: <span class="badge badge-success">${this._room.name}</span>`);
         this._lableUserName.html(`User: <span class="badge badge-success">${this._user.name}</span>`);
         this._labelFileName.html(`File: <span class="badge badge-success">${this._user.file.name}</span>`);
+
+        this._player.src('rabbit.mp4');
     }
 
     _addEventToList(userName, message) {
         this._listEvents.append(`<li><span class="badge badge-info">${userName}</span> ${message}</li>`);
+    }
+
+    _playToggleButtonClick() {
+        if (this._player.paused()) {
+            this._client.changePlayStateToPause();
+            this._addEventToList('You', 'Paused playing');
+        } else {
+            this._client.changePlayStateToPlay();
+            this._addEventToList('You', 'Started playing');
+        }
     }
 
     _handleUserJoinedRoomEvent(res) {
@@ -80,7 +99,8 @@ export default class AppController {
     }
 
     _handleCangedPlayStateToPlayEvent(res) {
-
+        this._addEventToList(res.user.name, 'Started playing');
+        this._player.play();
     }
 
     _handleErrorOfChangingPlayStateToPlayEvent(res) {
@@ -88,7 +108,8 @@ export default class AppController {
     }
 
     _handleCangedPlayStateToPauseEvent(res) {
-
+        this._addEventToList(res.user.name, 'Paused playing');
+        this._player.pause();
     }
 
     _handleErrorOfChangingPlayStateToPauseEvent(res) {
@@ -96,7 +117,8 @@ export default class AppController {
     }
 
     _handleCangedPlayStateToStopEvent(res) {
-
+        this._addEventToList(res.user.name, 'Stopped playing');
+        this._player.stop();
     }
 
     _handleErrorOfChangingPlayStateToStopEvent(res) {

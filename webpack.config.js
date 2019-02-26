@@ -14,13 +14,13 @@ module.exports = {
         home: './home/home.js'
     },
     output: {
-        filename: '[name].[chunkhash].bundle.js',
+        filename: '[name].bundle.js',
         path: PUBLIC_PATH
     },
     plugins: [
-        new CleanWebpackPlugin(PUBLIC_PATH),
+        // new CleanWebpackPlugin(PUBLIC_PATH),
         new MiniCssExtractPlugin({
-            filename: '[name].[chunkhash].bundle.css'
+            filename: '[name].bundle.css'
         }),
         new ManifestPlugin()
     ],
@@ -31,6 +31,10 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "babel-loader"
             },
+            // {
+            //     test: /\.js$/,
+            //     loader: 'expose-loader'
+            // },
             {
                 test: /\.css$/,
                 use: [
