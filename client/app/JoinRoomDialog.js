@@ -86,7 +86,7 @@ export default class JoinRoomDialog {
             isValid = false;
 
             this._inputUserFile.addClass('is-invalid');
-            this._blockErrorsUserFile.text('Please select mp4 or webm file');
+            this._blockErrorsUserFile.text('Please select mp4 or webm file.');
         } else {
             this._inputUserFile.removeClass('is-invalid');
             this._blockErrorsUserFile.empty();
