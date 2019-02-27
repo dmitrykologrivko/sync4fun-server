@@ -20,6 +20,7 @@ export default class AppController {
         this._lableUserName = $('#labelUserName');
         this._labelFileName = $('#labelFileName');
         this._listEvents = $('.main__events-list');
+        this._linkLeaveRoom = $('#linkLeaveRoom');
 
         // Subscribe observers on events
         this._userJoinedRoomObserver = new Observer(this._handleUserJoinedRoomEvent.bind(this));
@@ -51,6 +52,8 @@ export default class AppController {
         this._player.bigPlayButton.on('click', this._playToggleButtonClick.bind(this));
         this._player.tech_.on('mousedown', this._playToggleButtonClick.bind(this));
 
+        this._linkLeaveRoom.on('click', this._leaveRoomLickClick.bind(this));
+
         this._joinRoomDialog.showDialog();
     }
 
@@ -58,7 +61,7 @@ export default class AppController {
         this._user = res.user;
         this._room = res.room;
 
-        this._lableRoomName.html(`Room: <span class="badge badge-success">${this._room.name}</span>`);
+        this._lableRoomName.html(`Room: <span class="badge badge-success">${this._room.name}</span> <a id="linkLeaveRoom" href="/">Leave</a>`);
         this._lableUserName.html(`User: <span class="badge badge-success">${this._user.name}</span>`);
         this._labelFileName.html(`File: <span class="badge badge-success">${this._user.file.name}</span>`);
 
@@ -82,6 +85,10 @@ export default class AppController {
         }
     }
 
+    _leaveRoomLickClick() {
+        this._client.leaveUserFromRoom();
+    }
+
     _handleUserJoinedRoomEvent(res) {
         this._addEventToList(res.user.name, 'Joined room');
     }
@@ -95,7 +102,7 @@ export default class AppController {
     }
 
     _handleYouLeftRoomEvent(res) {
-
+        this._addEventToList('You', 'Left room');
     }
 
     _handleErrorOfLeavingRoomObserver(res) {
