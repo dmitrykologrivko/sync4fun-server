@@ -81,7 +81,7 @@ export default class JoinRoomDialog {
             isValid = false;
 
             this._inputUserFile.addClass('is-invalid');
-            this._blockErrorsUserFile.text('Please provide room name.');
+            this._blockErrorsUserFile.text('Please provide a file.');
         } else if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
             isValid = false;
 
