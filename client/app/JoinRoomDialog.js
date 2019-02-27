@@ -20,6 +20,12 @@ export default class JoinRoomDialog {
         this._blockErrorsUserFile = $('#blockErrorsUserFile');
         this._blockErrorsRoomName = $('#blockErrorsRoomName');
 
+        // Set parametrs
+        this._root.modal({
+          backdrop: 'static',
+          keyboard: false
+        });
+
         // Subscribe observers on events
         this._youJoinedRoomObserver = new Observer(this._handleYouJoinedRoomEvent.bind(this));
         this._youReconnectedRoomObserver = new Observer(this._handleYouReconectedToRoomEvent.bind(this));
