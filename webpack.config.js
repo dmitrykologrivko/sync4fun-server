@@ -82,7 +82,18 @@ module.exports = {
                         }
                     }
                 ]
-            }
+            },
+            {
+                test: /\.(ttf)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            outputPath: 'fonts',
+                        }
+                    }
+                ]
+            },
         ]
     },
     optimization: {

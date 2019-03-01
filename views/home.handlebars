@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sync For Fun :: Home</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!--Home-->
+    <link rel="stylesheet" href={{assetPath 'vendor.css'}}>
     <link rel="stylesheet" href={{assetPath 'home.css'}}>
+
+    <title>Sync For Fun :: Home</title>
 </head>
 <body>
-    <main>
-        <a href="app" class="fun_button">Start FUN!</a>
-    </main>
+
+<main class="main">
+    <div class="main__content">
+        <a class="btn-play-outer" href="app">
+            <div class="btn-play"></div>
+        </a>
+        <p class="main__label">Start watching</p>
+    </div>
+</main>
+
+<!--Home-->
+<script src={{assetPath 'vendor.js'}}></script>
+<script src={{assetPath 'home.js'}}></script>
 </body>
 </html>
