@@ -85,6 +85,14 @@ export default class AppController {
                 <div class="events-list__message">${message}</div>
             </li>
         `);
+
+        const scrollPosition = this._listEvents.scrollTop();
+        const scrollHeight = this._listEvents.prop("scrollHeight");
+        const listHeight = this._listEvents.height();
+
+        if ((scrollPosition + listHeight) > (scrollHeight - listHeight)) {
+            this._listEvents.animate({scrollTop: scrollHeight});
+        }
     }
 
     _showUsersButtonClick() {
