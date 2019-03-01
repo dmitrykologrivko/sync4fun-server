@@ -76,10 +76,10 @@ export default class JoinRoomDialog {
             isValid = false;
 
             this._inputRoomName.addClass('is-invalid');
-            this._blockErrorsUserFile.text('Please provide user name.');
+            this._blockErrorsRoomName.text('Please provide room name.');
         } else {
             this._inputRoomName.removeClass('is-invalid');
-            this._blockErrorsUserFile.empty();
+            this._blockErrorsRoomName.empty();
         }
 
         // Validate user file
