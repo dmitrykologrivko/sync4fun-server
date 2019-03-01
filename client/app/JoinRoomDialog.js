@@ -3,6 +3,8 @@ import $ from 'jquery';
 import {Observer} from './subjects';
 import {ALLOWED_VIDEO_TYPES} from "./constants";
 
+import './JoinRoomDialog.css';
+
 export default class JoinRoomDialog {
     constructor(webSocketClient, subjectsManager, onSuccessCallback) {
         this._client = webSocketClient;
@@ -16,11 +18,11 @@ export default class JoinRoomDialog {
         this._inputUserFile = $('#inputUserFile');
         this._inputRoomName = $('#inputRoomName');
         this._buttonJoinRoom = $('#buttonJoinRoom');
-        this._blockErrorsUserName = $('#blockErrorsUserName');
-        this._blockErrorsUserFile = $('#blockErrorsUserFile');
-        this._blockErrorsRoomName = $('#blockErrorsRoomName');
+        this._blockErrorsUserName = $('.join-room-dialog__error-user-name');
+        this._blockErrorsUserFile = $('.join-room-dialog__error-user-file');
+        this._blockErrorsRoomName = $('.join-room-dialog__error-room-name');
 
-        // Set parametrs
+        // Set parameters
         this._root.modal({
           backdrop: 'static',
           keyboard: false

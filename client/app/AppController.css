@@ -19,7 +19,7 @@
 }
 
 .room-info__room-name {
-
+    color: #e6e8e7;
 }
 
 .room-info__leave-link {
@@ -54,6 +54,7 @@
 .users-list__item {
     padding: 8px;
     border-bottom: 2px solid #3c4046;
+    color: #e6e8e7;
 }
 
 .users-list__item:last-child {
