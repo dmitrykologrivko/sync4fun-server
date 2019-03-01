@@ -1,0 +1,61 @@
+.join-room-dialog {
+
+}
+
+.join-room-dialog__content {
+    background: #3c4046;
+}
+
+.join-room-dialog__title {
+    color: #e6e8e7;
+}
+
+.join-room-dialog__form-label {
+    color: #e6e8e7;
+}
+
+.join-room-dialog__form-control {
+    outline: none;
+}
+
+.join-room-dialog__form-control:focus {
+    border-color: #FFFFFF;
+}
+
+.join-room-dialog__btn-primary {
+    background: #242424;
+    border-color: #242424;
+}
+
+.join-room-dialog__btn-primary:hover {
+    background: #0d1216 !important;
+    border-color: #0d1216 !important;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.join-room-dialog__btn-primary:focus {
+    background: #0d1216 !important;
+    border-color: #0d1216 !important;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.join-room-dialog__btn-primary:active {
+    background: #0d1216 !important;
+    border-color: #0d1216 !important;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.join-room-dialog__error-user-name {
+
+}
+
+.join-room-dialog__error-user-file {
+
+}
+
+.join-room-dialog__error-room-name {
+
+}

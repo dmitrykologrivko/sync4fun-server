@@ -1,11 +1,8 @@
-.main {
-    max-height: 465px;
-}
+/* General */
 
-.main__events-list {
-    max-height: 264px;
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
-    list-style: none;
-    overflow-y: scroll;
+    background: #0d1216;
 }

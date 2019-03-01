@@ -3,6 +3,8 @@ import $ from 'jquery';
 import {Observer} from './subjects';
 import {ALLOWED_VIDEO_TYPES} from "./constants";
 
+import './JoinRoomDialog.css';
+
 export default class JoinRoomDialog {
     constructor(webSocketClient, subjectsManager, onSuccessCallback) {
         this._client = webSocketClient;
@@ -16,9 +18,15 @@ export default class JoinRoomDialog {
         this._inputUserFile = $('#inputUserFile');
         this._inputRoomName = $('#inputRoomName');
         this._buttonJoinRoom = $('#buttonJoinRoom');
-        this._blockErrorsUserName = $('#blockErrorsUserName');
-        this._blockErrorsUserFile = $('#blockErrorsUserFile');
-        this._blockErrorsRoomName = $('#blockErrorsRoomName');
+        this._blockErrorsUserName = $('.join-room-dialog__error-user-name');
+        this._blockErrorsUserFile = $('.join-room-dialog__error-user-file');
+        this._blockErrorsRoomName = $('.join-room-dialog__error-room-name');
+
+        // Set parameters
+        this._root.modal({
+          backdrop: 'static',
+          keyboard: false
+        });
 
         // Subscribe observers on events
         this._youJoinedRoomObserver = new Observer(this._handleYouJoinedRoomEvent.bind(this));
@@ -70,10 +78,10 @@ export default class JoinRoomDialog {
             isValid = false;
 
             this._inputRoomName.addClass('is-invalid');
-            this._blockErrorsUserFile.text('Please provide user name.');
+            this._blockErrorsRoomName.text('Please provide room name.');
         } else {
             this._inputRoomName.removeClass('is-invalid');
-            this._blockErrorsUserFile.empty();
+            this._blockErrorsRoomName.empty();
         }
 
         // Validate user file
@@ -86,7 +94,7 @@ export default class JoinRoomDialog {
             isValid = false;
 
             this._inputUserFile.addClass('is-invalid');
-            this._blockErrorsUserFile.text('Please select mp4 or webm file');
+            this._blockErrorsUserFile.text('Please select mp4 or webm file.');
         } else {
             this._inputUserFile.removeClass('is-invalid');
             this._blockErrorsUserFile.empty();

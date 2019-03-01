@@ -6,6 +6,8 @@ import 'video.js/dist/video-js.min.css';
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
 
+import './AppController.css';
+
 export default class AppController {
     constructor(webSocketClient, subjectsManager) {
         this._client = webSocketClient;
@@ -13,13 +15,17 @@ export default class AppController {
         this._joinRoomDialog = new JoinRoomDialog(this._client, this._subjects, this._onSuccessJoinToRoom.bind(this));
         this._user = {};
         this._room = {};
+        this._isUsersListVisible = false;
 
         // Find elements
-        this._player = videojs('videoPlayer', {fluid: true});
-        this._lableRoomName = $('#labelRoomName');
-        this._lableUserName = $('#labelUserName');
-        this._labelFileName = $('#labelFileName');
-        this._listEvents = $('.main__events-list');
+        this._player = videojs('videoPlayer');
+        this._lableRoomName = $('.room-info__room-name');
+        this._labelFileName = $('.video-info__file-name');
+        this._labelFileSize = $('.video-info__file-size');
+        this._buttonShowUsers = $('.room-info__show-users-button');
+        this._listUsers = $('.users-list');
+        this._listEvents = $('.events-list');
+        this._linkLeaveRoom = $('.room-info__leave-link');
 
         // Subscribe observers on events
         this._userJoinedRoomObserver = new Observer(this._handleUserJoinedRoomEvent.bind(this));
@@ -51,6 +57,10 @@ export default class AppController {
         this._player.bigPlayButton.on('click', this._playToggleButtonClick.bind(this));
         this._player.tech_.on('mousedown', this._playToggleButtonClick.bind(this));
 
+        this._buttonShowUsers.on('click', this._showUsersButtonClick.bind(this));
+
+        this._linkLeaveRoom.on('click', this._leaveRoomLickClick.bind(this));
+
         this._joinRoomDialog.showDialog();
     }
 
@@ -58,9 +68,9 @@ export default class AppController {
         this._user = res.user;
         this._room = res.room;
 
-        this._lableRoomName.html(`Room: <span class="badge badge-success">${this._room.name}</span>`);
-        this._lableUserName.html(`User: <span class="badge badge-success">${this._user.name}</span>`);
-        this._labelFileName.html(`File: <span class="badge badge-success">${this._user.file.name}</span>`);
+        this._lableRoomName.html(`${this._room.name} <a class="room-info__leave-link" href="/">Leave</a>`);
+        this._labelFileName.text(this._user.file.name);
+        this._labelFileSize.text(`Size: ${this._user.file.size}MB`);
 
         this._player.src({
             type: selectedFile.type,
@@ -69,7 +79,22 @@ export default class AppController {
     }
 
     _addEventToList(userName, message) {
-        this._listEvents.append(`<li><span class="badge badge-info">${userName}</span> ${message}</li>`);
+        this._listEvents.append(`
+            <li class="events-list__item">
+                <div class="events-list__user">${userName}</div>
+                <div class="events-list__message">${message}</div>
+            </li>
+        `);
+    }
+
+    _showUsersButtonClick() {
+        if (this._isUsersListVisible) {
+            this._listUsers.addClass('d-none');
+            this._isUsersListVisible = false;
+        } else {
+            this._listUsers.removeClass('d-none');
+            this._isUsersListVisible = true;
+        }
     }
 
     _playToggleButtonClick() {
@@ -80,6 +105,10 @@ export default class AppController {
             this._client.changePlayStateToPlay();
             this._addEventToList('You', 'Started playing');
         }
+    }
+
+    _leaveRoomLickClick() {
+        this._client.leaveUserFromRoom();
     }
 
     _handleUserJoinedRoomEvent(res) {
@@ -95,7 +124,7 @@ export default class AppController {
     }
 
     _handleYouLeftRoomEvent(res) {
-
+        this._addEventToList('You', 'Left room');
     }
 
     _handleErrorOfLeavingRoomObserver(res) {

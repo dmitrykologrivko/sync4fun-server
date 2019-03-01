@@ -20,59 +20,84 @@
      role="dialog"
      aria-labelledby="exampleModalCenterTitle"
      aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered join-room-dialog" role="document">
+        <div class="modal-content join-room-dialog__content">
             <div class="modal-header">
-                <h5 class="modal-title">Join Room</h5>
+                <h5 class="modal-title join-room-dialog__title">Join Room</h5>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="form-group">
-                        <label for="inputUserName" class="col-form-label">Your name:</label>
-                        <input type="text" class="form-control" id="inputUserName">
-                        <div id="blockErrorsUserName" class="invalid-feedback"></div>
+                        <label for="inputUserName" class="col-form-label join-room-dialog__form-label">
+                            Your name:
+                        </label>
+                        <input type="text"
+                               class="form-control join-room-dialog__form-control"
+                               id="inputUserName">
+                        <div class="invalid-feedback join-room-dialog__error-user-name"></div>
                     </div>
                     <div class="form-group">
-                        <label for="inputUserFile">Media file</label>
-                        <!--TODO: check multi-browser support accept="video/*"-->
-                        <input type="file" class="form-control-file" id="inputUserFile">
-                        <div id="blockErrorsUserFile" class="invalid-feedback"></div>
+                        <label for="inputUserFile" class="col-form-label join-room-dialog__form-label">
+                            Media file
+                        </label>
+                        <input type="file"
+                               class="form-control-file join-room-dialog__form-label join-room-dialog__form-control"
+                               id="inputUserFile">
+                        <div class="invalid-feedback join-room-dialog__error-user-file"></div>
                     </div>
                     <div class="form-group">
-                        <label for="inputRoomName" class="col-form-label">Room name:</label>
-                        <input type="text" class="form-control" id="inputRoomName">
-                        <div id="blockErrorsRoomName" class="invalid-feedback"></div>
+                        <label for="inputRoomName"
+                               class="col-form-label join-room-dialog__form-label">
+                            Room name:
+                        </label>
+                        <input type="text"
+                               class="form-control join-room-dialog__form-control"
+                               id="inputRoomName">
+                        <div class="invalid-feedback join-room-dialog__error-user-name"></div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="buttonJoinRoom">Join</button>
+                <button type="button"
+                        class="btn btn-primary join-room-dialog__btn-primary"
+                        id="buttonJoinRoom">
+                    Join
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <main class="main">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-9 col-sm-12">
-                <video id='videoPlayer' class='video-js' controls preload='auto'>
-                    <p class='vjs-no-js'>
-                        To view this video please enable JavaScript, and consider upgrading to a web browser that
-                        <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
-                    </p>
-                </video>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col-md-9 col-sm-12 h-100">
+                <div class="row h-75">
+                    <video id='videoPlayer' class='video-js' controls preload='auto'>
+                        <p class='vjs-no-js'>
+                            To view this video please enable JavaScript, and consider upgrading to a web browser that
+                            <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                        </p>
+                    </video>
+                </div>
+                <div class="row h-25">
+                    <div class="video-info">
+                        <h5 class="video-info__file-name"></h5>
+                        <h6 class="video-info__file-size"></h6>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-3 col-sm-12">
-                <br/>
+            <div class="col-md-3 col-sm-12 h-100 p-0">
+                <div class="room-info">
+                    <h5 class="room-info__room-name"></h5>
+                    <button class="room-info__show-users-button">Users in room</button>
+                    <ul class="users-list d-none"></ul>
+                </div>
 
-                <h5 id="labelRoomName"></h5>
-                <h5 id="labelUserName"></h5>
-                <h5 id="labelFileName"></h5>
-
-                <br/>
-                <h6>Lasted events:</h6>
-                <ul class="main__events-list"></ul>
+                <div class="events">
+                    <h6>Lasted events:</h6>
+                    <ul class="events-list"></ul>
+                </div>
             </div>
         </div>
     </div>
