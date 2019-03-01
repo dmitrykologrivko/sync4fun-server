@@ -62,7 +62,7 @@ export default class WebSocketClient {
         });
 
         this._socket.on(CHANGED_PLAY_STATE_TO_PLAY, res => {
-            this._subjectsManager.cangedPlayStateToPlaySubject.publish(res);
+            this._subjectsManager.changePlayStateToPlaySubject.publish(res);
         });
 
         this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, res => {
@@ -70,7 +70,7 @@ export default class WebSocketClient {
         });
 
         this._socket.on(CHANGED_PLAY_STATE_TO_PAUSE, res => {
-            this._subjectsManager.cangedPlayStateToPauseSubject.publish(res);
+            this._subjectsManager.changedPlayStateToPauseSubject.publish(res);
         });
 
         this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, res => {
@@ -78,7 +78,7 @@ export default class WebSocketClient {
         });
 
         this._socket.on(CHANGED_PLAY_STATE_TO_STOP, res => {
-            this._subjectsManager.cangedPlayStateToStopSubject.publish(res);
+            this._subjectsManager.changedPlayStateToStopSubject.publish(res);
         });
 
         this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, res => {

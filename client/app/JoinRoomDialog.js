@@ -30,7 +30,7 @@ export default class JoinRoomDialog {
 
         // Subscribe observers on events
         this._youJoinedRoomObserver = new Observer(this._handleYouJoinedRoomEvent.bind(this));
-        this._youReconnectedRoomObserver = new Observer(this._handleYouReconectedToRoomEvent.bind(this));
+        this._youReconnectedRoomObserver = new Observer(this._handleYouReconnectedToRoomEvent.bind(this));
         this._errorOfJoiningUserToRoomObserver = new Observer(this._handleErrorOfJoiningUserToRoomEvent.bind(this));
 
         this._subjects.youJoinedRoomSubject.subscribe(this._youJoinedRoomObserver);
@@ -127,7 +127,7 @@ export default class JoinRoomDialog {
         this.hideDialog();
     }
 
-    _handleYouReconectedToRoomEvent(res) {
+    _handleYouReconnectedToRoomEvent(res) {
         this._onSuccessCallback(res, this._selectedFile);
         this.hideDialog();
     }

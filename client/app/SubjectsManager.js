@@ -65,7 +65,7 @@ export default class SubjectsManager {
         return this._errorOfLeavingRoomSubject;
     }
 
-    get cangedPlayStateToPlaySubject() {
+    get changePlayStateToPlaySubject() {
         return this._cangedPlayStateToPlaySubject;
     }
 
@@ -73,7 +73,7 @@ export default class SubjectsManager {
         return this._errorOfChangingPlayStateToPlaySubject;
     }
 
-    get cangedPlayStateToPauseSubject() {
+    get changedPlayStateToPauseSubject() {
         return this._cangedPlayStateToPauseSubject;
     }
 
@@ -81,7 +81,7 @@ export default class SubjectsManager {
         return this._errorOfChangingPlayStateToPauseSubject;
     }
 
-    get cangedPlayStateToStopSubject() {
+    get changedPlayStateToStopSubject() {
         return this._cangedPlayStateToStopSubject;
     }
 
