@@ -34,7 +34,6 @@
                     </div>
                     <div class="form-group">
                         <label for="inputUserFile">Media file</label>
-                        <!--TODO: check multi-browser support accept="video/*"-->
                         <input type="file" class="form-control-file" id="inputUserFile">
                         <div id="blockErrorsUserFile" class="invalid-feedback"></div>
                     </div>
@@ -53,26 +52,35 @@
 </div>
 
 <main class="main">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-9 col-sm-12">
-                <video id='videoPlayer' class='video-js' controls preload='auto'>
-                    <p class='vjs-no-js'>
-                        To view this video please enable JavaScript, and consider upgrading to a web browser that
-                        <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
-                    </p>
-                </video>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col-md-9 col-sm-12 h-100">
+                <div class="row h-75">
+                    <video id='videoPlayer' class='video-js' controls preload='auto'>
+                        <p class='vjs-no-js'>
+                            To view this video please enable JavaScript, and consider upgrading to a web browser that
+                            <a href='https://videojs.com/html5-video-support/' target='_blank'>supports HTML5 video</a>
+                        </p>
+                    </video>
+                </div>
+                <div class="row h-25">
+                    <div class="video-info">
+                        <h5 class="video-info__file-name"></h5>
+                        <h6 class="video-info__file-size"></h6>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-3 col-sm-12">
-                <br/>
+            <div class="col-md-3 col-sm-12 h-100 p-0">
+                <div class="room-info">
+                    <h5 class="room-info__room-name"></h5>
+                    <button class="room-info__show-users-button">Users in room</button>
+                    <ul class="users-list d-none"></ul>
+                </div>
 
-                <h5 id="labelRoomName"></h5>
-                <h5 id="labelUserName"></h5>
-                <h5 id="labelFileName"></h5>
-
-                <br/>
-                <h6>Lasted events:</h6>
-                <ul class="main__events-list"></ul>
+                <div class="events">
+                    <h6>Lasted events:</h6>
+                    <ul class="events-list"></ul>
+                </div>
             </div>
         </div>
     </div>
