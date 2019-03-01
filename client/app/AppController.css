@@ -68,11 +68,11 @@
 }
 
 .video-info__file-name {
-
+    color: #e6e8e7;
 }
 
 .video-info__file-size {
-
+    color: #e6e8e7;
 }
 
 /* Events */
@@ -80,6 +80,10 @@
 .events {
     height: calc(100% - 120px);
     padding: 15px;
+}
+
+.events__lasted-events-label {
+    color: #e6e8e7;
 }
 
 .events-list {
