@@ -5,6 +5,7 @@ import 'video.js/dist/video-js.min.css';
 
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
+import {convertBytesToMegabytes} from './utils';
 
 import './AppController.css';
 
@@ -67,10 +68,11 @@ export default class AppController {
     _onSuccessJoinToRoom(res, selectedFile) {
         this._user = res.user;
         this._room = res.room;
+        const fileSize = convertBytesToMegabytes(this._user.file.size);
 
         this._lableRoomName.html(`${this._room.name} <a class="room-info__leave-link" href="/">Leave</a>`);
         this._labelFileName.text(this._user.file.name);
-        this._labelFileSize.text(`Size: ${this._user.file.size}MB`);
+        this._labelFileSize.text(`Size: ${Number(fileSize).toFixed(2)}MB`);
 
         this._player.src({
             type: selectedFile.type,
