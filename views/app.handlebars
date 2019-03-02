@@ -53,7 +53,7 @@
                         <input type="text"
                                class="form-control join-room-dialog__form-control"
                                id="inputRoomName">
-                        <div class="invalid-feedback join-room-dialog__error-user-name"></div>
+                        <div class="invalid-feedback join-room-dialog__error-room-name"></div>
                     </div>
                 </form>
             </div>
@@ -95,7 +95,7 @@
                 </div>
 
                 <div class="events">
-                    <h6>Lasted events:</h6>
+                    <h6 class="events__latest-events-label">Latest events:</h6>
                     <ul class="events-list"></ul>
                 </div>
             </div>
@@ -104,7 +104,7 @@
 </main>
 
 <!--App-->
-<script src={{assetPath 'vendor.js'}}></script>
-<script src={{assetPath 'app.js'}}></script>
+<script defer src={{assetPath 'vendor.js'}}></script>
+<script defer src={{assetPath 'app.js'}}></script>
 </body>
 </html>

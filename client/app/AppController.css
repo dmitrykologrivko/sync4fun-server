@@ -23,7 +23,11 @@
 }
 
 .room-info__leave-link {
+    color: #979998;
+}
 
+.room-info__leave-link:hover {
+    color: #979998;
 }
 
 .room-info__show-users-button {
@@ -68,11 +72,11 @@
 }
 
 .video-info__file-name {
-
+    color: #e6e8e7;
 }
 
 .video-info__file-size {
-
+    color: #e6e8e7;
 }
 
 /* Events */
@@ -80,6 +84,10 @@
 .events {
     height: calc(100% - 120px);
     padding: 15px;
+}
+
+.events__latest-events-label {
+    color: #e6e8e7;
 }
 
 .events-list {

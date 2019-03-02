@@ -5,6 +5,7 @@ import 'video.js/dist/video-js.min.css';
 
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
+import {convertBytesToMegabytes} from './utils';
 
 import './AppController.css';
 
@@ -33,23 +34,23 @@ export default class AppController {
         this._userLeftRoomObserver = new Observer(this._handleUserLeftRoomEvent.bind(this));
         this._youLeftRoomObserver = new Observer(this._handleYouLeftRoomEvent.bind(this));
         this._errorOfLeavingRoomObserver = new Observer(this._handleErrorOfLeavingRoomObserver.bind(this));
-        this._cangedPlayStateToPlayObserver = new Observer(this._handleCangedPlayStateToPlayEvent.bind(this));
-        this._errorOfChangingPlayStateToPlayObserver = new Observer(this._handleCangedPlayStateToPlayEvent.bind(this));
-        this._cangedPlayStateToPauseObserver = new Observer(this._handleCangedPlayStateToPauseEvent.bind(this));
-        this._errorOfChangingPlayStateToPauseObserver = new Observer(this._handleCangedPlayStateToPauseEvent.bind(this));
-        this._cangedPlayStateToStopObserver = new Observer(this._handleCangedPlayStateToStopEvent.bind(this));
-        this._errorOfChangingPlayStateToStopObserver = new Observer(this._handleCangedPlayStateToStopEvent.bind(this));
+        this._cangedPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
+        this._errorOfChangingPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
+        this._cangedPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
+        this._errorOfChangingPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
+        this._cangedPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
+        this._errorOfChangingPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
 
         this._subjects.userJoinedRoomSubject.subscribe(this._userJoinedRoomObserver);
         this._subjects.userReconnectedToRoomSubject.subscribe(this._userReconnectedToRoomObserver);
         this._subjects.userLeftRoomSubject.subscribe(this._userLeftRoomObserver);
         this._subjects.youLeftRoomSubject.subscribe(this._youLeftRoomObserver);
         this._subjects.errorOfLeavingRoomSubject.subscribe(this._errorOfLeavingRoomObserver);
-        this._subjects.cangedPlayStateToPlaySubject.subscribe(this._cangedPlayStateToPlayObserver);
+        this._subjects.changePlayStateToPlaySubject.subscribe(this._cangedPlayStateToPlayObserver);
         this._subjects.errorOfChangingPlayStateToPlaySubject.subscribe(this._errorOfChangingPlayStateToPlayObserver);
-        this._subjects.cangedPlayStateToPauseSubject.subscribe(this._cangedPlayStateToPauseObserver);
+        this._subjects.changedPlayStateToPauseSubject.subscribe(this._cangedPlayStateToPauseObserver);
         this._subjects.errorOfChangingPlayStateToPauseSubject.subscribe(this._errorOfChangingPlayStateToPauseObserver);
-        this._subjects.cangedPlayStateToStopSubject.subscribe(this._cangedPlayStateToStopObserver);
+        this._subjects.changedPlayStateToStopSubject.subscribe(this._cangedPlayStateToStopObserver);
         this._subjects.errorOfChangingPlayStateToStopSubject.subscribe(this._errorOfChangingPlayStateToStopObserver);
 
         // Set listeners
@@ -67,10 +68,11 @@ export default class AppController {
     _onSuccessJoinToRoom(res, selectedFile) {
         this._user = res.user;
         this._room = res.room;
+        const fileSize = convertBytesToMegabytes(this._user.file.size);
 
         this._lableRoomName.html(`${this._room.name} <a class="room-info__leave-link" href="/">Leave</a>`);
         this._labelFileName.text(this._user.file.name);
-        this._labelFileSize.text(`Size: ${this._user.file.size}MB`);
+        this._labelFileSize.text(`Size: ${Number(fileSize).toFixed(2)}MB`);
 
         this._player.src({
             type: selectedFile.type,
@@ -85,6 +87,14 @@ export default class AppController {
                 <div class="events-list__message">${message}</div>
             </li>
         `);
+
+        const scrollPosition = this._listEvents.scrollTop();
+        const scrollHeight = this._listEvents.prop("scrollHeight");
+        const listHeight = this._listEvents.height();
+
+        if ((scrollPosition + listHeight) > (scrollHeight - listHeight)) {
+            this._listEvents.animate({scrollTop: scrollHeight});
+        }
     }
 
     _showUsersButtonClick() {
@@ -131,7 +141,7 @@ export default class AppController {
         console.error(res);
     }
 
-    _handleCangedPlayStateToPlayEvent(res) {
+    _handleChangedPlayStateToPlayEvent(res) {
         this._addEventToList(res.user.name, 'Started playing');
         this._player.play();
     }
@@ -140,7 +150,7 @@ export default class AppController {
         console.error(res);
     }
 
-    _handleCangedPlayStateToPauseEvent(res) {
+    _handleChangedPlayStateToPauseEvent(res) {
         this._addEventToList(res.user.name, 'Paused playing');
         this._player.pause();
     }
@@ -149,7 +159,7 @@ export default class AppController {
         console.error(res);
     }
 
-    _handleCangedPlayStateToStopEvent(res) {
+    _handleChangedPlayStateToStopEvent(res) {
         this._addEventToList(res.user.name, 'Stopped playing');
         this._player.stop();
     }
