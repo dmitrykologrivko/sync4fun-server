@@ -75,25 +75,25 @@ async function joinUserToRoom(req, socket, roomManager) {
     const user = new User(socket.id, req.user.name, file);
 
     try {
-        roomManager.addUser(user, req.room.name);
+        const room = roomManager.addUser(user, req.room.name);
 
-        socket.join(req.room.name);
+        socket.join(room.name);
 
         socket.emit(YOU_JOINED_ROOM, {
             user: {
                 id: user.id,
                 name: user.name,
                 file: {
-                    name: file.name,
-                    size: file.size
+                    name: user.file.name,
+                    size: user.file.size
                 }
             },
             room: {
-                name: req.room.name
+                name: room.name
             }
         });
 
-        return socket.to(req.room.name).emit(USER_JOINED_ROOM, {
+        return socket.to(room.name).emit(USER_JOINED_ROOM, {
             user: {
                 id: user.id,
                 name: user.name
@@ -101,6 +101,8 @@ async function joinUserToRoom(req, socket, roomManager) {
         });
     } catch (error) {
         if (error instanceof UserInThisRoomError) {
+            const room = roomManager.findRoomByUser(user);
+
             socket.emit(YOU_RECONNECTED_TO_ROOM, {
                 user: {
                     id: user.id,
@@ -111,13 +113,13 @@ async function joinUserToRoom(req, socket, roomManager) {
                     }
                 },
                 room: {
-                    name: req.room.name
+                    name: room.name
                 }
             });
 
-            socket.join(req.room.name);
+            socket.join(room.name);
 
-            return socket.to(req.room.name).emit(USER_RECONNECTED_TO_ROOM, {
+            return socket.to(room.name).emit(USER_RECONNECTED_TO_ROOM, {
                 user: {
                     id: user.id,
                     name: user.name
@@ -127,7 +129,7 @@ async function joinUserToRoom(req, socket, roomManager) {
         if (error instanceof UserInAnotherRoomError) {
             const previousRoom = roomManager.findRoomByUser(user);
 
-            roomManager.moveUser(user, req.room.name);
+            const currentRoom = roomManager.moveUser(user, req.room.name);
 
             socket.leave(previousRoom.name);
 
@@ -138,7 +140,7 @@ async function joinUserToRoom(req, socket, roomManager) {
                 }
             });
 
-            socket.join(req.room.name);
+            socket.join(currentRoom.name);
 
             socket.emit(YOU_JOINED_ROOM, {
                 user: {
@@ -150,11 +152,11 @@ async function joinUserToRoom(req, socket, roomManager) {
                     }
                 },
                 room: {
-                    name: req.room.name
+                    name: currentRoom.name
                 }
             });
 
-            return socket.to(req.room.name).emit(USER_JOINED_ROOM, {
+            return socket.to(currentRoom.name).emit(USER_JOINED_ROOM, {
                 user: {
                     id: user.id,
                     name: user.name

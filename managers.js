@@ -44,6 +44,8 @@ class RoomManager {
             this._rooms.set(roomName, new Room(roomName));
             this._rooms.get(roomName).addUser(user);
         }
+
+        return this._rooms.get(roomName);
     }
 
     removeUser(user) {
@@ -54,16 +56,20 @@ class RoomManager {
     moveUser(user, roomName) {
         const room = this.findRoomByUser(user);
 
-        if (room) {
-            room.removeUser(user);
-
-            if (this._rooms.has(roomName)) {
-                this._rooms.get(roomName).addUser(user);
-            } else {
-                this._rooms.set(roomName, new Room(roomName));
-                this._rooms.get(roomName).addUser(user);
-            }
+        if (!room) {
+            return null;
         }
+
+        room.removeUser(user);
+
+        if (this._rooms.has(roomName)) {
+            this._rooms.get(roomName).addUser(user);
+        } else {
+            this._rooms.set(roomName, new Room(roomName));
+            this._rooms.get(roomName).addUser(user);
+        }
+
+        return this._rooms.get(roomName);
     }
 
     findRoomByUser(user) {

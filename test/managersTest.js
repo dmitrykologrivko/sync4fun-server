@@ -59,10 +59,29 @@ describe('Room manager test', () => {
             roomManager.addUser(user, room.name);
 
             assert.equal(true, roomManager.rooms.has(room.name));
+            assert.equal(true, roomManager.rooms.get(room.name).users.has(user.id));
+        });
 
-            room = roomManager.rooms.get(room.name);
+        it('when user is not in any rooms and provided room exists should return existing room', () => {
+            const room = roomManager.rooms.get('#2');
+            const user = UsersFactory.makeUser('123', 'Some name');
 
-            assert.equal(true, room.users.has(user.id));
+            const resultRoom = roomManager.addUser(user, room.name);
+
+            assert.equal(room, resultRoom);
+            assert.deepEqual(room, resultRoom);
+        });
+
+        it('when user is not in any rooms and provided room not exist should return added room', () => {
+            let room = RoomsFactory.makeRoom('Some room');
+            let user = UsersFactory.makeUser('123', 'Some name');
+
+            room.addUser(user);
+
+            const resultRoom = roomManager.addUser(user, room.name);
+
+            assert.notEqual(room, resultRoom);
+            assert.deepEqual(room, resultRoom);
         });
     });
 
@@ -144,6 +163,39 @@ describe('Room manager test', () => {
 
             assert.equal(room1.users.size, 2);
             assert.equal(room2.users.size, 0);
+        });
+
+        it('when user is in another room and provided room exists should return existing room', () => {
+            const room1 = roomManager.rooms.get('#1');
+            const room2 = roomManager.rooms.get('#2');
+            const user = room1.users.get('ID:1');
+
+            const resultRoom = roomManager.moveUser(user, room2.name);
+
+            assert.equal(room2, resultRoom);
+            assert.deepEqual(room2, resultRoom);
+        });
+
+        it('when user is in another room and provided room not exist should return added room', () => {
+            const room1 = roomManager.rooms.get('#1');
+            const room2 = roomManager.rooms.get('#2');
+            const room3 = RoomsFactory.makeRoom('#3');
+            const user = room1.users.get('ID:1');
+
+            room3.addUser(user);
+
+            const resultRoom = roomManager.moveUser(user, room3.name);
+
+            assert.notEqual(room3, resultRoom);
+            assert.deepEqual(room3, resultRoom);
+        });
+
+        it('when user is not in any rooms should not return any rooms', () => {
+            const user = UsersFactory.makeUser('123', 'Some name');
+
+            const resultRoom = roomManager.moveUser(user, '#3');
+
+            assert.isNull(resultRoom);
         });
     });
 
