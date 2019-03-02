@@ -23,7 +23,11 @@
 }
 
 .room-info__leave-link {
+    color: #979998;
+}
 
+.room-info__leave-link:hover {
+    color: #979998;
 }
 
 .room-info__show-users-button {
