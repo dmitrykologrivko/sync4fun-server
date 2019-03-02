@@ -14,7 +14,7 @@ html, body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: url('background-1.jpg');
+    background: url('background-1.jpg') center center;
 }
 
 .main__content {
@@ -25,13 +25,13 @@ html, body {
 }
 
 .main__label {
+    margin: 0;
     font-family: 'Releway Regular', sans-serif;
     font-size: 60px;
     color: white;
 }
 
 .btn-play-outer {
-    margin-left: -15px;
     display: flex;
     justify-content: center;
     align-items: center;
