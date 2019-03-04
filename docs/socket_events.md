@@ -38,14 +38,33 @@ Response to user `you_joined_room`
 ```
 {
    "user":{
+      "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
       "file":{
-        "name":"rabbit.mp4",
-        "size":145899989
+         "name":"rabbit.mp4",
+         "size":145899989
       }
    },
    "room":{
-      "name":"My room"
+      "name":"My room",
+      "users":[
+         {
+            "id":"qqffsfs8938dffsbdwwt",
+            "name":"John",
+            "file":{
+               "name":"rabbit.mp4",
+               "size":145899989
+            }
+         },
+         {
+            "id":"fgwsvs674gf8dh2y47gh",
+            "name":"Kate",
+            "file":{
+               "name":"rabbit.mp4",
+               "size":145899989
+            }
+         }
+      ]
    }
 }
 ```
@@ -56,7 +75,11 @@ Response to the room `user_joined_room`
 {
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
-      "name":"John"
+      "name":"John",
+      "file":{
+         "name":"rabbit.mp4",
+         "size":145899989
+      }
    }
 }
 ```
@@ -68,14 +91,33 @@ Response to user `you_reconnected_to_room`
 ```
 {
    "user":{
+      "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
       "file":{
-        "name":"rabbit.mp4",
-        "size":145899989
+         "name":"rabbit.mp4",
+         "size":145899989
       }
    },
    "room":{
-      "name":"My room"
+      "name":"My room",
+      "users":[
+         {
+            "id":"qqffsfs8938dffsbdwwt",
+            "name":"John",
+            "file":{
+               "name":"rabbit.mp4",
+               "size":145899989
+            }
+         },
+         {
+            "id":"fgwsvs674gf8dh2y47gh",
+            "name":"Kate",
+            "file":{
+               "name":"rabbit.mp4",
+               "size":145899989
+            }
+         }
+      ]
    }
 }
 ```
@@ -86,7 +128,11 @@ Response to the room `user_reconnected_to_room`
 {
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
-      "name":"John"
+      "name":"John",
+      "file":{
+         "name":"rabbit.mp4",
+         "size":145899989
+      }
    }
 }
 ```
@@ -98,14 +144,33 @@ Response to user `you_joined_room`
 ```
 {
    "user":{
+      "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
       "file":{
-        "name":"rabbit.mp4",
-        "size":145899989
+         "name":"rabbit.mp4",
+         "size":145899989
       }
    },
    "room":{
-      "name":"My room"
+      "name":"My room",
+      "users":[
+         {
+            "id":"qqffsfs8938dffsbdwwt",
+            "name":"John",
+            "file":{
+               "name":"rabbit.mp4",
+               "size":145899989
+            }
+         },
+         {
+            "id":"fgwsvs674gf8dh2y47gh",
+            "name":"Kate",
+            "file":{
+               "name":"rabbit.mp4",
+               "size":145899989
+            }
+         }
+      ]
    }
 }
 ```
@@ -119,7 +184,6 @@ Response to the previous room `user_left_room`
       "name":"John"
    }
 }
-
 ```
 
 Response to the new room `user_joined_room`
@@ -128,10 +192,13 @@ Response to the new room `user_joined_room`
 {
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
-      "name":"John"
+      "name":"John",
+      "file":{
+         "name":"rabbit.mp4",
+         "size":145899989
+      }
    }
 }
-
 ```
 
 #### Case 4 - The user is passing invalid request
