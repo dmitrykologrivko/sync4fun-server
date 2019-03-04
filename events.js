@@ -2,6 +2,11 @@ const validate = require("validate.js");
 
 const {User, File} = require('./models');
 const {
+    UserSerializer,
+    UserShortSerializer,
+    RoomSerializer
+} = require('./serializers');
+const {
     UserInThisRoomError,
     UserInAnotherRoomError
 } = require('./managers');
@@ -29,6 +34,10 @@ const {
     CHANGED_PLAY_STATE_TO_STOP,
     ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
 } = require('./constants').events;
+
+const userSerializer = new UserSerializer();
+const userShortSerializer = new UserShortSerializer();
+const roomSerializer = new RoomSerializer();
 
 async function joinUserToRoom(req, socket, roomManager) {
     const constraints = {
@@ -80,50 +89,26 @@ async function joinUserToRoom(req, socket, roomManager) {
         socket.join(room.name);
 
         socket.emit(YOU_JOINED_ROOM, {
-            user: {
-                id: user.id,
-                name: user.name,
-                file: {
-                    name: user.file.name,
-                    size: user.file.size
-                }
-            },
-            room: {
-                name: room.name
-            }
+            user: await userSerializer.serialize(user),
+            room: await roomSerializer.serialize(room)
         });
 
         return socket.to(room.name).emit(USER_JOINED_ROOM, {
-            user: {
-                id: user.id,
-                name: user.name
-            },
+            user: await userSerializer.serialize(user)
         });
     } catch (error) {
         if (error instanceof UserInThisRoomError) {
             const room = roomManager.findRoomByUser(user);
 
             socket.emit(YOU_RECONNECTED_TO_ROOM, {
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    file: {
-                        name: file.name,
-                        size: file.size
-                    }
-                },
-                room: {
-                    name: room.name
-                }
+                user: await userSerializer.serialize(user),
+                room: await roomSerializer.serialize(room)
             });
 
             socket.join(room.name);
 
             return socket.to(room.name).emit(USER_RECONNECTED_TO_ROOM, {
-                user: {
-                    id: user.id,
-                    name: user.name
-                },
+                user: await userShortSerializer.serialize(user),
             });
         }
         if (error instanceof UserInAnotherRoomError) {
@@ -134,33 +119,18 @@ async function joinUserToRoom(req, socket, roomManager) {
             socket.leave(previousRoom.name);
 
             socket.to(previousRoom.name).emit(USER_LEFT_ROOM, {
-                user: {
-                    id: user.id,
-                    name: user.name
-                }
+                user: await userShortSerializer.serialize(user)
             });
 
             socket.join(currentRoom.name);
 
             socket.emit(YOU_JOINED_ROOM, {
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    file: {
-                        name: file.name,
-                        size: file.size
-                    }
-                },
-                room: {
-                    name: currentRoom.name
-                }
+                user: await userSerializer.serialize(user),
+                room: await roomSerializer.serialize(currentRoom)
             });
 
             return socket.to(currentRoom.name).emit(USER_JOINED_ROOM, {
-                user: {
-                    id: user.id,
-                    name: user.name
-                }
+                user: await userShortSerializer.serialize(user)
             });
         }
 
@@ -168,7 +138,7 @@ async function joinUserToRoom(req, socket, roomManager) {
     }
 }
 
-function leaveUserFromRoom(req, socket, roomManager) {
+async function leaveUserFromRoom(req, socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_LEAVING_USER_FROM_ROOM, {message: 'You are not in any of the rooms'});
@@ -183,14 +153,11 @@ function leaveUserFromRoom(req, socket, roomManager) {
     socket.emit(YOU_LEFT_ROOM, {});
 
     return socket.to(room.name).emit(USER_LEFT_ROOM, {
-        user: {
-            id: user.id,
-            name: user.name
-        }
+        user: await userShortSerializer.serialize(user)
     });
 }
 
-function changePlayStateToPlay(req, socket, roomManager) {
+async function changePlayStateToPlay(req, socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, {message: 'You are not in any of the rooms'});
@@ -199,14 +166,11 @@ function changePlayStateToPlay(req, socket, roomManager) {
     const room = roomManager.findRoomByUser(user);
 
     return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PLAY, {
-        user: {
-            id: user.id,
-            name: user.name
-        }
+        user: await userShortSerializer.serialize(user)
     });
 }
 
-function changePlayStateToPause(req, socket, roomManager) {
+async function changePlayStateToPause(req, socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, {message: 'You are not in any of the rooms'});
@@ -215,14 +179,11 @@ function changePlayStateToPause(req, socket, roomManager) {
     const room = roomManager.findRoomByUser(user);
 
     return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PAUSE, {
-        user: {
-            id: user.id,
-            name: user.name
-        }
+        user: await userShortSerializer.serialize(user)
     });
 }
 
-function changePlayStateToStop(req, socket, roomManager) {
+async function changePlayStateToStop(req, socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
         return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, {message: 'You are not in any of the rooms'});
@@ -231,14 +192,11 @@ function changePlayStateToStop(req, socket, roomManager) {
     const room = roomManager.findRoomByUser(user);
 
     return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_STOP, {
-        user: {
-            id: user.id,
-            name: user.name
-        }
+        user: await userShortSerializer.serialize(user)
     });
 }
 
-function disconnect(socket, roomManager) {
+async function disconnect(socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
         return;
@@ -251,10 +209,7 @@ function disconnect(socket, roomManager) {
     socket.leave(room.name);
 
     return socket.to(room.name).emit(USER_LEFT_ROOM, {
-        user: {
-            id: user.id,
-            name: user.name
-        }
+        user: await userShortSerializer.serialize(user)
     });
 }
 

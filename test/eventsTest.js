@@ -25,6 +25,33 @@ const {
     ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
 } = require('../constants').events;
 
+function assertEqualUser(actualRes, expectedRes) {
+    assert.isDefined(actualRes.user.id);
+    assert.equal(actualRes.user.name, expectedRes.user.name);
+    assert.equal(actualRes.user.file.name, expectedRes.user.file.name);
+    assert.equal(actualRes.user.file.size, expectedRes.user.file.size);
+}
+
+function assertEqualUserShort(actualRes, expectedRes) {
+    assert.equal(Object.keys(actualRes.user).length, 2);
+
+    assert.isDefined(actualRes.user.id);
+    assert.equal(actualRes.user.name, expectedRes.user.name);
+}
+
+function assertEqualRoom(actualRes, expectedRes) {
+    assert.equal(actualRes.room.name, expectedRes.room.name);
+
+    for (let i = 0; i < actualRes.room.users.length; i++) {
+        const actualUser = actualRes.room.users[i];
+        const expectedUser = expectedRes.room.users[i];
+
+        assert.equal(actualUser.name, expectedUser.name);
+        assert.equal(actualUser.file.name, expectedUser.file.name);
+        assert.equal(actualUser.file.size, expectedUser.file.size);
+    }
+}
+
 describe('Events test', () => {
     let httpServer;
     let httpServerAddr;
@@ -201,7 +228,7 @@ describe('Events test', () => {
         });
 
         it('when new user tries to join the room', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -214,7 +241,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -227,32 +254,50 @@ describe('Events test', () => {
                 }
             };
 
+            const resYouJoinedRoomClient1 = {
+                user: reqJoinUserToRoomClient1.user,
+                room: {
+                    ...reqJoinUserToRoomClient1.room,
+                    users: [
+                        reqJoinUserToRoomClient1.user
+                    ]
+                }
+            };
+
+            const resYouJoinedRoomClient2 = {
+                user: reqJoinUserToRoomClient2.user,
+                room: {
+                    ...reqJoinUserToRoomClient2.room,
+                    users: [
+                        reqJoinUserToRoomClient1.user,
+                        reqJoinUserToRoomClient2.user
+                    ]
+                }
+            };
+
+            const resUserJoinedRoomClient1 = {
+                user: reqJoinUserToRoomClient2.user
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
-                assert.isDefined(res.user.id);
-                assert.equal(res.user.name, reqClient1.user.name);
-                assert.equal(res.user.file.name, reqClient1.user.file.name);
-                assert.equal(res.user.file.size, reqClient1.user.file.size);
-                assert.equal(res.room.name, reqClient1.room.name);
+                assertEqualUser(res, resYouJoinedRoomClient1);
+                assertEqualRoom(res, resYouJoinedRoomClient1);
 
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
-                    assert.isDefined(res.user.id);
-                    assert.equal(res.user.name, reqClient2.user.name);
-                    assert.equal(res.user.file.name, reqClient2.user.file.name);
-                    assert.equal(res.user.file.size, reqClient2.user.file.size);
-                    assert.equal(res.room.name, reqClient2.room.name);
+                    assertEqualUser(res, resYouJoinedRoomClient2);
+                    assertEqualRoom(res, resYouJoinedRoomClient2);
 
                     // #5 - John got an event that Kate joined
                     socketClient1.once(USER_JOINED_ROOM, res => {
-                        assert.isDefined(res.user.id);
-                        assert.equal(res.user.name, reqClient2.user.name);
+                        assertEqualUser(res, resUserJoinedRoomClient1);
 
                         done();
                     });
@@ -287,6 +332,17 @@ describe('Events test', () => {
                 }
             };
 
+            const resClient1 = {
+                user: reqClient1.user,
+                room: {
+                    ...reqClient1.room,
+                    users: [
+                        reqClient1.user,
+                        reqClient2.user
+                    ]
+                }
+            };
+
             // #1 - Connect John to "My room"
             socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
 
@@ -302,11 +358,7 @@ describe('Events test', () => {
 
                     // #6 - John reconnected to "My room"
                     socketClient1.once(YOU_RECONNECTED_TO_ROOM, res => {
-                        assert.isDefined(res.user.id);
-                        assert.equal(res.user.name, reqClient1.user.name);
-                        assert.equal(res.user.file.name, reqClient1.user.file.name);
-                        assert.equal(res.user.file.size, reqClient1.user.file.size);
-                        assert.equal(res.room.name, reqClient1.room.name);
+                        assertEqualUserAndRoom(res, resClient1);
 
                         // #7 - Kate got an event that John reconnected
                         socketClient2.once(USER_RECONNECTED_TO_ROOM, res => {
@@ -367,6 +419,17 @@ describe('Events test', () => {
                 }
             };
 
+            const resClient1 = {
+                ...reqClient1Modified,
+                room: {
+                    ...reqClient1Modified.room,
+                    users: [
+                        reqClient3.user,
+                        reqClient1.user
+                    ]
+                }
+            };
+
             // #1 - Connect John to "My room"
             socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
 
@@ -392,11 +455,7 @@ describe('Events test', () => {
 
                             // #9 - John connected to "My room 2"
                             socketClient1.once(YOU_JOINED_ROOM, res => {
-                                assert.isDefined(res.user.id);
-                                assert.equal(res.user.name, reqClient1Modified.user.name);
-                                assert.equal(res.user.file.name, reqClient1Modified.user.file.name);
-                                assert.equal(res.user.file.size, reqClient1Modified.user.file.size);
-                                assert.equal(res.room.name, reqClient1Modified.room.name);
+                                assertEqualUserAndRoom(res, resClient1);
 
                                 // #10 - Bob got an event that John joined
                                 socketClient3.once(USER_JOINED_ROOM, res => {
