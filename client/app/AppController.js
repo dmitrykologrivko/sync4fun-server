@@ -74,10 +74,31 @@ export default class AppController {
         this._labelFileName.text(this._user.file.name);
         this._labelFileSize.text(`Size: ${Number(fileSize).toFixed(2)}MB`);
 
+        this._updateUsersList();
+
         this._player.src({
             type: selectedFile.type,
             src: URL.createObjectURL(selectedFile)
         });
+    }
+
+    _updateUsersList() {
+        this._listUsers.empty();
+
+        for (let user of this._room.users) {
+            const name = user.id === this._user.id
+                ? `${user.name} (You)`
+                : user.name;
+            const fileSize = convertBytesToMegabytes(this._user.file.size);
+
+            this._listUsers.append(`
+                <li class="users-list__item">
+                    <div class="users-list__user">${name}</div>
+                    <div class="users-list__file-name">${user.file.name}</div>
+                    <div class="users-list__file-size">Size: ${Number(fileSize).toFixed(2)}MB</div>
+                </li>
+            `);
+        }
     }
 
     _addEventToList(userName, message) {
@@ -123,14 +144,23 @@ export default class AppController {
 
     _handleUserJoinedRoomEvent(res) {
         this._addEventToList(res.user.name, 'Joined room');
+
+        this._room.users.push(res.user);
+        this._updateUsersList();
     }
 
     _handleUserReconnectedToRoomEvent(res) {
         this._addEventToList(res.user.name, 'Reconnected to room');
+
+        this._room.users.push(res.user);
+        this._updateUsersList();
     }
 
     _handleUserLeftRoomEvent(res) {
         this._addEventToList(res.user.name, 'Left room');
+
+        this._room.users = this._room.users.filter(user => res.user.id !== user.id);
+        this._updateUsersList();
     }
 
     _handleYouLeftRoomEvent(res) {
