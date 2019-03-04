@@ -108,7 +108,7 @@ async function joinUserToRoom(req, socket, roomManager) {
             socket.join(room.name);
 
             return socket.to(room.name).emit(USER_RECONNECTED_TO_ROOM, {
-                user: await userShortSerializer.serialize(user),
+                user: await userSerializer.serialize(user),
             });
         }
         if (error instanceof UserInAnotherRoomError) {
@@ -130,7 +130,7 @@ async function joinUserToRoom(req, socket, roomManager) {
             });
 
             return socket.to(currentRoom.name).emit(USER_JOINED_ROOM, {
-                user: await userShortSerializer.serialize(user)
+                user: await userSerializer.serialize(user)
             });
         }
 

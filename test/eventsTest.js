@@ -25,33 +25,6 @@ const {
     ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
 } = require('../constants').events;
 
-function assertEqualUser(actualRes, expectedRes) {
-    assert.isDefined(actualRes.user.id);
-    assert.equal(actualRes.user.name, expectedRes.user.name);
-    assert.equal(actualRes.user.file.name, expectedRes.user.file.name);
-    assert.equal(actualRes.user.file.size, expectedRes.user.file.size);
-}
-
-function assertEqualUserShort(actualRes, expectedRes) {
-    assert.equal(Object.keys(actualRes.user).length, 2);
-
-    assert.isDefined(actualRes.user.id);
-    assert.equal(actualRes.user.name, expectedRes.user.name);
-}
-
-function assertEqualRoom(actualRes, expectedRes) {
-    assert.equal(actualRes.room.name, expectedRes.room.name);
-
-    for (let i = 0; i < actualRes.room.users.length; i++) {
-        const actualUser = actualRes.room.users[i];
-        const expectedUser = expectedRes.room.users[i];
-
-        assert.equal(actualUser.name, expectedUser.name);
-        assert.equal(actualUser.file.name, expectedUser.file.name);
-        assert.equal(actualUser.file.size, expectedUser.file.size);
-    }
-}
-
 describe('Events test', () => {
     let httpServer;
     let httpServerAddr;
@@ -60,6 +33,33 @@ describe('Events test', () => {
     let socketClient2;
     let socketClient3;
     let roomManager;
+
+    function assertEqualUser(actUser, expUser) {
+        assert.isDefined(actUser.id);
+        assert.equal(actUser.name, expUser.name);
+        assert.equal(actUser.file.name, expUser.file.name);
+        assert.equal(actUser.file.size, expUser.file.size);
+    }
+
+    function assertEqualUserShort(actUser, expUser) {
+        assert.equal(Object.keys(actUser).length, 2);
+
+        assert.isDefined(actUser.id);
+        assert.equal(actUser.name, expUser.name);
+    }
+
+    function assertEqualRoom(actRoom, expRoom) {
+        assert.equal(actRoom.name, expRoom.name);
+
+        for (let i = 0; i < actRoom.users.length; i++) {
+            const actUser = actRoom.users[i];
+            const expUser = expRoom.users[i];
+
+            assert.equal(actUser.name, expUser.name);
+            assert.equal(actUser.file.name, expUser.file.name);
+            assert.equal(actUser.file.size, expUser.file.size);
+        }
+    }
 
     before(done => {
         httpServer = require('http').createServer().listen(() => {
@@ -255,28 +255,64 @@ describe('Events test', () => {
             };
 
             const resYouJoinedRoomClient1 = {
-                user: reqJoinUserToRoomClient1.user,
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
                 room: {
-                    ...reqJoinUserToRoomClient1.room,
+                    name: 'My room',
                     users: [
-                        reqJoinUserToRoomClient1.user
+                        {
+                            name: 'John',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        }
                     ]
                 }
             };
 
             const resYouJoinedRoomClient2 = {
-                user: reqJoinUserToRoomClient2.user,
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
                 room: {
-                    ...reqJoinUserToRoomClient2.room,
+                    name: 'My room',
                     users: [
-                        reqJoinUserToRoomClient1.user,
-                        reqJoinUserToRoomClient2.user
+                        {
+                            name: 'John',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        },
+                        {
+                            name: 'Kate',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        }
                     ]
                 }
             };
 
             const resUserJoinedRoomClient1 = {
-                user: reqJoinUserToRoomClient2.user
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                }
             };
 
             // #1 - Connect John to "My room"
@@ -284,20 +320,20 @@ describe('Events test', () => {
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
-                assertEqualUser(res, resYouJoinedRoomClient1);
-                assertEqualRoom(res, resYouJoinedRoomClient1);
+                assertEqualUser(res.user, resYouJoinedRoomClient1.user);
+                assertEqualRoom(res.room, resYouJoinedRoomClient1.room);
 
                 // #3 - Connect Kate to "My room"
                 socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
-                    assertEqualUser(res, resYouJoinedRoomClient2);
-                    assertEqualRoom(res, resYouJoinedRoomClient2);
+                    assertEqualUser(res.user, resYouJoinedRoomClient2.user);
+                    assertEqualRoom(res.room, resYouJoinedRoomClient2.room);
 
                     // #5 - John got an event that Kate joined
                     socketClient1.once(USER_JOINED_ROOM, res => {
-                        assertEqualUser(res, resUserJoinedRoomClient1);
+                        assertEqualUser(res.user, resUserJoinedRoomClient1.user);
 
                         done();
                     });
@@ -306,7 +342,7 @@ describe('Events test', () => {
         });
 
         it('when user uses this room already and tries to join again', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -319,7 +355,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -332,38 +368,66 @@ describe('Events test', () => {
                 }
             };
 
-            const resClient1 = {
-                user: reqClient1.user,
+            const resYouReconnectedToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
                 room: {
-                    ...reqClient1.room,
+                    name: 'My room',
                     users: [
-                        reqClient1.user,
-                        reqClient2.user
+                        {
+                            name: 'John',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        },
+                        {
+                            name: 'Kate',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        }
                     ]
                 }
             };
 
+            const resUserReconnectedToRoomClient2 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Try to reconnect John to "My room"
-                    socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+                    socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
                     // #6 - John reconnected to "My room"
                     socketClient1.once(YOU_RECONNECTED_TO_ROOM, res => {
-                        assertEqualUserAndRoom(res, resClient1);
+                        assertEqualUser(res.user, resYouReconnectedToRoomClient1.user);
+                        assertEqualRoom(res.room, resYouReconnectedToRoomClient1.room);
 
                         // #7 - Kate got an event that John reconnected
                         socketClient2.once(USER_RECONNECTED_TO_ROOM, res => {
-                            assert.isDefined(res.user.id);
-                            assert.equal(res.user.name, reqClient1.user.name);
+                            assertEqualUser(res.user, resUserReconnectedToRoomClient2.user);
 
                             done();
                         });
@@ -373,7 +437,7 @@ describe('Events test', () => {
         });
 
         it('when user uses another room but tries to join another one', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -386,7 +450,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -399,7 +463,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient3 = {
+            const reqJoinUserToRoomClient3 = {
                 user: {
                     name: 'Bob',
                     file: {
@@ -412,55 +476,94 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient1Modified = {
-                ...reqClient1,
+            const reqJoinUserToRoom2Client1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
                 room: {
                     name: 'My room 2'
                 }
             };
 
-            const resClient1 = {
-                ...reqClient1Modified,
+            const resYouJoinedRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
                 room: {
-                    ...reqClient1Modified.room,
+                    name: 'My room 2',
                     users: [
-                        reqClient3.user,
-                        reqClient1.user
+                        {
+                            name: 'Bob',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        },
+                        {
+                            name: 'John',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        }
                     ]
                 }
             };
 
+            const resUserLeftRoomClient2 = {
+                user: {
+                    name: 'John'
+                }
+            };
+
+            const resUserJoinedRoomClient3 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 -  John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Connect Bob to "My room 2"
-                    socketClient3.emit(JOIN_USER_TO_ROOM, reqClient3);
+                    socketClient3.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient3);
 
                     // #6 - Bob connected to "My room 2"
                     socketClient3.once(YOU_JOINED_ROOM, res => {
                         // #7 - Connect John to "My room 2"
-                        socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1Modified);
+                        socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoom2Client1);
 
                         // #8 - Kate got an event that John came out from room
                         socketClient2.once(USER_LEFT_ROOM, res => {
-                            assert.isDefined(res.user.id);
-                            assert.equal(res.user.name, reqClient1.user.name);
+                            assertEqualUserShort(res.user, resUserLeftRoomClient2.user);
 
                             // #9 - John connected to "My room 2"
                             socketClient1.once(YOU_JOINED_ROOM, res => {
-                                assertEqualUserAndRoom(res, resClient1);
+                                assertEqualUser(res.user, resYouJoinedRoomClient1.user);
+                                assertEqualRoom(res.room, resYouJoinedRoomClient1.room);
 
                                 // #10 - Bob got an event that John joined
                                 socketClient3.once(USER_JOINED_ROOM, res => {
-                                    assert.isDefined(res.user.id);
-                                    assert.equal(res.user.name, reqClient1.user.name);
+                                    assertEqualUser(res.user, resUserJoinedRoomClient3.user);
 
                                     done();
                                 });
@@ -474,7 +577,7 @@ describe('Events test', () => {
 
     describe(`test requesting ${LEAVE_USER_FROM_ROOM} event`, () => {
         it('when user is trying to leave room', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -487,7 +590,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -500,13 +603,19 @@ describe('Events test', () => {
                 }
             };
 
+            const resUserLeftRoomClient2 = {
+                user: {
+                    name: 'John'
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
@@ -519,8 +628,7 @@ describe('Events test', () => {
 
                         // #7 - Kate got an event that John is left room
                         socketClient2.once(USER_LEFT_ROOM, res => {
-                            assert.isDefined(res.user.id);
-                            assert.equal(res.user.name, reqClient1.user.name);
+                            assertEqualUserShort(res.user, resUserLeftRoomClient2.user);
 
                             done();
                         });
@@ -548,7 +656,7 @@ describe('Events test', () => {
 
     describe(`test requesting ${CHANGE_PLAY_STATE_TO_PLAY} event`, () => {
         it('when user in the room and is trying to set play state to play', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -561,7 +669,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -574,23 +682,28 @@ describe('Events test', () => {
                 }
             };
 
+            const resChangedPlayStateToPlayClient2 = {
+                user: {
+                    name: 'John'
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Change play state to play by John
-                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PLAY, reqClient1);
+                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PLAY, reqJoinUserToRoomClient1);
 
                     // #6 - Kate got an event that John changed play state to play
                     socketClient2.once(CHANGED_PLAY_STATE_TO_PLAY, res => {
-                        assert.isDefined(res.user.id);
-                        assert.equal(res.user.name, reqClient1.user.name);
+                        assertEqualUserShort(res.user, resChangedPlayStateToPlayClient2.user);
 
                         done();
                     });
@@ -617,7 +730,7 @@ describe('Events test', () => {
 
     describe(`test requesting ${CHANGE_PLAY_STATE_TO_PAUSE} event`, () => {
         it('when user in the room and is trying to set play state to pause', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -630,7 +743,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -643,23 +756,28 @@ describe('Events test', () => {
                 }
             };
 
+            const resChangedPlayStateToPauseClient2 = {
+                user: {
+                    name: 'John'
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Change play state to pause by John
-                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PAUSE, reqClient1);
+                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PAUSE, reqJoinUserToRoomClient1);
 
                     // #6 - Kate got an event that John changed play state to play
                     socketClient2.once(CHANGED_PLAY_STATE_TO_PAUSE, res => {
-                        assert.isDefined(res.user.id);
-                        assert.equal(res.user.name, reqClient1.user.name);
+                        assertEqualUserShort(res.user, resChangedPlayStateToPauseClient2.user);
 
                         done();
                     });
@@ -686,7 +804,7 @@ describe('Events test', () => {
 
     describe(`test requesting ${CHANGE_PLAY_STATE_TO_STOP} event`, () => {
         it('when user in the room and is trying to set play state to stop', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -699,7 +817,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -712,23 +830,28 @@ describe('Events test', () => {
                 }
             };
 
+            const resChangedPlayStateToStopClient2 = {
+                user: {
+                    name: 'John'
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Change play state to stop by John
-                    socketClient1.emit(CHANGE_PLAY_STATE_TO_STOP, reqClient1);
+                    socketClient1.emit(CHANGE_PLAY_STATE_TO_STOP, reqJoinUserToRoomClient1);
 
                     // #6 - Kate got an event that John changed play state to stop
                     socketClient2.once(CHANGED_PLAY_STATE_TO_STOP, res => {
-                        assert.isDefined(res.user.id);
-                        assert.equal(res.user.name, reqClient1.user.name);
+                        assertEqualUserShort(res.user, resChangedPlayStateToStopClient2.user);
 
                         done();
                     });
@@ -755,7 +878,7 @@ describe('Events test', () => {
 
     describe('test disconnecting user', () => {
         it('when user was in any group', done => {
-            const reqClient1 = {
+            const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
                     file: {
@@ -768,7 +891,7 @@ describe('Events test', () => {
                 }
             };
 
-            const reqClient2 = {
+            const reqJoinUserToRoomClient2 = {
                 user: {
                     name: 'Kate',
                     file: {
@@ -781,13 +904,19 @@ describe('Events test', () => {
                 }
             };
 
+            const resChangedUserLeftRoomClient2 = {
+                user: {
+                    name: 'John'
+                }
+            };
+
             // #1 - Connect John to "My room"
-            socketClient1.emit(JOIN_USER_TO_ROOM, reqClient1);
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
 
             // #2 - John connected to "My room"
             socketClient1.once(YOU_JOINED_ROOM, res => {
                 // #3 - Connect Kate to "My room"
-                socketClient2.emit(JOIN_USER_TO_ROOM, reqClient2);
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
@@ -796,8 +925,7 @@ describe('Events test', () => {
 
                     // #6 - Kate got an event that John came out from room
                     socketClient2.once(USER_LEFT_ROOM, res => {
-                        assert.isDefined(res.user.id);
-                        assert.equal(res.user.name, reqClient1.user.name);
+                        assertEqualUserShort(res.user, resChangedUserLeftRoomClient2.user);
 
                         done();
                     });
