@@ -18,6 +18,9 @@ import {
     CHANGE_PLAY_STATE_TO_STOP,
     CHANGED_PLAY_STATE_TO_STOP,
     ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
+    CHANGE_PLAY_STATE_TIME,
+    CHANGED_PLAY_STATE_TIME,
+    ERROR_OF_CHANGING_PLAY_STATE_TIME
 } from './constants';
 
 export default class WebSocketClient {
@@ -84,6 +87,14 @@ export default class WebSocketClient {
         this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, res => {
             this._subjectsManager.errorOfChangingPlayStateToStopSubject.publish(res);
         });
+
+        this._socket.on(CHANGED_PLAY_STATE_TIME, res => {
+            this._subjectsManager.changedPlayStateTimeSubject.publish(res);
+        });
+
+        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TIME, res => {
+            this._subjectsManager.errorOfChangingPlayStateTimeSubject.publish(res);
+        });
     }
 
     joinUserToRoom(user, room) {
@@ -107,5 +118,9 @@ export default class WebSocketClient {
 
     changePlayStateToStop() {
         this._socket.emit(CHANGE_PLAY_STATE_TO_STOP);
+    }
+
+    changePlayStateTime(currentTime) {
+        this._socket.emit(CHANGE_PLAY_STATE_TIME, {currentTime});
     }
 }
