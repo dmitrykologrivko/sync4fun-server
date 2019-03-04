@@ -339,6 +339,56 @@ Response to user `error_of_changing_play_state_to_stop`
 }
 ```
 
+## change_play_state_time
+
+This event allows setting play state time for all users in the room
+
+Request:
+```
+{
+   "currentTime": 207.141845
+}
+```
+
+#### Case 1 - The user in the room and is trying to set play state time
+
+Response to the room `changed_play_state_time`
+
+```
+{
+   "user":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   },
+   "currentTime": 207.141845
+}
+```
+
+#### Case 2 - The user is passing invalid request
+
+Response to user `error_of_changing_play_state_time`
+
+```
+{
+   "message":"Validation error",
+   "fields":{
+      "currentTime": [
+         "Current Time must be of type number"
+      ],
+   }
+}
+```
+
+#### Case 3 - The user is trying to set play state time but is not in any room
+
+Response to user `error_of_changing_play_state_time`
+
+```
+{
+   "message":"You are not in any of the rooms"
+}
+```
+
 ## disconnect
 
 This automatic event happens when user closed socket connection
