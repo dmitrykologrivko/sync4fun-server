@@ -188,22 +188,25 @@ describe('Events test', () => {
             });
         });
 
-        it('when request is invalid', done => {
+        it('when request has incorrect types of fields', done => {
             socketClient1.once(ERROR_OF_JOINING_USER_TO_ROOM, res => {
                 const errorResponse = {
                     message: 'Validation error',
                     fields: {
                         'room.name': [
-                            "Room name must be of type string"
+                            "Room name must be of type string",
+                            "Room name has an incorrect length"
                         ],
                         'user.file.name': [
-                            "User file name must be of type string"
+                            "User file name must be of type string",
+                            "User file name has an incorrect length"
                         ],
                         'user.file.size': [
-                            "User file size must be of type number"
+                            "User file size must be an integer"
                         ],
                         'user.name': [
-                            "User name must be of type string"
+                            "User name must be of type string",
+                            "User name has an incorrect length"
                         ]
                     }
                 };
@@ -218,11 +221,84 @@ describe('Events test', () => {
                     name: 1,
                     file: {
                         name: 1,
-                        size: '1'
+                        size: 1.1
                     }
                 },
                 room: {
                     name: 1
+                }
+            });
+        });
+
+        it('when request has fields values less than minimum length', done => {
+            socketClient1.once(ERROR_OF_JOINING_USER_TO_ROOM, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'room.name': [
+                            "Room name is too short (minimum is 2 characters)"
+                        ],
+                        'user.file.name': [
+                            "User file name is too short (minimum is 3 characters)"
+                        ],
+                        'user.name': [
+                            "User name is too short (minimum is 2 characters)"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(JOIN_USER_TO_ROOM, {
+                user: {
+                    name: 'J',
+                    file: {
+                        name: 'r',
+                        size: 1
+                    }
+                },
+                room: {
+                    name: 'M'
+                }
+            });
+        });
+
+        it('when request has fields values more than maximum length', done => {
+            socketClient1.once(ERROR_OF_JOINING_USER_TO_ROOM, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'room.name': [
+                            "Room name is too long (maximum is 20 characters)"
+                        ],
+                        'user.file.name': [
+                            "User file name is too long (maximum is 100 characters)"
+                        ],
+                        'user.name': [
+                            "User name is too long (maximum is 20 characters)"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(JOIN_USER_TO_ROOM, {
+                user: {
+                    name: 'John-John-John-John-John-John',
+                    file: {
+                        name: 'rabbit-rabbit-rabbit-rabbit-rabbit-rabbit-rabbit-' +
+                            'rabbit-rabbit-rabbit-rabbit-rabbit-rabbit-rabbit-rabbit.mp4',
+                        size: 1
+                    }
+                },
+                room: {
+                    name: 'My room-My room-My room'
                 }
             });
         });
