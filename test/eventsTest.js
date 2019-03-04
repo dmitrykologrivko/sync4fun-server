@@ -23,6 +23,9 @@ const {
     CHANGE_PLAY_STATE_TO_STOP,
     CHANGED_PLAY_STATE_TO_STOP,
     ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
+    CHANGE_PLAY_STATE_TIME,
+    CHANGED_PLAY_STATE_TIME,
+    ERROR_OF_CHANGING_PLAY_STATE_TIME
 } = require('../constants').events;
 
 describe('Events test', () => {
@@ -775,7 +778,7 @@ describe('Events test', () => {
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Change play state to play by John
-                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PLAY, reqJoinUserToRoomClient1);
+                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PLAY, {});
 
                     // #6 - Kate got an event that John changed play state to play
                     socketClient2.once(CHANGED_PLAY_STATE_TO_PLAY, res => {
@@ -787,7 +790,7 @@ describe('Events test', () => {
             });
         });
 
-        it('when is trying to set play state to play but is not in any room', done => {
+        it('when user is trying to set play state to play but is not in any room', done => {
             // #1 - Change play state to play
             socketClient1.emit(CHANGE_PLAY_STATE_TO_PLAY, {});
 
@@ -849,7 +852,7 @@ describe('Events test', () => {
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Change play state to pause by John
-                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PAUSE, reqJoinUserToRoomClient1);
+                    socketClient1.emit(CHANGE_PLAY_STATE_TO_PAUSE, {});
 
                     // #6 - Kate got an event that John changed play state to play
                     socketClient2.once(CHANGED_PLAY_STATE_TO_PAUSE, res => {
@@ -861,7 +864,7 @@ describe('Events test', () => {
             });
         });
 
-        it('when is trying to set play state to pause but is not in any room', done => {
+        it('when user is trying to set play state to pause but is not in any room', done => {
             // #1 - Change play state to pause
             socketClient1.emit(CHANGE_PLAY_STATE_TO_PAUSE, {});
 
@@ -923,7 +926,7 @@ describe('Events test', () => {
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
                     // #5 - Change play state to stop by John
-                    socketClient1.emit(CHANGE_PLAY_STATE_TO_STOP, reqJoinUserToRoomClient1);
+                    socketClient1.emit(CHANGE_PLAY_STATE_TO_STOP, {});
 
                     // #6 - Kate got an event that John changed play state to stop
                     socketClient2.once(CHANGED_PLAY_STATE_TO_STOP, res => {
@@ -935,12 +938,115 @@ describe('Events test', () => {
             });
         });
 
-        it('when is trying to set play state to stop but is not in any room', done => {
+        it('when user is trying to set play state to stop but is not in any room', done => {
             // #1 - Change play state to stop
             socketClient1.emit(CHANGE_PLAY_STATE_TO_STOP, {});
 
             // #2 - User got an error that he is not in one room
             socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, res => {
+                const errorResponse = {
+                    message: 'You are not in any of the rooms'
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+        });
+    });
+
+    describe(`test requesting ${CHANGE_PLAY_STATE_TIME} event`, () => {
+        it('when request has incorrect types of fields', done => {
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE_TIME, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'currentTime': [
+                            "Current time must be of type number"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(CHANGE_PLAY_STATE_TIME, {currentTime: '207.141845'});
+        });
+
+        it('when user in the room and is trying to set play time', done => {
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateTimeClient1 = {
+                currentTime: 207.141845
+            };
+
+            const resChangedPlayStateTimeClient2 = {
+                user: {
+                    name: 'John'
+                },
+                currentTime: 207.141845
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Connect Kate to "My room"
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                // #4 - Kate connected to "My room"
+                socketClient2.once(YOU_JOINED_ROOM, res => {
+                    // #5 - Change play state time by John
+                    socketClient1.emit(CHANGE_PLAY_STATE_TIME, reqChangePlayStateTimeClient1);
+
+                    // #6 - Kate got an event that John changed play state time
+                    socketClient2.once(CHANGED_PLAY_STATE_TIME, res => {
+                        assertEqualUserShort(res.user, resChangedPlayStateTimeClient2.user);
+                        assert.equal(res.currentTime, resChangedPlayStateTimeClient2.currentTime);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('when user is trying to set play state time but is not in any room', done => {
+            const reqChangePlayStateTimeClient1 = {
+                currentTime: 207.141845
+            };
+
+            // #1 - Change play state time
+            socketClient1.emit(CHANGE_PLAY_STATE_TIME, reqChangePlayStateTimeClient1);
+
+            // #2 - User got an error that he is not in one room
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE_TIME, res => {
                 const errorResponse = {
                     message: 'You are not in any of the rooms'
                 };
