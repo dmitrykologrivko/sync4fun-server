@@ -47,7 +47,11 @@ async function joinUserToRoom(req, socket, roomManager) {
         },
         'user.name': {
             presence: true,
-            type: "string"
+            type: "string",
+            length: {
+                minimum: 2,
+                maximum: 20
+            }
         },
         'user.file': {
             presence: true,
@@ -55,11 +59,18 @@ async function joinUserToRoom(req, socket, roomManager) {
         },
         'user.file.name': {
             presence: true,
-            type: "string"
+            type: "string",
+            length: {
+                minimum: 3,
+                maximum: 100
+            }
         },
         'user.file.size': {
             presence: true,
-            type: "number"
+            type: "number",
+            numericality: {
+                onlyInteger: true
+            }
         },
         'room': {
             presence: true,
@@ -67,7 +78,11 @@ async function joinUserToRoom(req, socket, roomManager) {
         },
         'room.name': {
             presence: true,
-            type: "string"
+            type: "string",
+            length: {
+                minimum: 2,
+                maximum: 20
+            }
         }
     };
 
