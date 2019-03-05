@@ -68,3 +68,7 @@ export class ErrorOfChangingPlayStateToPauseSubject extends BaseSubject {}
 export class ChangedPlayStateToStopSubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateToStopSubject extends BaseSubject {}
+
+export class ChangedPlayStateTimeSubject extends BaseSubject {}
+
+export class ErrorOfChangingPlayStateTimeSubject extends BaseSubject {}

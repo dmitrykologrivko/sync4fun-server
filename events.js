@@ -33,6 +33,9 @@ const {
     CHANGE_PLAY_STATE_TO_STOP,
     CHANGED_PLAY_STATE_TO_STOP,
     ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
+    CHANGE_PLAY_STATE_TIME,
+    CHANGED_PLAY_STATE_TIME,
+    ERROR_OF_CHANGING_PLAY_STATE_TIME
 } = require('./constants').events;
 
 const userSerializer = new UserSerializer();
@@ -211,6 +214,36 @@ async function changePlayStateToStop(req, socket, roomManager) {
     });
 }
 
+async function changePlayStateTime(req, socket, roomManager) {
+    const constraints = {
+        'currentTime': {
+            presence: true,
+            type: "number"
+        }
+    };
+
+    try {
+        await validate.async(req, constraints);
+    } catch (error) {
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TIME, {
+            message: 'Validation error',
+            fields: error
+        });
+    }
+
+    const user = roomManager.findUserById(socket.id);
+    if (!user) {
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TIME, {message: 'You are not in any of the rooms'});
+    }
+
+    const room = roomManager.findRoomByUser(user);
+
+    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TIME, {
+        user: await userShortSerializer.serialize(user),
+        currentTime: req.currentTime
+    });
+}
+
 async function disconnect(socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
@@ -235,6 +268,7 @@ module.exports = (io, roomManager) => {
         socket.on(CHANGE_PLAY_STATE_TO_PLAY, req => (changePlayStateToPlay(req, socket, roomManager)));
         socket.on(CHANGE_PLAY_STATE_TO_PAUSE, req => (changePlayStateToPause(req, socket, roomManager)));
         socket.on(CHANGE_PLAY_STATE_TO_STOP, req => (changePlayStateToStop(req, socket, roomManager)));
+        socket.on(CHANGE_PLAY_STATE_TIME, req => (changePlayStateTime(req, socket, roomManager)));
         socket.on(DISCONNECT, () => (disconnect(socket, roomManager)));
     });
 };

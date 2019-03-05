@@ -12,7 +12,9 @@ import {
     ChangedPlayStateToPauseSubject,
     ErrorOfChangingPlayStateToPauseSubject,
     ChangedPlayStateToStopSubject,
-    ErrorOfChangingPlayStateToStopSubject
+    ErrorOfChangingPlayStateToStopSubject,
+    ChangedPlayStateTimeSubject,
+    ErrorOfChangingPlayStateTimeSubject
 } from './subjects';
 
 export default class SubjectsManager {
@@ -31,6 +33,8 @@ export default class SubjectsManager {
         this._errorOfChangingPlayStateToPauseSubject = new ErrorOfChangingPlayStateToPauseSubject();
         this._cangedPlayStateToStopSubject = new ChangedPlayStateToStopSubject();
         this._errorOfChangingPlayStateToStopSubject = new ErrorOfChangingPlayStateToStopSubject();
+        this._cangedPlayStateTimeSubject = new ChangedPlayStateTimeSubject();
+        this._errorOfChangingPlayStateTimeSubject = new ErrorOfChangingPlayStateTimeSubject();
     }
 
     get youJoinedRoomSubject() {
@@ -87,5 +91,13 @@ export default class SubjectsManager {
 
     get errorOfChangingPlayStateToStopSubject() {
         return this._errorOfChangingPlayStateToStopSubject;
+    }
+
+    get changedPlayStateTimeSubject() {
+        return this._cangedPlayStateTimeSubject;
+    }
+
+    get errorOfChangingPlayStateTimeSubject() {
+        return this._errorOfChangingPlayStateTimeSubject;
     }
 }
