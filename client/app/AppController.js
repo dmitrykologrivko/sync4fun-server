@@ -40,6 +40,8 @@ export default class AppController {
         this._errorOfChangingPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
         this._cangedPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
         this._errorOfChangingPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
+        this._cangedPlayStateTimeObserver = new Observer(this._handleChangedPlayStateTimeEvent.bind(this));
+        this._errorOfChangingPlayStateTimeObserver = new Observer(this._handleChangedPlayStateTimeEvent.bind(this));
 
         this._subjects.userJoinedRoomSubject.subscribe(this._userJoinedRoomObserver);
         this._subjects.userReconnectedToRoomSubject.subscribe(this._userReconnectedToRoomObserver);
@@ -52,11 +54,16 @@ export default class AppController {
         this._subjects.errorOfChangingPlayStateToPauseSubject.subscribe(this._errorOfChangingPlayStateToPauseObserver);
         this._subjects.changedPlayStateToStopSubject.subscribe(this._cangedPlayStateToStopObserver);
         this._subjects.errorOfChangingPlayStateToStopSubject.subscribe(this._errorOfChangingPlayStateToStopObserver);
+        this._subjects.changedPlayStateTimeSubject.subscribe(this._cangedPlayStateTimeObserver);
+        this._subjects.errorOfChangingPlayStateTimeSubject.subscribe(this._errorOfChangingPlayStateTimeObserver);
 
         // Set listeners
         this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
         this._player.bigPlayButton.on('click', this._playToggleButtonClick.bind(this));
-        this._player.tech_.on('mousedown', this._playToggleButtonClick.bind(this));
+        this._player.tech_.on('mouseup', this._playToggleButtonClick.bind(this));
+
+        this._player.controlBar.progressControl.on('mousedown', this._videoSeeked.bind(this));
+        this._player.controlBar.progressControl.seekBar.on('mousedown', this._videoSeeked.bind(this));
 
         this._buttonShowUsers.on('click', this._showUsersButtonClick.bind(this));
 
@@ -99,6 +106,11 @@ export default class AppController {
                 </li>
             `);
         }
+
+        this._buttonShowUsers.removeClass('d-none');
+        this._buttonShowUsers.text(`
+            ${this._room.users.length} ${this._room.users.length === 1 ? 'user' : 'users'} in room
+        `);
     }
 
     _addEventToList(userName, message) {
@@ -116,6 +128,17 @@ export default class AppController {
         if ((scrollPosition + listHeight) > (scrollHeight - listHeight)) {
             this._listEvents.animate({scrollTop: scrollHeight});
         }
+    }
+
+    _videoSeeked() {
+        document.onmouseup = () => {
+            const currentTime = this._player.currentTime();
+
+            this._client.changePlayStateTime(currentTime);
+            this._addEventToList('You', 'Changed time');
+
+            document.onmouseup = null;
+        };
     }
 
     _showUsersButtonClick() {
@@ -195,6 +218,15 @@ export default class AppController {
     }
 
     _handleErrorOfChangingPlayStateToStopEvent(res) {
+        console.error(res);
+    }
+
+    _handleChangedPlayStateTimeEvent(res) {
+        this._addEventToList(res.user.name, 'Changed time');
+        this._player.currentTime(res.currentTime);
+    }
+
+    _handleErrorOfChangingPlayStateTimeEvent(res) {
         console.error(res);
     }
 }
