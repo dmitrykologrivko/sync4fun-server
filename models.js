@@ -1,7 +1,15 @@
+const {
+    PLAY_STATE_PLAY,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_STOP
+} = require('./constants').playStates;
+
 class Room {
-    constructor(name) {
+    constructor(name, users = new Map()) {
+        this._checkUsers(users);
+
         this._name = name;
-        this._users = new Map();
+        this._users = users;
     }
 
     get name() {
@@ -13,15 +21,7 @@ class Room {
     }
 
     set users(users) {
-        if (!users || !(users instanceof Map))
-            throw new Error('Required argument "users" is not a "Map" class instance!');
-
-        for (const [key, value] of users) {
-            if (!(value instanceof User)) {
-                throw new Error(`Item with key "${key}" is not a "User" class instance!`);
-            }
-        }
-
+        this._checkUsers(users);
         this._users = users;
     }
 
@@ -41,6 +41,36 @@ class Room {
 
     isEmpty() {
         return this._users.size === 0;
+    }
+
+    _checkUsers(users) {
+        if (!users || !(users instanceof Map))
+            throw new Error('Required argument "users" is not a "Map" class instance!');
+
+        for (const [key, value] of users) {
+            if (!(value instanceof User)) {
+                throw new Error(`Item with key "${key}" is not a "User" class instance!`);
+            }
+        }
+    }
+}
+
+class PlayState {
+    constructor(state) {
+        if (!state)
+            throw new Error('Required argument "state" is not defined!');
+        if (![PLAY_STATE_PLAY, PLAY_STATE_PAUSE, PLAY_STATE_STOP].includes(state))
+            throw new Error('Argument "state" is not one of play states!');
+
+        this._state = state;
+    }
+
+    get state() {
+        return this._state;
+    }
+
+    set state(value) {
+        this._state = value;
     }
 }
 
@@ -68,17 +98,20 @@ class File {
 }
 
 class User {
-    constructor(id, name, file) {
+    constructor(id, name, file, playState) {
         if (!id)
             throw new Error('Required argument "id" is not defined!');
         if (!name)
             throw new Error('Required argument "name" is not defined!');
         if (!(file instanceof File))
             throw new Error('Required argument "file" is not a "File" class instance!');
+        if (!(playState instanceof PlayState))
+            throw new Error('Required argument "playState" is not a "PlayState" class instance!');
 
         this._id = id;
         this._name = name;
         this._file = file;
+        this._playState = playState;
     }
 
     get id() {
@@ -92,8 +125,12 @@ class User {
     get file() {
         return this._file;
     }
+
+    get playState() {
+        return this._playState;
+    }
 }
 
 module.exports = {
-    Room, File, User
+    Room, PlayState, File, User
 };

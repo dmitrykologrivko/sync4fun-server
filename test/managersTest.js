@@ -14,7 +14,7 @@ describe('Room manager test', () => {
     beforeEach(() => {
         const rooms = RoomsFactory.makeRooms(2);
 
-        rooms.get('#1').users = UsersFactory.makeUsers(2);
+        rooms.get('#2').users = new Map();
 
         roomManager = new RoomManager();
         roomManager.rooms = rooms;
@@ -51,7 +51,7 @@ describe('Room manager test', () => {
         });
 
         it('when user is not in any rooms and provided room not exist should add room and user', () => {
-            let room = RoomsFactory.makeRoom('Some room');
+            let room = RoomsFactory.makeRoom('Some room', new Map());
             let user = UsersFactory.makeUser('123', 'Some name');
 
             assert.equal(false, roomManager.rooms.has(room.name));
@@ -68,19 +68,23 @@ describe('Room manager test', () => {
 
             const resultRoom = roomManager.addUser(user, room.name);
 
+            // Asserts that objects references are equal
             assert.equal(room, resultRoom);
+            // Asserts that objects are deeply equal
             assert.deepEqual(room, resultRoom);
         });
 
         it('when user is not in any rooms and provided room not exist should return added room', () => {
-            let room = RoomsFactory.makeRoom('Some room');
+            let room = RoomsFactory.makeRoom('Some room', new Map());
             let user = UsersFactory.makeUser('123', 'Some name');
 
             room.addUser(user);
 
             const resultRoom = roomManager.addUser(user, room.name);
 
+            // Asserts that objects references are not equal
             assert.notEqual(room, resultRoom);
+            // Asserts that objects are deeply equal
             assert.deepEqual(room, resultRoom);
         });
     });
@@ -172,21 +176,25 @@ describe('Room manager test', () => {
 
             const resultRoom = roomManager.moveUser(user, room2.name);
 
+            // Asserts that objects references are equal
             assert.equal(room2, resultRoom);
+            // Asserts that objects are deeply equal
             assert.deepEqual(room2, resultRoom);
         });
 
         it('when user is in another room and provided room not exist should return added room', () => {
             const room1 = roomManager.rooms.get('#1');
             const room2 = roomManager.rooms.get('#2');
-            const room3 = RoomsFactory.makeRoom('#3');
+            const room3 = RoomsFactory.makeRoom('#3', new Map());
             const user = room1.users.get('ID:1');
 
             room3.addUser(user);
 
             const resultRoom = roomManager.moveUser(user, room3.name);
 
+            // Asserts that objects references are not equal
             assert.notEqual(room3, resultRoom);
+            // Asserts that objects are deeply equal
             assert.deepEqual(room3, resultRoom);
         });
 

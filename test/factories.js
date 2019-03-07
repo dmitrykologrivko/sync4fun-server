@@ -1,8 +1,10 @@
-const {Room, User, File} = require('../models');
+const {Room, User, PlayState, File} = require('../models');
+
+const {PLAY_STATE_PAUSE} = require('../constants').playStates;
 
 class RoomsFactory {
-    static makeRoom(name) {
-        return new Room(name);
+    static makeRoom(name = '#1', users = UsersFactory.makeUsers(2)) {
+        return new Room(name, users);
     }
 
     static makeRooms(size) {
@@ -16,15 +18,25 @@ class RoomsFactory {
     }
 }
 
+class PlayStateFactory {
+    static makePlayState(state = PLAY_STATE_PAUSE) {
+        return new PlayState(state);
+    }
+}
+
 class FilesFactory {
-    static makeFile() {
-        return new File('rabbit.mp4', 125789);
+    static makeFile(name = 'rabbit.mp4', size = 125789) {
+        return new File(name, size);
     }
 }
 
 class UsersFactory {
-    static makeUser(id, name) {
-        return new User(id, name, FilesFactory.makeFile());
+    static makeUser(id = 'ID:1',
+                    name = 'John',
+                    file = FilesFactory.makeFile(),
+                    state = PlayStateFactory.makePlayState()) {
+
+        return new User(id, name, file, state);
     }
 
     static makeUsers(size) {
@@ -40,6 +52,7 @@ class UsersFactory {
 
 module.exports = {
     RoomsFactory,
+    PlayStateFactory,
     FilesFactory,
     UsersFactory
 };
