@@ -6,6 +6,8 @@ const {
     UserInAnotherRoomError
 } = require('../managers');
 
+const {PLAY_STATE_PLAYING, PLAY_STATE_PAUSE} = require('../constants').playStates;
+
 const {RoomsFactory, UsersFactory} = require('./factories');
 
 describe('Room manager test', () => {
@@ -218,6 +220,42 @@ describe('Room manager test', () => {
         it('when user in not in room should return null', () => {
             const user = UsersFactory.makeUser('123', 'Some name');
             assert.isNull(roomManager.findRoomByUser(user));
+        });
+    });
+
+    describe('#updatePlayState()', () => {
+        it('when user is in room should update play state', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
+
+            assert.equal(room.playState, PLAY_STATE_PAUSE);
+            assert.equal(room.currentTime, 0);
+            assert.deepEqual(room.updatedBy, {});
+            expect(room.updatedAt).to.satisfy(Number.isInteger);
+
+            roomManager.updatePlayState(PLAY_STATE_PAUSE, 12345, user);
+
+            assert.equal(room.playState, PLAY_STATE_PAUSE);
+            assert.equal(room.currentTime, 12345);
+            assert.deepEqual(room.updatedBy, {id: user.id, name: user.name});
+            expect(room.updatedAt).to.satisfy(Number.isInteger);
+        });
+
+        it('when user is in room should return updated room', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
+
+            const resultRoom = roomManager.updatePlayState(PLAY_STATE_PAUSE, 12345, user);
+
+            // Asserts that objects references are equal
+            assert.equal(room, resultRoom);
+            // Asserts that objects are deeply equal
+            assert.deepEqual(room, resultRoom);
+        });
+
+        it('when user is not in any rooms should not return any rooms', () => {
+            const user = UsersFactory.makeUser('123', 'Some name');
+            assert.isNull(roomManager.updatePlayState(PLAY_STATE_PAUSE, 12345, user));
         });
     });
 

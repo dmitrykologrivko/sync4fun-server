@@ -71,10 +71,13 @@ class Room {
     updatePlayState(playState, currentTime, user) {
         if (![PLAY_STATE_PLAYING, PLAY_STATE_PAUSE, PLAY_STATE_STOP].includes(playState))
             throw new Error('Required argument "playState" is not one of play states!');
+
         if (typeof currentTime !== 'number')
             throw new Error('Required argument "currentTime" is not a number!');
+
         if (!(user instanceof User))
             throw new Error('Required argument "user" is not a "User" class instance!');
+
         if (!this._users.has(user.id))
             throw new Error('Required argument "user" is not in this room!');
 
@@ -126,8 +129,10 @@ class User {
     constructor(id, name, file) {
         if (!id)
             throw new Error('Required argument "id" is not defined!');
+
         if (!name)
             throw new Error('Required argument "name" is not defined!');
+
         if (!(file instanceof File))
             throw new Error('Required argument "file" is not a "File" class instance!');
 

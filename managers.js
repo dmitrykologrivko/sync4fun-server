@@ -97,6 +97,18 @@ class RoomManager {
 
         return null;
     }
+
+    updatePlayState(playState, currentTime, user) {
+        const room = this.findRoomByUser(user);
+
+        if (!room) {
+            return null;
+        }
+
+        room.updatePlayState(playState, currentTime, user);
+
+        return room;
+    }
 }
 
 module.exports = {
