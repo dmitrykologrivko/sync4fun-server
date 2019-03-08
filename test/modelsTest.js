@@ -170,6 +170,8 @@ describe('Room model test', () => {
 
     describe('#getCurrentTime()', () => {
         it('when current play state is playing should return calculated time', done => {
+            const TIMEOUT = 100;
+
             room.users = users;
 
             assert.equal(room.currentTime, 0);
@@ -180,9 +182,9 @@ describe('Room model test', () => {
             assert.equal(room.playState, PLAY_STATE_PLAYING);
 
             setTimeout(() => {
-                assert.isAtLeast(room.currentTime, 100);
+                assert.isAtLeast(room.currentTime, TIMEOUT);
                 done();
-            }, 100);
+            }, TIMEOUT);
         });
     });
 });

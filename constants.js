@@ -15,6 +15,10 @@ module.exports.events = {
     USER_LEFT_ROOM: 'user_left_room',
     ERROR_OF_LEAVING_USER_FROM_ROOM: 'error_of_leaving_user_from_room',
 
+    CHANGE_PLAY_STATE: 'change_play_state',
+    CHANGED_PLAY_STATE: 'changed_play_state',
+    ERROR_OF_CHANGING_PLAY_STATE: 'error_of_changing_play_state',
+
     CHANGE_PLAY_STATE_TO_PLAY: 'change_play_state_to_play',
     CHANGED_PLAY_STATE_TO_PLAY: 'changed_play_state_to_play',
     ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY: 'error_of_changing_play_state_to_play',

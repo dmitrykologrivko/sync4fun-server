@@ -13,6 +13,9 @@ const {
     LEAVE_USER_FROM_ROOM,
     YOU_LEFT_ROOM,
     USER_LEFT_ROOM,
+    CHANGE_PLAY_STATE,
+    CHANGED_PLAY_STATE,
+    ERROR_OF_CHANGING_PLAY_STATE,
     ERROR_OF_LEAVING_USER_FROM_ROOM,
     CHANGE_PLAY_STATE_TO_PLAY,
     CHANGED_PLAY_STATE_TO_PLAY,
@@ -62,7 +65,13 @@ describe('Events test', () => {
         assert.equal(actRoom.playState, expRoom.playState);
         assert.isAtLeast(actRoom.currentTime, expRoom.currentTime);
         assert.isAtLeast(actRoom.updatedAt, expRoom.updatedAt);
-        assert.deepEqual(actRoom.updatedBy, expRoom.updatedBy);
+
+        if (Object.entries(expRoom.updatedBy).length === 0) {
+            assert.deepEqual(actRoom.updatedBy, expRoom.updatedBy);
+        } else {
+            assert.isDefined(actRoom.updatedBy.id);
+            assert.equal(actRoom.updatedBy.name, expRoom.updatedBy.name);
+        }
 
         for (let i = 0; i < actRoom.users.length; i++) {
             const actUser = actRoom.users[i];
@@ -72,6 +81,14 @@ describe('Events test', () => {
             assert.equal(actUser.file.name, expUser.file.name);
             assert.equal(actUser.file.size, expUser.file.size);
         }
+    }
+
+    function assertEqualPlayState(actPlayState, expPlayState) {
+        assert.equal(actPlayState.playState, expPlayState.playState);
+        assert.isAtLeast(actPlayState.currentTime, expPlayState.currentTime);
+        assert.isDefined(actPlayState.updatedBy.id);
+        assert.equal(actPlayState.updatedBy.name, expPlayState.updatedBy.name);
+        assert.equal(actPlayState.seek, expPlayState.seek);
     }
 
     before(done => {
@@ -1088,6 +1105,481 @@ describe('Events test', () => {
         });
     });
 
+    describe(`test requesting ${CHANGE_PLAY_STATE} event`, () => {
+        it('when request is empty', done => {
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'currentTime': [
+                            "Current time can't be blank"
+                        ],
+                        'playState': [
+                            "Play state can't be blank"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(CHANGE_PLAY_STATE, {});
+        });
+
+        it('when request has no required fields', done => {
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'currentTime': [
+                            "Current time can't be blank"
+                        ],
+                        'playState': [
+                            "Play state can't be blank"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(CHANGE_PLAY_STATE, {seek: true});
+        });
+
+        it('when request has incorrect types of fields', done => {
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'currentTime': [
+                            "Current time must be of type number"
+                        ],
+                        'playState': [
+                            "Play state must be of type string",
+                            "1 is not included in the list"
+                        ],
+                        'seek': [
+                            "Seek must be of type boolean"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(CHANGE_PLAY_STATE, {
+                playState: 1,
+                currentTime: '12345',
+                seek: 'true'
+            });
+        });
+
+        it('when request has invalid values', done => {
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'playState': [
+                            "TEST is not included in the list"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(CHANGE_PLAY_STATE, {
+                playState: 'TEST',
+                currentTime: 12345,
+                seek: true
+            });
+        });
+
+        it('when user in the room and is trying to change play state to playing', done => {
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateClient1 = {
+                playState: PLAY_STATE_PLAYING,
+                currentTime: 207.141845,
+                seek: false
+            };
+
+            const resChangedPlayStateClient2 = {
+                playState: PLAY_STATE_PLAYING,
+                currentTime: 207.141845,
+                seek: false,
+                updatedBy: {
+                    name: 'John'
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Connect Kate to "My room"
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                // #4 - Kate connected to "My room"
+                socketClient2.once(YOU_JOINED_ROOM, res => {
+                    // #5 - Change play state to playing by John
+                    socketClient1.emit(CHANGE_PLAY_STATE, reqChangePlayStateClient1);
+
+                    // #6 - Kate got an event that John changed play state to playing
+                    socketClient2.once(CHANGED_PLAY_STATE, res => {
+                        assertEqualPlayState(res, resChangedPlayStateClient2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('when user in the room and is trying to change play state to pause', done => {
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateClient1 = {
+                playState: PLAY_STATE_PAUSE,
+                currentTime: 207.141845,
+                seek: false
+            };
+
+            const resChangedPlayStateClient2 = {
+                playState: PLAY_STATE_PAUSE,
+                currentTime: 207.141845,
+                seek: false,
+                updatedBy: {
+                    name: 'John'
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Connect Kate to "My room"
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                // #4 - Kate connected to "My room"
+                socketClient2.once(YOU_JOINED_ROOM, res => {
+                    // #5 - Change play state to pause by John
+                    socketClient1.emit(CHANGE_PLAY_STATE, reqChangePlayStateClient1);
+
+                    // #6 - Kate got an event that John changed play state to pause
+                    socketClient2.once(CHANGED_PLAY_STATE, res => {
+                        assertEqualPlayState(res, resChangedPlayStateClient2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('when user in the room and is trying to change play state to stop', done => {
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateClient1 = {
+                playState: PLAY_STATE_STOP,
+                currentTime: 207.141845,
+                seek: false
+            };
+
+            const resChangedPlayStateClient2 = {
+                playState: PLAY_STATE_STOP,
+                currentTime: 207.141845,
+                seek: false,
+                updatedBy: {
+                    name: 'John'
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Connect Kate to "My room"
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                // #4 - Kate connected to "My room"
+                socketClient2.once(YOU_JOINED_ROOM, res => {
+                    // #5 - Change play state to stop by John
+                    socketClient1.emit(CHANGE_PLAY_STATE, reqChangePlayStateClient1);
+
+                    // #6 - Kate got an event that John changed play state to stop
+                    socketClient2.once(CHANGED_PLAY_STATE, res => {
+                        assertEqualPlayState(res, resChangedPlayStateClient2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('when user in the room and is trying to change current time', done => {
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateClient1 = {
+                playState: PLAY_STATE_PLAYING,
+                currentTime: 207.141845,
+                seek: true
+            };
+
+            const resChangedPlayStateClient2 = {
+                playState: PLAY_STATE_PLAYING,
+                currentTime: 207.141845,
+                seek: true,
+                updatedBy: {
+                    name: 'John'
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Connect Kate to "My room"
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                // #4 - Kate connected to "My room"
+                socketClient2.once(YOU_JOINED_ROOM, res => {
+                    // #5 - Change current time by John
+                    socketClient1.emit(CHANGE_PLAY_STATE, reqChangePlayStateClient1);
+
+                    // #6 - Kate got an event that John changed current time
+                    socketClient2.once(CHANGED_PLAY_STATE, res => {
+                        assertEqualPlayState(res, resChangedPlayStateClient2);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('when user is trying to change play state but is not in any room', done => {
+            // #1 - Change play state
+            socketClient1.emit(CHANGE_PLAY_STATE, {
+                playState: PLAY_STATE_PAUSE,
+                currentTime: 12345,
+                seek: true
+            });
+
+            // #2 - User got an error that he is not in one room
+            socketClient1.once(ERROR_OF_CHANGING_PLAY_STATE, res => {
+                const errorResponse = {
+                    message: 'You are not in any of the rooms'
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+        });
+    });
+
+    describe('test restoring play state', () => {
+        it('when new user tries join the room', done => {
+            const TIMEOUT = 500;
+
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateClient1 = {
+                playState: PLAY_STATE_PLAYING,
+                currentTime: 0,
+                seek: false
+            };
+
+            const resYouJoinedRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room',
+                    playState: PLAY_STATE_PLAYING,
+                    currentTime: TIMEOUT,
+                    updatedAt: new Date().getTime(),
+                    updatedBy: {
+                        name: 'John'
+                    },
+                    users: [
+                        {
+                            name: 'John',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        },
+                        {
+                            name: 'Kate',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        }
+                    ]
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Change play state to play by John
+                socketClient1.emit(CHANGE_PLAY_STATE, reqChangePlayStateClient1);
+
+                // #4 - Wait timeout 500ms
+                setTimeout(() => {
+                    // #5 - Connect Kate to "My room"
+                    socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                    // #6 - Kate connected to "My room"
+                    socketClient2.once(YOU_JOINED_ROOM, res => {
+                        assertEqualUser(res.user, resYouJoinedRoomClient2.user);
+                        assertEqualRoom(res.room, resYouJoinedRoomClient2.room);
+
+                        done();
+                    });
+                }, TIMEOUT);
+            });
+        });
+    });
+
     describe('test disconnecting user', () => {
         it('when user was in any group', done => {
             const reqJoinUserToRoomClient1 = {
@@ -1145,5 +1637,4 @@ describe('Events test', () => {
             });
         });
     });
-
 });

@@ -284,9 +284,9 @@ This event allows changing play state for all users in the room
 | seek        | boolean | If player should do seek | no       |
 
 Available play states:
-- Playing
-- Pause
-- Stop
+- playing
+- pause
+- stop
 
 #### Case 1 - The user in the room and is trying to change play state to playing
 
@@ -306,6 +306,10 @@ Response to the room `changed_play_state`
 {
    "playState": "playing",
    "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }    
    "seek": false
 }
 ```
@@ -328,6 +332,10 @@ Response to the room `changed_play_state`
 {
    "playState": "pause",
    "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }    
    "seek": false
 }
 ```
