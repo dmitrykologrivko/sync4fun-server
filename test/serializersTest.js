@@ -82,12 +82,9 @@ describe('UserShortSerializer test', () => {
 
 describe('RoomSerializer test', () => {
     const room = RoomsFactory.makeRoom('#1');
-    const user1 = UsersFactory.makeUser(1, 'John');
-    const user2 = UsersFactory.makeUser(2, 'Kate');
+    const user1 = room.users.get('ID:1');
+    const user2 = room.users.get('ID:2');
     const serializer = new RoomSerializer();
-
-    room.addUser(user1);
-    room.addUser(user2);
 
     describe('#serialize()', () => {
         it('when room argument is not instance of Room class should throw error', done => {

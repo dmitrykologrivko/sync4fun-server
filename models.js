@@ -1,7 +1,9 @@
 class Room {
-    constructor(name) {
+    constructor(name, users = new Map()) {
+        this._checkUsers(users);
+
         this._name = name;
-        this._users = new Map();
+        this._users = users;
     }
 
     get name() {
@@ -13,15 +15,7 @@ class Room {
     }
 
     set users(users) {
-        if (!users || !(users instanceof Map))
-            throw new Error('Required argument "users" is not a "Map" class instance!');
-
-        for (const [key, value] of users) {
-            if (!(value instanceof User)) {
-                throw new Error(`Item with key "${key}" is not a "User" class instance!`);
-            }
-        }
-
+        this._checkUsers(users);
         this._users = users;
     }
 
@@ -41,6 +35,17 @@ class Room {
 
     isEmpty() {
         return this._users.size === 0;
+    }
+
+    _checkUsers(users) {
+        if (!users || !(users instanceof Map))
+            throw new Error('Required argument "users" is not a "Map" class instance!');
+
+        for (const [key, value] of users) {
+            if (!(value instanceof User)) {
+                throw new Error(`Item with key "${key}" is not a "User" class instance!`);
+            }
+        }
     }
 }
 
