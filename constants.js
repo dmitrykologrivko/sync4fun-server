@@ -31,3 +31,9 @@ module.exports.events = {
     CHANGED_PLAY_STATE_TIME: 'changed_play_state_time',
     ERROR_OF_CHANGING_PLAY_STATE_TIME: 'error_of_changing_play_state_time',
 };
+
+module.exports.playStates = {
+    PLAY_STATE_PLAYING: 'playing',
+    PLAY_STATE_PAUSE: 'pause',
+    PLAY_STATE_STOP: 'stop'
+};
