@@ -1,9 +1,19 @@
+const {
+    PLAY_STATE_PLAYING,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_STOP
+} = require('./constants').playStates;
+
 class Room {
     constructor(name, users = new Map()) {
         this._checkUsers(users);
 
         this._name = name;
         this._users = users;
+        this._playState = PLAY_STATE_PAUSE;
+        this._currentTime = 0;
+        this._updatedAt = new Date().getTime();
+        this._updatedBy = {};
     }
 
     get name() {
@@ -17,6 +27,27 @@ class Room {
     set users(users) {
         this._checkUsers(users);
         this._users = users;
+    }
+
+    get playState() {
+        return this._playState;
+    }
+
+    get currentTime() {
+        if (this._playState === PLAY_STATE_PLAYING) {
+            const now = new Date().getTime();
+            return this._currentTime + (now - this._updatedAt);
+        }
+
+        return this._currentTime;
+    }
+
+    get updatedAt() {
+        return this._updatedAt;
+    }
+
+    get updatedBy() {
+        return this._updatedBy;
     }
 
     addUser(user) {
@@ -35,6 +66,25 @@ class Room {
 
     isEmpty() {
         return this._users.size === 0;
+    }
+
+    updatePlayState(playState, currentTime, user) {
+        if (![PLAY_STATE_PLAYING, PLAY_STATE_PAUSE, PLAY_STATE_STOP].includes(playState))
+            throw new Error('Required argument "playState" is not one of play states!');
+        if (typeof currentTime !== 'number')
+            throw new Error('Required argument "currentTime" is not a number!');
+        if (!(user instanceof User))
+            throw new Error('Required argument "user" is not a "User" class instance!');
+        if (!this._users.has(user.id))
+            throw new Error('Required argument "user" is not in this room!');
+
+        this._playState = playState;
+        this._currentTime = currentTime;
+        this._updatedAt = new Date().getTime();
+        this._updatedBy = {
+            id: user.id,
+            name: user.name
+        };
     }
 
     _checkUsers(users) {
