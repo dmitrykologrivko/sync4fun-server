@@ -50,7 +50,10 @@ Response to user `you_joined_room`
       "playState": "pause",
       "currentTime": 207.141845,
       "updatedAt": 1552039787472,
-      "updatedBy": "Kate",
+      "updatedBy":{
+         "id":"fgwsvs674gf8dh2y47gh",
+         "name":"Kate"
+      }, 
       "users":[
          {
             "id":"qqffsfs8938dffsbdwwt",
@@ -107,7 +110,10 @@ Response to user `you_reconnected_to_room`
       "playState": "pause",
       "currentTime": 207.141845,
       "updatedAt": 1552039787472,
-      "updatedBy": "Kate",
+      "updatedBy":{
+         "id":"fgwsvs674gf8dh2y47gh",
+         "name":"Kate"
+      }, 
       "users":[
          {
             "id":"qqffsfs8938dffsbdwwt",
@@ -164,7 +170,10 @@ Response to user `you_joined_room`
       "playState": "pause",
       "currentTime": 207.141845,
       "updatedAt": 1552039787472,
-      "updatedBy": "Kate",
+      "updatedBy":{
+         "id":"fgwsvs674gf8dh2y47gh",
+         "name":"Kate"
+      }, 
       "users":[
          {
             "id":"qqffsfs8938dffsbdwwt",
@@ -341,6 +350,10 @@ Response to the room `changed_play_state`
 {
    "playState": "stop",
    "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }      
    "seek": false
 }
 ```
@@ -363,6 +376,10 @@ Response to the room `changed_play_state`
 {
    "playState": "playing",
    "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }   
    "seek": true
 }
 ```
