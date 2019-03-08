@@ -49,6 +49,10 @@ class RoomSerializer extends BaseSerializer {
 
             return resolve({
                 name: room.name,
+                playState: room.playState,
+                currentTime: room.currentTime,
+                updatedAt: room.updatedAt,
+                updatedBy: room.updatedBy,
                 users: Array.from(room.users.values()).map(user => ({
                     id: user.id,
                     name: user.name,

@@ -28,6 +28,12 @@ const {
     ERROR_OF_CHANGING_PLAY_STATE_TIME
 } = require('../constants').events;
 
+const {
+    PLAY_STATE_PLAYING,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_STOP
+} = require('../constants').playStates;
+
 describe('Events test', () => {
     let httpServer;
     let httpServerAddr;
@@ -53,6 +59,10 @@ describe('Events test', () => {
 
     function assertEqualRoom(actRoom, expRoom) {
         assert.equal(actRoom.name, expRoom.name);
+        assert.equal(actRoom.playState, expRoom.playState);
+        assert.isAtLeast(actRoom.currentTime, expRoom.currentTime);
+        assert.isAtLeast(actRoom.updatedAt, expRoom.updatedAt);
+        assert.deepEqual(actRoom.updatedBy, expRoom.updatedBy);
 
         for (let i = 0; i < actRoom.users.length; i++) {
             const actUser = actRoom.users[i];
@@ -116,6 +126,10 @@ describe('Events test', () => {
         if (socketClient3.connected) {
             socketClient3.disconnect();
         }
+
+        // Clear rooms after each test
+        roomManager.rooms = new Map();
+
         done();
     });
 
@@ -343,6 +357,10 @@ describe('Events test', () => {
                 },
                 room: {
                     name: 'My room',
+                    playState: PLAY_STATE_PAUSE,
+                    currentTime: 0,
+                    updatedAt: new Date().getTime(),
+                    updatedBy: {},
                     users: [
                         {
                             name: 'John',
@@ -365,6 +383,10 @@ describe('Events test', () => {
                 },
                 room: {
                     name: 'My room',
+                    playState: PLAY_STATE_PAUSE,
+                    currentTime: 0,
+                    updatedAt: new Date().getTime(),
+                    updatedBy: {},
                     users: [
                         {
                             name: 'John',
@@ -457,6 +479,10 @@ describe('Events test', () => {
                 },
                 room: {
                     name: 'My room',
+                    playState: PLAY_STATE_PAUSE,
+                    currentTime: 0,
+                    updatedAt: new Date().getTime(),
+                    updatedBy: {},
                     users: [
                         {
                             name: 'John',
@@ -578,6 +604,10 @@ describe('Events test', () => {
                 },
                 room: {
                     name: 'My room 2',
+                    playState: PLAY_STATE_PAUSE,
+                    currentTime: 0,
+                    updatedAt: new Date().getTime(),
+                    updatedBy: {},
                     users: [
                         {
                             name: 'Bob',

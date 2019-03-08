@@ -6,6 +6,8 @@ const {
     RoomSerializer
 } = require('./../serializers');
 
+const {PLAY_STATE_PAUSE} = require('../constants').playStates;
+
 const {UsersFactory, RoomsFactory} = require('./factories');
 
 describe('UserSerializer test', () => {
@@ -101,6 +103,10 @@ describe('RoomSerializer test', () => {
         it('when room argument is instance of Room class should serialize room', done => {
             const serializedRoom = {
                 name: room.name,
+                playState: room.playState,
+                currentTime: room.currentTime,
+                updatedAt: room.updatedAt,
+                updatedBy: room.updatedBy,
                 users: [
                     {
                         id: user1.id,
