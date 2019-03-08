@@ -40,8 +40,6 @@ Response to user `you_joined_room`
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
       "file":{
          "name":"rabbit.mp4",
          "size":145899989
@@ -57,8 +55,6 @@ Response to user `you_joined_room`
          {
             "id":"qqffsfs8938dffsbdwwt",
             "name":"John",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
             "file":{
                "name":"rabbit.mp4",
                "size":145899989
@@ -67,8 +63,6 @@ Response to user `you_joined_room`
          {
             "id":"fgwsvs674gf8dh2y47gh",
             "name":"Kate",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
             "file":{
                "name":"rabbit.mp4",
                "size":145899989
@@ -86,8 +80,6 @@ Response to the room `user_joined_room`
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
       "file":{
          "name":"rabbit.mp4",
          "size":145899989
@@ -105,8 +97,6 @@ Response to user `you_reconnected_to_room`
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
       "file":{
          "name":"rabbit.mp4",
          "size":145899989
@@ -122,8 +112,6 @@ Response to user `you_reconnected_to_room`
          {
             "id":"qqffsfs8938dffsbdwwt",
             "name":"John",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
             "file":{
                "name":"rabbit.mp4",
                "size":145899989
@@ -132,8 +120,6 @@ Response to user `you_reconnected_to_room`
          {
             "id":"fgwsvs674gf8dh2y47gh",
             "name":"Kate",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
             "file":{
                "name":"rabbit.mp4",
                "size":145899989
@@ -151,8 +137,6 @@ Response to the room `user_reconnected_to_room`
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
       "file":{
          "name":"rabbit.mp4",
          "size":145899989
@@ -170,8 +154,6 @@ Response to user `you_joined_room`
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
       "file":{
          "name":"rabbit.mp4",
          "size":145899989
@@ -187,8 +169,6 @@ Response to user `you_joined_room`
          {
             "id":"qqffsfs8938dffsbdwwt",
             "name":"John",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
             "file":{
                "name":"rabbit.mp4",
                "size":145899989
@@ -197,8 +177,6 @@ Response to user `you_joined_room`
          {
             "id":"fgwsvs674gf8dh2y47gh",
             "name":"Kate",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
             "file":{
                "name":"rabbit.mp4",
                "size":145899989
@@ -227,8 +205,6 @@ Response to the new room `user_joined_room`
    "user":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
       "file":{
          "name":"rabbit.mp4",
          "size":145899989
@@ -409,99 +385,6 @@ Response to user `error_of_changing_play_state`
 #### Case 6 - The user is trying to change play state but is not in any room
 
 Response to user `error_of_changing_play_state`
-
-```
-{
-   "message":"You are not in any of the rooms"
-}
-```
-
-## ping_play_state
-
-This event allows keeping actual video time. 
-This will allow you to restore the current video status and time for reconnected or new users.
-The client must send this ping in the interval up to 15 seconds regardless of the play state 
-when connected to the room, otherwise the client will be disconnected.
-
-Request:
-
-```
-{
-   "currentTime": 207.141845
-}
-```
-
-| Field       | Type    | Description              | Required |
-| ------------|---------| -------------------------| ---------|
-| currentTime | number  | Current video time       | yes      |
-
-
-#### Case 1 - The user in the room and is trying to ping play state
-
-Response to user `pong_play_state`
-
-```
-{
-   "user":{
-      "id":"qqffsfs8938dffsbdwwt",
-      "name":"John",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
-      "file":{
-         "name":"rabbit.mp4",
-         "size":145899989
-      }
-   },
-   "room":{
-      "name":"My room",
-      "playState": "pause",
-      "currentTime": 207.141845,
-      "updatedAt": 1552039787472,
-      "updatedBy": "Kate",
-      "users":[
-         {
-            "id":"qqffsfs8938dffsbdwwt",
-            "name":"John",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
-            "file":{
-               "name":"rabbit.mp4",
-               "size":145899989
-            }
-         },
-         {
-            "id":"fgwsvs674gf8dh2y47gh",
-            "name":"Kate",
-            "currentTime": 207.141845,
-            "updatedAt": 1552039787472,
-            "file":{
-               "name":"rabbit.mp4",
-               "size":145899989
-            }
-         }
-      ]
-   }
-}
-```
-
-#### Case 2 - The user is passing invalid request
-
-Response to user `error_of_pining_play_state`
-
-```
-{
-   "message":"Validation error",
-   "fields":{
-      "currentTime": [
-         "Current Time must be of type number"
-      ],
-   }
-}
-```
-
-#### Case 3 - The user is trying to ping play state but is not in any room
-
-Response to user `error_of_pining_play_state`
 
 ```
 {
