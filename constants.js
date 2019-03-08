@@ -17,23 +17,7 @@ module.exports.events = {
 
     CHANGE_PLAY_STATE: 'change_play_state',
     CHANGED_PLAY_STATE: 'changed_play_state',
-    ERROR_OF_CHANGING_PLAY_STATE: 'error_of_changing_play_state',
-
-    CHANGE_PLAY_STATE_TO_PLAY: 'change_play_state_to_play',
-    CHANGED_PLAY_STATE_TO_PLAY: 'changed_play_state_to_play',
-    ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY: 'error_of_changing_play_state_to_play',
-
-    CHANGE_PLAY_STATE_TO_PAUSE: 'change_play_state_to_pause',
-    CHANGED_PLAY_STATE_TO_PAUSE: 'changed_play_state_to_pause',
-    ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE: 'error_of_changing_play_state_to_pause',
-
-    CHANGE_PLAY_STATE_TO_STOP: 'change_play_state_to_stop',
-    CHANGED_PLAY_STATE_TO_STOP: 'changed_play_state_to_stop',
-    ERROR_OF_CHANGING_PLAY_STATE_TO_STOP: 'error_of_changing_play_state_to_stop',
-
-    CHANGE_PLAY_STATE_TIME: 'change_play_state_time',
-    CHANGED_PLAY_STATE_TIME: 'changed_play_state_time',
-    ERROR_OF_CHANGING_PLAY_STATE_TIME: 'error_of_changing_play_state_time',
+    ERROR_OF_CHANGING_PLAY_STATE: 'error_of_changing_play_state'
 };
 
 module.exports.playStates = {
