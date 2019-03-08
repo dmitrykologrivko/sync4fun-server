@@ -436,7 +436,7 @@ Request:
 | currentTime | number  | Current video time       | yes      |
 
 
-#### Case 1 - The user in the room and is trying to change play state to playing
+#### Case 1 - The user in the room and is trying to ping play state
 
 Response to user `pong_play_state`
 
