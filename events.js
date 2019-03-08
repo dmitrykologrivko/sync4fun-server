@@ -4,7 +4,8 @@ const {User, File} = require('./models');
 const {
     UserSerializer,
     UserShortSerializer,
-    RoomSerializer
+    RoomSerializer,
+    PlayStateSerializer
 } = require('./serializers');
 const {
     UserInThisRoomError,
@@ -38,6 +39,7 @@ const {
 const userSerializer = new UserSerializer();
 const userShortSerializer = new UserShortSerializer();
 const roomSerializer = new RoomSerializer();
+const playStateSerializer = new PlayStateSerializer();
 
 async function joinUserToRoom(req, socket, roomManager) {
     const constraints = {
@@ -205,15 +207,7 @@ async function changePlayState(req, socket, roomManager) {
 
     const room = roomManager.updatePlayState(req.playState, req.currentTime, user);
 
-    return socket.to(room.name).emit(CHANGED_PLAY_STATE, {
-        playState: room.playState,
-        currentTime: room.currentTime,
-        updatedBy: {
-            id: room.updatedBy.id,
-            name: room.updatedBy.name
-        },
-        seek: req.seek
-    });
+    return socket.to(room.name).emit(CHANGED_PLAY_STATE, await playStateSerializer.serialize(room, req.seek));
 }
 
 async function disconnect(socket, roomManager) {

@@ -66,6 +66,27 @@ class RoomSerializer extends BaseSerializer {
     }
 }
 
+class PlayStateSerializer extends BaseSerializer {
+    async serialize(room, seek) {
+        return new Promise(((resolve, reject) => {
+            this._checkInstanceOf(room, Room);
+
+            return resolve({
+                playState: room.playState,
+                currentTime: room.currentTime,
+                updatedBy: {
+                    id: room.updatedBy.id,
+                    name: room.updatedBy.name
+                },
+                seek: seek
+            });
+        }));
+    }
+}
+
 module.exports = {
-    UserSerializer, UserShortSerializer, RoomSerializer
+    UserSerializer,
+    UserShortSerializer,
+    RoomSerializer,
+    PlayStateSerializer
 };
