@@ -92,15 +92,58 @@ describe('Room manager test', () => {
     });
 
     describe('#removeUser()', () => {
-        it('when user is in room should remove user', () => {
+        it('when several users in room should remove user', () => {
             const room = roomManager.rooms.get('#1');
             const user = room.users.get('ID:1');
 
-            assert.equal(true, room.users.has(user.id));
+            assert.equal(room.users.has(user.id), true);
+            assert.equal(room.users.size, 2);
 
             roomManager.removeUser(user);
 
-            assert.equal(false, room.users.has(user.id));
+            assert.equal(room.users.has(user.id), false);
+            assert.equal(room.users.size, 1);
+        });
+
+        it('when several users in room should not remove room', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
+
+            assert.equal(room.users.has(user.id), true);
+            assert.equal(room.users.size, 2);
+
+            roomManager.removeUser(user);
+
+            assert.equal(roomManager.rooms.has(room.name), true);
+        });
+
+        it('when one user in room should remove user', () => {
+            const user = UsersFactory.makeUser('ID:3', 'Bob');
+            const room = RoomsFactory.makeRoom('#3', new Map([[user.id, user]]));
+
+            roomManager.rooms.set(room.name, room);
+
+            assert.equal(room.users.has(user.id), true);
+            assert.equal(room.users.size, 1);
+
+            roomManager.removeUser(user);
+
+            assert.equal(room.users.has(user.id), false);
+            assert.equal(room.users.size, 0);
+        });
+
+        it('when one user in room should remove room', () => {
+            const user = UsersFactory.makeUser('ID:3', 'Bob');
+            const room = RoomsFactory.makeRoom('#3', new Map([[user.id, user]]));
+
+            roomManager.rooms.set(room.name, room);
+
+            assert.equal(room.users.has(user.id), true);
+            assert.equal(room.users.size, 1);
+
+            roomManager.removeUser(user);
+
+            assert.equal(roomManager.rooms.has(room.name), false);
         });
 
         it('when user is not in any rooms should not remove any users', () => {

@@ -50,7 +50,13 @@ class RoomManager {
 
     removeUser(user) {
         const room = this.findRoomByUser(user);
-        if (room) room.removeUser(user);
+        if (room) {
+            room.removeUser(user);
+
+            if (room.users.size === 0) {
+                this._rooms.delete(room.name);
+            }
+        }
     }
 
     moveUser(user, roomName) {
