@@ -1194,7 +1194,7 @@ describe('Events test', () => {
                 room: {
                     name: 'My room',
                     playState: PLAY_STATE_PLAYING,
-                    currentTime: TIMEOUT,
+                    currentTime: TIMEOUT / 1000,
                     updatedAt: new Date().getTime(),
                     updatedBy: {
                         name: 'John'

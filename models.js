@@ -36,7 +36,8 @@ class Room {
     get currentTime() {
         if (this._playState === PLAY_STATE_PLAYING) {
             const now = new Date().getTime();
-            return this._currentTime + (now - this._updatedAt);
+            const difference = (now - this._updatedAt) / 1000;
+            return this._currentTime + difference;
         }
 
         return this._currentTime;

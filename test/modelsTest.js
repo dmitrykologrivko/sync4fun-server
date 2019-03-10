@@ -182,7 +182,7 @@ describe('Room model test', () => {
             assert.equal(room.playState, PLAY_STATE_PLAYING);
 
             setTimeout(() => {
-                assert.isAtLeast(room.currentTime, TIMEOUT);
+                assert.isAtLeast(room.currentTime, TIMEOUT / 1000);
                 done();
             }, TIMEOUT);
         });
