@@ -8,15 +8,7 @@ import {
     UserLeftRoomSubject,
     ErrorOfLeavingRoomSubject,
     ChangedPlayStateSubject,
-    ErrorOfChangingPlayStateSubject,
-    ChangedPlayStateToPlaySubject,
-    ErrorOfChangingPlayStateToPlaySubject,
-    ChangedPlayStateToPauseSubject,
-    ErrorOfChangingPlayStateToPauseSubject,
-    ChangedPlayStateToStopSubject,
-    ErrorOfChangingPlayStateToStopSubject,
-    ChangedPlayStateTimeSubject,
-    ErrorOfChangingPlayStateTimeSubject
+    ErrorOfChangingPlayStateSubject
 } from './subjects';
 
 export default class SubjectsManager {
@@ -31,14 +23,6 @@ export default class SubjectsManager {
         this._errorOfLeavingRoomSubject = new ErrorOfLeavingRoomSubject();
         this._changedPlayStateSubject = new ChangedPlayStateSubject();
         this._errorOfChangingPlayStateSubject = new ErrorOfChangingPlayStateSubject();
-        this._cangedPlayStateToPlaySubject = new ChangedPlayStateToPlaySubject();
-        this._errorOfChangingPlayStateToPlaySubject = new ErrorOfChangingPlayStateToPlaySubject();
-        this._cangedPlayStateToPauseSubject = new ChangedPlayStateToPauseSubject();
-        this._errorOfChangingPlayStateToPauseSubject = new ErrorOfChangingPlayStateToPauseSubject();
-        this._cangedPlayStateToStopSubject = new ChangedPlayStateToStopSubject();
-        this._errorOfChangingPlayStateToStopSubject = new ErrorOfChangingPlayStateToStopSubject();
-        this._cangedPlayStateTimeSubject = new ChangedPlayStateTimeSubject();
-        this._errorOfChangingPlayStateTimeSubject = new ErrorOfChangingPlayStateTimeSubject();
     }
 
     get youJoinedRoomSubject() {
@@ -79,37 +63,5 @@ export default class SubjectsManager {
 
     get errorOfChangingPlayStateSubject() {
         return this._errorOfChangingPlayStateSubject;
-    }
-
-    get changePlayStateToPlaySubject() {
-        return this._cangedPlayStateToPlaySubject;
-    }
-
-    get errorOfChangingPlayStateToPlaySubject() {
-        return this._errorOfChangingPlayStateToPlaySubject;
-    }
-
-    get changedPlayStateToPauseSubject() {
-        return this._cangedPlayStateToPauseSubject;
-    }
-
-    get errorOfChangingPlayStateToPauseSubject() {
-        return this._errorOfChangingPlayStateToPauseSubject;
-    }
-
-    get changedPlayStateToStopSubject() {
-        return this._cangedPlayStateToStopSubject;
-    }
-
-    get errorOfChangingPlayStateToStopSubject() {
-        return this._errorOfChangingPlayStateToStopSubject;
-    }
-
-    get changedPlayStateTimeSubject() {
-        return this._cangedPlayStateTimeSubject;
-    }
-
-    get errorOfChangingPlayStateTimeSubject() {
-        return this._errorOfChangingPlayStateTimeSubject;
     }
 }

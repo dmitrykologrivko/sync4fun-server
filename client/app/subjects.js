@@ -60,19 +60,3 @@ export class ErrorOfLeavingRoomSubject extends BaseSubject {}
 export class ChangedPlayStateSubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateSubject extends BaseSubject {}
-
-export class ChangedPlayStateToPlaySubject extends BaseSubject {}
-
-export class ErrorOfChangingPlayStateToPlaySubject extends BaseSubject {}
-
-export class ChangedPlayStateToPauseSubject extends BaseSubject {}
-
-export class ErrorOfChangingPlayStateToPauseSubject extends BaseSubject {}
-
-export class ChangedPlayStateToStopSubject extends BaseSubject {}
-
-export class ErrorOfChangingPlayStateToStopSubject extends BaseSubject {}
-
-export class ChangedPlayStateTimeSubject extends BaseSubject {}
-
-export class ErrorOfChangingPlayStateTimeSubject extends BaseSubject {}
