@@ -42,14 +42,6 @@ export default class AppController {
         this._errorOfLeavingRoomObserver = new Observer(this._handleErrorOfLeavingRoomObserver.bind(this));
         this._changedPlayStateObserver = new Observer(this._handleChangedPlayStateEvent.bind(this));
         this._errorOfChangingPlayStateObsever = new Observer(this._handleErrorOfChangingPlayStateEvent.bind(this));
-        this._cangedPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
-        this._errorOfChangingPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
-        this._cangedPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
-        this._errorOfChangingPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
-        this._cangedPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
-        this._errorOfChangingPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
-        this._cangedPlayStateTimeObserver = new Observer(this._handleChangedPlayStateTimeEvent.bind(this));
-        this._errorOfChangingPlayStateTimeObserver = new Observer(this._handleChangedPlayStateTimeEvent.bind(this));
 
         this._subjects.userJoinedRoomSubject.subscribe(this._userJoinedRoomObserver);
         this._subjects.userReconnectedToRoomSubject.subscribe(this._userReconnectedToRoomObserver);
@@ -58,14 +50,6 @@ export default class AppController {
         this._subjects.errorOfLeavingRoomSubject.subscribe(this._errorOfLeavingRoomObserver);
         this._subjects.changedPlayStateSubject.subscribe(this._changedPlayStateObserver);
         this._subjects.errorOfChangingPlayStateSubject.subscribe(this._errorOfChangingPlayStateObsever);
-        this._subjects.changePlayStateToPlaySubject.subscribe(this._cangedPlayStateToPlayObserver);
-        this._subjects.errorOfChangingPlayStateToPlaySubject.subscribe(this._errorOfChangingPlayStateToPlayObserver);
-        this._subjects.changedPlayStateToPauseSubject.subscribe(this._cangedPlayStateToPauseObserver);
-        this._subjects.errorOfChangingPlayStateToPauseSubject.subscribe(this._errorOfChangingPlayStateToPauseObserver);
-        this._subjects.changedPlayStateToStopSubject.subscribe(this._cangedPlayStateToStopObserver);
-        this._subjects.errorOfChangingPlayStateToStopSubject.subscribe(this._errorOfChangingPlayStateToStopObserver);
-        this._subjects.changedPlayStateTimeSubject.subscribe(this._cangedPlayStateTimeObserver);
-        this._subjects.errorOfChangingPlayStateTimeSubject.subscribe(this._errorOfChangingPlayStateTimeObserver);
 
         // Set listeners
         this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
@@ -267,42 +251,6 @@ export default class AppController {
     }
 
     _handleErrorOfChangingPlayStateEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateToPlayEvent(res) {
-        this._addEventToList(res.user.name, 'Started playing');
-        this._player.play();
-    }
-
-    _handleErrorOfChangingPlayStateToPlayEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateToPauseEvent(res) {
-        this._addEventToList(res.user.name, 'Paused playing');
-        this._player.pause();
-    }
-
-    _handleErrorOfChangingPlayStateToPauseEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateToStopEvent(res) {
-        this._addEventToList(res.user.name, 'Stopped playing');
-        this._player.stop();
-    }
-
-    _handleErrorOfChangingPlayStateToStopEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateTimeEvent(res) {
-        this._addEventToList(res.user.name, 'Changed time');
-        this._player.currentTime(res.currentTime);
-    }
-
-    _handleErrorOfChangingPlayStateTimeEvent(res) {
         console.error(res);
     }
 }
