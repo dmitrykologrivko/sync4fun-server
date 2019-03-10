@@ -57,6 +57,10 @@ export class UserLeftRoomSubject extends BaseSubject {}
 
 export class ErrorOfLeavingRoomSubject extends BaseSubject {}
 
+export class ChangedPlayStateSubject extends BaseSubject {}
+
+export class ErrorOfChangingPlayStateSubject extends BaseSubject {}
+
 export class ChangedPlayStateToPlaySubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateToPlaySubject extends BaseSubject {}

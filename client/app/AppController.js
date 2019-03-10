@@ -3,6 +3,12 @@ import videojs from 'video.js';
 
 import 'video.js/dist/video-js.min.css';
 
+import {
+    PLAY_STATE_PLAYING,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_STOP
+} from './constants';
+
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
 import {convertBytesToMegabytes} from './utils';
@@ -34,6 +40,8 @@ export default class AppController {
         this._userLeftRoomObserver = new Observer(this._handleUserLeftRoomEvent.bind(this));
         this._youLeftRoomObserver = new Observer(this._handleYouLeftRoomEvent.bind(this));
         this._errorOfLeavingRoomObserver = new Observer(this._handleErrorOfLeavingRoomObserver.bind(this));
+        this._changedPlayStateObserver = new Observer(this._handleChangedPlayStateEvent.bind(this));
+        this._errorOfChangingPlayStateObsever = new Observer(this._handleErrorOfChangingPlayStateEvent.bind(this));
         this._cangedPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
         this._errorOfChangingPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
         this._cangedPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
@@ -48,6 +56,8 @@ export default class AppController {
         this._subjects.userLeftRoomSubject.subscribe(this._userLeftRoomObserver);
         this._subjects.youLeftRoomSubject.subscribe(this._youLeftRoomObserver);
         this._subjects.errorOfLeavingRoomSubject.subscribe(this._errorOfLeavingRoomObserver);
+        this._subjects.changedPlayStateSubject.subscribe(this._changedPlayStateObserver);
+        this._subjects.errorOfChangingPlayStateSubject.subscribe(this._errorOfChangingPlayStateObsever);
         this._subjects.changePlayStateToPlaySubject.subscribe(this._cangedPlayStateToPlayObserver);
         this._subjects.errorOfChangingPlayStateToPlaySubject.subscribe(this._errorOfChangingPlayStateToPlayObserver);
         this._subjects.changedPlayStateToPauseSubject.subscribe(this._cangedPlayStateToPauseObserver);
@@ -86,6 +96,26 @@ export default class AppController {
         this._player.src({
             type: selectedFile.type,
             src: URL.createObjectURL(selectedFile)
+        });
+        this._player.ready(() => {
+            const playState = this._room.playState;
+            const currentTime = this._room.currentTime;
+
+            if (playState === PLAY_STATE_PLAYING) {
+                this._player.currentTime(currentTime);
+                this._player.play();
+                return;
+            }
+
+            if (playState === PLAY_STATE_PAUSE) {
+                this._player.currentTime(currentTime);
+                this._player.pause();
+                return;
+            }
+
+            if (playState === PLAY_STATE_STOP) {
+                this._player.stop();
+            }
         });
     }
 
@@ -134,7 +164,11 @@ export default class AppController {
         document.onmouseup = () => {
             const currentTime = this._player.currentTime();
 
-            this._client.changePlayStateTime(currentTime);
+            this._client.changePlayState({
+                playState: PLAY_STATE_PLAYING,
+                currentTime: currentTime,
+                seek: true
+            });
             this._addEventToList('You', 'Changed time');
 
             document.onmouseup = null;
@@ -153,10 +187,18 @@ export default class AppController {
 
     _playToggleButtonClick() {
         if (this._player.paused()) {
-            this._client.changePlayStateToPause();
+            this._client.changePlayState({
+                playState: PLAY_STATE_PAUSE,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
             this._addEventToList('You', 'Paused playing');
         } else {
-            this._client.changePlayStateToPlay();
+            this._client.changePlayState({
+                playState: PLAY_STATE_PLAYING,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
             this._addEventToList('You', 'Started playing');
         }
     }
@@ -191,6 +233,40 @@ export default class AppController {
     }
 
     _handleErrorOfLeavingRoomObserver(res) {
+        console.error(res);
+    }
+
+    _handleChangedPlayStateEvent(res) {
+        const playState = res.playState;
+        const currentTime = res.currentTime;
+        const seek = res.seek;
+        const updatedBy = res.updatedBy;
+
+        if (seek) {
+            this._addEventToList(updatedBy.name, 'Changed time');
+            this._player.currentTime(currentTime);
+            return;
+        }
+
+        if (playState === PLAY_STATE_PLAYING) {
+            this._addEventToList(updatedBy.name, 'Started playing');
+            this._player.play();
+            return;
+        }
+
+        if (playState === PLAY_STATE_PAUSE) {
+            this._addEventToList(updatedBy.name, 'Paused playing');
+            this._player.pause();
+            return;
+        }
+
+        if (playState === PLAY_STATE_STOP) {
+            this._addEventToList(updatedBy.name, 'Stopped playing');
+            this._player.stop();
+        }
+    }
+
+    _handleErrorOfChangingPlayStateEvent(res) {
         console.error(res);
     }
 

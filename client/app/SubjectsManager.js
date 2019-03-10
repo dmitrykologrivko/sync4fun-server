@@ -7,6 +7,8 @@ import {
     YouLeftRoomSubject,
     UserLeftRoomSubject,
     ErrorOfLeavingRoomSubject,
+    ChangedPlayStateSubject,
+    ErrorOfChangingPlayStateSubject,
     ChangedPlayStateToPlaySubject,
     ErrorOfChangingPlayStateToPlaySubject,
     ChangedPlayStateToPauseSubject,
@@ -27,6 +29,8 @@ export default class SubjectsManager {
         this._youLeftRoomSubject = new YouLeftRoomSubject();
         this._userLeftRoomSubject = new UserLeftRoomSubject();
         this._errorOfLeavingRoomSubject = new ErrorOfLeavingRoomSubject();
+        this._changedPlayStateSubject = new ChangedPlayStateSubject();
+        this._errorOfChangingPlayStateSubject = new ErrorOfChangingPlayStateSubject();
         this._cangedPlayStateToPlaySubject = new ChangedPlayStateToPlaySubject();
         this._errorOfChangingPlayStateToPlaySubject = new ErrorOfChangingPlayStateToPlaySubject();
         this._cangedPlayStateToPauseSubject = new ChangedPlayStateToPauseSubject();
@@ -67,6 +71,14 @@ export default class SubjectsManager {
 
     get errorOfLeavingRoomSubject() {
         return this._errorOfLeavingRoomSubject;
+    }
+
+    get changedPlayStateSubject() {
+        return this._changedPlayStateSubject;
+    }
+
+    get errorOfChangingPlayStateSubject() {
+        return this._errorOfChangingPlayStateSubject;
     }
 
     get changePlayStateToPlaySubject() {

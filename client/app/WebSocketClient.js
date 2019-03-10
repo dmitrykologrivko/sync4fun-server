@@ -9,6 +9,9 @@ import {
     YOU_LEFT_ROOM,
     USER_LEFT_ROOM,
     ERROR_OF_LEAVING_USER_FROM_ROOM,
+    CHANGE_PLAY_STATE,
+    CHANGED_PLAY_STATE,
+    ERROR_OF_CHANGING_PLAY_STATE,
     CHANGE_PLAY_STATE_TO_PLAY,
     CHANGED_PLAY_STATE_TO_PLAY,
     ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY,
@@ -64,6 +67,14 @@ export default class WebSocketClient {
             this._subjectsManager.errorOfLeavingRoomSubject.publish(res);
         });
 
+        this._socket.on(CHANGED_PLAY_STATE, res => {
+            this._subjectsManager.changedPlayStateSubject.publish(res);
+        });
+
+        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE, res => {
+            this._subjectsManager.errorOfChangingPlayStateSubject.publish(res);
+        });
+
         this._socket.on(CHANGED_PLAY_STATE_TO_PLAY, res => {
             this._subjectsManager.changePlayStateToPlaySubject.publish(res);
         });
@@ -106,6 +117,10 @@ export default class WebSocketClient {
 
     leaveUserFromRoom() {
         this._socket.emit(LEAVE_USER_FROM_ROOM);
+    }
+
+    changePlayState(playState) {
+        this._socket.emit(CHANGE_PLAY_STATE, playState);
     }
 
     changePlayStateToPlay() {
