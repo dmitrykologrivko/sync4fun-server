@@ -149,7 +149,7 @@ export default class AppController {
             const currentTime = this._player.currentTime();
 
             this._client.changePlayState({
-                playState: PLAY_STATE_PLAYING,
+                playState: this._player.played() ? PLAY_STATE_PAUSE : PLAY_STATE_PLAYING,
                 currentTime: currentTime,
                 seek: true
             });
