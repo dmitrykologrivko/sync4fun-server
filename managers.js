@@ -68,6 +68,10 @@ class RoomManager {
 
         room.removeUser(user);
 
+        if (room.users.size === 0) {
+            this._rooms.delete(room.name);
+        }
+
         if (this._rooms.has(roomName)) {
             this._rooms.get(roomName).addUser(user);
         } else {

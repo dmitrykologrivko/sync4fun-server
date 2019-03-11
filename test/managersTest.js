@@ -214,6 +214,32 @@ describe('Room manager test', () => {
             assert.equal(room2.users.size, 0);
         });
 
+        it('when room user leaves is empty should remove room', () => {
+            const user = UsersFactory.makeUser('ID:3', 'Bob');
+            const room = RoomsFactory.makeRoom('#3', new Map([[user.id, user]]));
+
+            roomManager.rooms.set(room.name, room);
+
+            assert.equal(room.users.has(user.id), true);
+            assert.equal(room.users.size, 1);
+
+            roomManager.moveUser(user, '#2');
+
+            assert.equal(roomManager.rooms.has(room.name), false);
+        });
+
+        it('when room user leaves is not empty should not remove room', () => {
+            const room = roomManager.rooms.get('#1');
+            const user = room.users.get('ID:1');
+
+            assert.equal(room.users.has(user.id), true);
+            assert.equal(room.users.size, 2);
+
+            roomManager.moveUser(user, '#2');
+
+            assert.equal(roomManager.rooms.has(room.name), true);
+        });
+
         it('when user is in another room and provided room exists should return existing room', () => {
             const room1 = roomManager.rooms.get('#1');
             const room2 = roomManager.rooms.get('#2');
@@ -229,7 +255,6 @@ describe('Room manager test', () => {
 
         it('when user is in another room and provided room not exist should return added room', () => {
             const room1 = roomManager.rooms.get('#1');
-            const room2 = roomManager.rooms.get('#2');
             const room3 = RoomsFactory.makeRoom('#3', new Map());
             const user = room1.users.get('ID:1');
 

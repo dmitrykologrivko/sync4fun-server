@@ -1241,10 +1241,88 @@ describe('Events test', () => {
                 }, TIMEOUT);
             });
         });
+
+        it('when user left and join room', done => {
+            const TIMEOUT = 500;
+
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqChangePlayStateClient1 = {
+                playState: PLAY_STATE_PLAYING,
+                currentTime: 0,
+                seek: false
+            };
+
+            const resYouJoinedRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room',
+                    playState: PLAY_STATE_PAUSE,
+                    currentTime: 0,
+                    updatedAt: new Date().getTime(),
+                    updatedBy: {},
+                    users: [
+                        {
+                            name: 'John',
+                            file: {
+                                name: 'rabbit.mp4',
+                                size: 145899989
+                            }
+                        }
+                    ]
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Change play state to play by John
+                socketClient1.emit(CHANGE_PLAY_STATE, reqChangePlayStateClient1);
+
+                // #4 - Wait timeout 500ms
+                setTimeout(() => {
+                    // #5 - Leave John from "My room"
+                    socketClient1.emit(LEAVE_USER_FROM_ROOM, {});
+
+                    // #6 - John left "My room"
+                    socketClient1.once(YOU_LEFT_ROOM, res => {
+                        // #7 - Connect John to "My room" again
+                        socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+                        // #8 - John connected to "My room"
+                        socketClient1.once(YOU_JOINED_ROOM, res => {
+                            assertEqualUser(res.user, resYouJoinedRoomClient1.user);
+                            assertEqualRoom(res.room, resYouJoinedRoomClient1.room);
+
+                            done();
+                        });
+                    });
+                }, TIMEOUT);
+            });
+        });
     });
 
     describe('test disconnecting user', () => {
-        it('when user was in any group', done => {
+        it('when user was in room', done => {
             const reqJoinUserToRoomClient1 = {
                 user: {
                     name: 'John',
@@ -1287,7 +1365,7 @@ describe('Events test', () => {
 
                 // #4 - Kate connected to "My room"
                 socketClient2.once(YOU_JOINED_ROOM, res => {
-                    // #5 - John disconnected
+                    // #5 - Disconnect John
                     socketClient1.disconnect();
 
                     // #6 - Kate got an event that John came out from room
