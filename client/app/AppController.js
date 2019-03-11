@@ -3,6 +3,12 @@ import videojs from 'video.js';
 
 import 'video.js/dist/video-js.min.css';
 
+import {
+    PLAY_STATE_PLAYING,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_STOP
+} from './constants';
+
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
 import {convertBytesToMegabytes} from './utils';
@@ -34,28 +40,16 @@ export default class AppController {
         this._userLeftRoomObserver = new Observer(this._handleUserLeftRoomEvent.bind(this));
         this._youLeftRoomObserver = new Observer(this._handleYouLeftRoomEvent.bind(this));
         this._errorOfLeavingRoomObserver = new Observer(this._handleErrorOfLeavingRoomObserver.bind(this));
-        this._cangedPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
-        this._errorOfChangingPlayStateToPlayObserver = new Observer(this._handleChangedPlayStateToPlayEvent.bind(this));
-        this._cangedPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
-        this._errorOfChangingPlayStateToPauseObserver = new Observer(this._handleChangedPlayStateToPauseEvent.bind(this));
-        this._cangedPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
-        this._errorOfChangingPlayStateToStopObserver = new Observer(this._handleChangedPlayStateToStopEvent.bind(this));
-        this._cangedPlayStateTimeObserver = new Observer(this._handleChangedPlayStateTimeEvent.bind(this));
-        this._errorOfChangingPlayStateTimeObserver = new Observer(this._handleChangedPlayStateTimeEvent.bind(this));
+        this._changedPlayStateObserver = new Observer(this._handleChangedPlayStateEvent.bind(this));
+        this._errorOfChangingPlayStateObsever = new Observer(this._handleErrorOfChangingPlayStateEvent.bind(this));
 
         this._subjects.userJoinedRoomSubject.subscribe(this._userJoinedRoomObserver);
         this._subjects.userReconnectedToRoomSubject.subscribe(this._userReconnectedToRoomObserver);
         this._subjects.userLeftRoomSubject.subscribe(this._userLeftRoomObserver);
         this._subjects.youLeftRoomSubject.subscribe(this._youLeftRoomObserver);
         this._subjects.errorOfLeavingRoomSubject.subscribe(this._errorOfLeavingRoomObserver);
-        this._subjects.changePlayStateToPlaySubject.subscribe(this._cangedPlayStateToPlayObserver);
-        this._subjects.errorOfChangingPlayStateToPlaySubject.subscribe(this._errorOfChangingPlayStateToPlayObserver);
-        this._subjects.changedPlayStateToPauseSubject.subscribe(this._cangedPlayStateToPauseObserver);
-        this._subjects.errorOfChangingPlayStateToPauseSubject.subscribe(this._errorOfChangingPlayStateToPauseObserver);
-        this._subjects.changedPlayStateToStopSubject.subscribe(this._cangedPlayStateToStopObserver);
-        this._subjects.errorOfChangingPlayStateToStopSubject.subscribe(this._errorOfChangingPlayStateToStopObserver);
-        this._subjects.changedPlayStateTimeSubject.subscribe(this._cangedPlayStateTimeObserver);
-        this._subjects.errorOfChangingPlayStateTimeSubject.subscribe(this._errorOfChangingPlayStateTimeObserver);
+        this._subjects.changedPlayStateSubject.subscribe(this._changedPlayStateObserver);
+        this._subjects.errorOfChangingPlayStateSubject.subscribe(this._errorOfChangingPlayStateObsever);
 
         // Set listeners
         this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
@@ -86,6 +80,26 @@ export default class AppController {
         this._player.src({
             type: selectedFile.type,
             src: URL.createObjectURL(selectedFile)
+        });
+        this._player.ready(() => {
+            const playState = this._room.playState;
+            const currentTime = this._room.currentTime;
+
+            if (playState === PLAY_STATE_PLAYING) {
+                this._player.currentTime(currentTime);
+                this._player.play();
+                return;
+            }
+
+            if (playState === PLAY_STATE_PAUSE) {
+                this._player.currentTime(currentTime);
+                this._player.pause();
+                return;
+            }
+
+            if (playState === PLAY_STATE_STOP) {
+                this._player.stop();
+            }
         });
     }
 
@@ -134,7 +148,11 @@ export default class AppController {
         document.onmouseup = () => {
             const currentTime = this._player.currentTime();
 
-            this._client.changePlayStateTime(currentTime);
+            this._client.changePlayState({
+                playState: this._player.played() ? PLAY_STATE_PAUSE : PLAY_STATE_PLAYING,
+                currentTime: currentTime,
+                seek: true
+            });
             this._addEventToList('You', 'Changed time');
 
             document.onmouseup = null;
@@ -153,10 +171,18 @@ export default class AppController {
 
     _playToggleButtonClick() {
         if (this._player.paused()) {
-            this._client.changePlayStateToPause();
+            this._client.changePlayState({
+                playState: PLAY_STATE_PAUSE,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
             this._addEventToList('You', 'Paused playing');
         } else {
-            this._client.changePlayStateToPlay();
+            this._client.changePlayState({
+                playState: PLAY_STATE_PLAYING,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
             this._addEventToList('You', 'Started playing');
         }
     }
@@ -194,39 +220,37 @@ export default class AppController {
         console.error(res);
     }
 
-    _handleChangedPlayStateToPlayEvent(res) {
-        this._addEventToList(res.user.name, 'Started playing');
-        this._player.play();
+    _handleChangedPlayStateEvent(res) {
+        const playState = res.playState;
+        const currentTime = res.currentTime;
+        const seek = res.seek;
+        const updatedBy = res.updatedBy;
+
+        if (seek) {
+            this._addEventToList(updatedBy.name, 'Changed time');
+            this._player.currentTime(currentTime);
+            return;
+        }
+
+        if (playState === PLAY_STATE_PLAYING) {
+            this._addEventToList(updatedBy.name, 'Started playing');
+            this._player.play();
+            return;
+        }
+
+        if (playState === PLAY_STATE_PAUSE) {
+            this._addEventToList(updatedBy.name, 'Paused playing');
+            this._player.pause();
+            return;
+        }
+
+        if (playState === PLAY_STATE_STOP) {
+            this._addEventToList(updatedBy.name, 'Stopped playing');
+            this._player.stop();
+        }
     }
 
-    _handleErrorOfChangingPlayStateToPlayEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateToPauseEvent(res) {
-        this._addEventToList(res.user.name, 'Paused playing');
-        this._player.pause();
-    }
-
-    _handleErrorOfChangingPlayStateToPauseEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateToStopEvent(res) {
-        this._addEventToList(res.user.name, 'Stopped playing');
-        this._player.stop();
-    }
-
-    _handleErrorOfChangingPlayStateToStopEvent(res) {
-        console.error(res);
-    }
-
-    _handleChangedPlayStateTimeEvent(res) {
-        this._addEventToList(res.user.name, 'Changed time');
-        this._player.currentTime(res.currentTime);
-    }
-
-    _handleErrorOfChangingPlayStateTimeEvent(res) {
+    _handleErrorOfChangingPlayStateEvent(res) {
         console.error(res);
     }
 }

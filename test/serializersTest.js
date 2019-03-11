@@ -3,8 +3,11 @@ const {assert, expect} = require('chai');
 const {
     UserSerializer,
     UserShortSerializer,
-    RoomSerializer
+    RoomSerializer,
+    PlayStateSerializer
 } = require('./../serializers');
+
+const {PLAY_STATE_PAUSE} = require('../constants').playStates;
 
 const {UsersFactory, RoomsFactory} = require('./factories');
 
@@ -82,12 +85,9 @@ describe('UserShortSerializer test', () => {
 
 describe('RoomSerializer test', () => {
     const room = RoomsFactory.makeRoom('#1');
-    const user1 = UsersFactory.makeUser(1, 'John');
-    const user2 = UsersFactory.makeUser(2, 'Kate');
+    const user1 = room.users.get('ID:1');
+    const user2 = room.users.get('ID:2');
     const serializer = new RoomSerializer();
-
-    room.addUser(user1);
-    room.addUser(user2);
 
     describe('#serialize()', () => {
         it('when room argument is not instance of Room class should throw error', done => {
@@ -104,6 +104,10 @@ describe('RoomSerializer test', () => {
         it('when room argument is instance of Room class should serialize room', done => {
             const serializedRoom = {
                 name: room.name,
+                playState: room.playState,
+                currentTime: room.currentTime,
+                updatedAt: room.updatedAt,
+                updatedBy: room.updatedBy,
                 users: [
                     {
                         id: user1.id,
@@ -127,6 +131,46 @@ describe('RoomSerializer test', () => {
             serializer.serialize(room)
                 .then(value => {
                     assert.deepEqual(value, serializedRoom);
+                    done();
+                })
+                .catch(error => {
+                    throw Error('Was not supposed to fail');
+                });
+        });
+    })
+});
+
+describe('PlayStateSerializer test', () => {
+    const room = RoomsFactory.makeRoom('#1');
+    const seek = true;
+    const serializer = new PlayStateSerializer();
+
+    describe('#serialize()', () => {
+        it('when user argument is not instance of Room class should throw error', done => {
+            serializer.serialize({}, seek)
+                .then(value => {
+                    throw new Error('Was not supposed to succeed');
+                })
+                .catch(error => {
+                    assert.equal(error.message, 'Provided argument is not instance of Room class');
+                    done();
+                });
+        });
+
+        it('when user argument is instance of Room class should serialize play state', done => {
+            const serializedPlayState = {
+                playState: room.playState,
+                currentTime: room.currentTime,
+                updatedBy: {
+                    id: room.updatedBy.id,
+                    name: room.updatedBy.name
+                },
+                seek: seek
+            };
+
+            serializer.serialize(room, seek)
+                .then(value => {
+                    assert.deepEqual(value, serializedPlayState);
                     done();
                 })
                 .catch(error => {

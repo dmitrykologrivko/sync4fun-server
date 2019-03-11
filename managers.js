@@ -50,7 +50,13 @@ class RoomManager {
 
     removeUser(user) {
         const room = this.findRoomByUser(user);
-        if (room) room.removeUser(user);
+        if (room) {
+            room.removeUser(user);
+
+            if (room.users.size === 0) {
+                this._rooms.delete(room.name);
+            }
+        }
     }
 
     moveUser(user, roomName) {
@@ -61,6 +67,10 @@ class RoomManager {
         }
 
         room.removeUser(user);
+
+        if (room.users.size === 0) {
+            this._rooms.delete(room.name);
+        }
 
         if (this._rooms.has(roomName)) {
             this._rooms.get(roomName).addUser(user);
@@ -96,6 +106,18 @@ class RoomManager {
         }
 
         return null;
+    }
+
+    updatePlayState(playState, currentTime, user) {
+        const room = this.findRoomByUser(user);
+
+        if (!room) {
+            return null;
+        }
+
+        room.updatePlayState(playState, currentTime, user);
+
+        return room;
     }
 }
 

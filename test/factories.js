@@ -1,8 +1,8 @@
 const {Room, User, File} = require('../models');
 
 class RoomsFactory {
-    static makeRoom(name) {
-        return new Room(name);
+    static makeRoom(name = '#1', users = UsersFactory.makeUsers(2)) {
+        return new Room(name, users);
     }
 
     static makeRooms(size) {
@@ -17,14 +17,14 @@ class RoomsFactory {
 }
 
 class FilesFactory {
-    static makeFile() {
-        return new File('rabbit.mp4', 125789);
+    static makeFile(name = 'rabbit.mp4', size = 125789) {
+        return new File(name, size);
     }
 }
 
 class UsersFactory {
-    static makeUser(id, name) {
-        return new User(id, name, FilesFactory.makeFile());
+    static makeUser(id = 'ID:1', name = 'John', file = FilesFactory.makeFile()) {
+        return new User(id, name, file);
     }
 
     static makeUsers(size) {

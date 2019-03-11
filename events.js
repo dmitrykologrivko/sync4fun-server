@@ -4,7 +4,8 @@ const {User, File} = require('./models');
 const {
     UserSerializer,
     UserShortSerializer,
-    RoomSerializer
+    RoomSerializer,
+    PlayStateSerializer
 } = require('./serializers');
 const {
     UserInThisRoomError,
@@ -24,33 +25,31 @@ const {
     YOU_LEFT_ROOM,
     USER_LEFT_ROOM,
     ERROR_OF_LEAVING_USER_FROM_ROOM,
-    CHANGE_PLAY_STATE_TO_PLAY,
-    CHANGED_PLAY_STATE_TO_PLAY,
-    ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY,
-    CHANGE_PLAY_STATE_TO_PAUSE,
-    CHANGED_PLAY_STATE_TO_PAUSE,
-    ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE,
-    CHANGE_PLAY_STATE_TO_STOP,
-    CHANGED_PLAY_STATE_TO_STOP,
-    ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
-    CHANGE_PLAY_STATE_TIME,
-    CHANGED_PLAY_STATE_TIME,
-    ERROR_OF_CHANGING_PLAY_STATE_TIME
+    CHANGE_PLAY_STATE,
+    CHANGED_PLAY_STATE,
+    ERROR_OF_CHANGING_PLAY_STATE
 } = require('./constants').events;
+
+const {
+    PLAY_STATE_PLAYING,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_STOP
+} = require('./constants').playStates;
 
 const userSerializer = new UserSerializer();
 const userShortSerializer = new UserShortSerializer();
 const roomSerializer = new RoomSerializer();
+const playStateSerializer = new PlayStateSerializer();
 
 async function joinUserToRoom(req, socket, roomManager) {
     const constraints = {
         'user': {
             presence: true,
-            type: "object"
+            type: 'object'
         },
         'user.name': {
             presence: true,
-            type: "string",
+            type: 'string',
             length: {
                 minimum: 2,
                 maximum: 20
@@ -58,11 +57,11 @@ async function joinUserToRoom(req, socket, roomManager) {
         },
         'user.file': {
             presence: true,
-            type: "object"
+            type: 'object'
         },
         'user.file.name': {
             presence: true,
-            type: "string",
+            type: 'string',
             length: {
                 minimum: 3,
                 maximum: 100
@@ -70,18 +69,18 @@ async function joinUserToRoom(req, socket, roomManager) {
         },
         'user.file.size': {
             presence: true,
-            type: "number",
+            type: 'number',
             numericality: {
                 onlyInteger: true
             }
         },
         'room': {
             presence: true,
-            type: "object"
+            type: 'object'
         },
         'room.name': {
             presence: true,
-            type: "string",
+            type: 'string',
             length: {
                 minimum: 2,
                 maximum: 20
@@ -175,57 +174,27 @@ async function leaveUserFromRoom(req, socket, roomManager) {
     });
 }
 
-async function changePlayStateToPlay(req, socket, roomManager) {
-    const user = roomManager.findUserById(socket.id);
-    if (!user) {
-        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, {message: 'You are not in any of the rooms'});
-    }
-
-    const room = roomManager.findRoomByUser(user);
-
-    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PLAY, {
-        user: await userShortSerializer.serialize(user)
-    });
-}
-
-async function changePlayStateToPause(req, socket, roomManager) {
-    const user = roomManager.findUserById(socket.id);
-    if (!user) {
-        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, {message: 'You are not in any of the rooms'});
-    }
-
-    const room = roomManager.findRoomByUser(user);
-
-    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_PAUSE, {
-        user: await userShortSerializer.serialize(user)
-    });
-}
-
-async function changePlayStateToStop(req, socket, roomManager) {
-    const user = roomManager.findUserById(socket.id);
-    if (!user) {
-        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, {message: 'You are not in any of the rooms'});
-    }
-
-    const room = roomManager.findRoomByUser(user);
-
-    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TO_STOP, {
-        user: await userShortSerializer.serialize(user)
-    });
-}
-
-async function changePlayStateTime(req, socket, roomManager) {
+async function changePlayState(req, socket, roomManager) {
     const constraints = {
+        'playState': {
+            presence: true,
+            type: 'string',
+            inclusion: [PLAY_STATE_PLAYING, PLAY_STATE_PAUSE, PLAY_STATE_STOP]
+        },
         'currentTime': {
             presence: true,
-            type: "number"
+            type: 'number'
+        },
+        'seek': {
+            presence: false,
+            type: 'boolean'
         }
     };
 
     try {
         await validate.async(req, constraints);
     } catch (error) {
-        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TIME, {
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE, {
             message: 'Validation error',
             fields: error
         });
@@ -233,15 +202,12 @@ async function changePlayStateTime(req, socket, roomManager) {
 
     const user = roomManager.findUserById(socket.id);
     if (!user) {
-        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE_TIME, {message: 'You are not in any of the rooms'});
+        return socket.emit(ERROR_OF_CHANGING_PLAY_STATE, {message: 'You are not in any of the rooms'});
     }
 
-    const room = roomManager.findRoomByUser(user);
+    const room = roomManager.updatePlayState(req.playState, req.currentTime, user);
 
-    return socket.to(room.name).emit(CHANGED_PLAY_STATE_TIME, {
-        user: await userShortSerializer.serialize(user),
-        currentTime: req.currentTime
-    });
+    return socket.to(room.name).emit(CHANGED_PLAY_STATE, await playStateSerializer.serialize(room, req.seek));
 }
 
 async function disconnect(socket, roomManager) {
@@ -265,10 +231,7 @@ module.exports = (io, roomManager) => {
     io.on(CONNECTION, (socket) => {
         socket.on(JOIN_USER_TO_ROOM, req => (joinUserToRoom(req, socket, roomManager)));
         socket.on(LEAVE_USER_FROM_ROOM, req => (leaveUserFromRoom(req, socket, roomManager)));
-        socket.on(CHANGE_PLAY_STATE_TO_PLAY, req => (changePlayStateToPlay(req, socket, roomManager)));
-        socket.on(CHANGE_PLAY_STATE_TO_PAUSE, req => (changePlayStateToPause(req, socket, roomManager)));
-        socket.on(CHANGE_PLAY_STATE_TO_STOP, req => (changePlayStateToStop(req, socket, roomManager)));
-        socket.on(CHANGE_PLAY_STATE_TIME, req => (changePlayStateTime(req, socket, roomManager)));
+        socket.on(CHANGE_PLAY_STATE, req => (changePlayState(req, socket, roomManager)));
         socket.on(DISCONNECT, () => (disconnect(socket, roomManager)));
     });
 };

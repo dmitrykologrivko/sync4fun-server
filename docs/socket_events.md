@@ -25,7 +25,7 @@ Request:
 ```
 
 | Field          | Type    | Description                   | Required |
-| ---------------|:-------:| -----------------------------:| --------:|
+| ---------------|---------| ------------------------------| ---------|
 | user.name      | string  | User name                     | yes      |
 | user.file.name | string  | File name plus file extension | yes      |
 | user.file.size | integer | File size in kilobytes        | yes      |
@@ -47,6 +47,13 @@ Response to user `you_joined_room`
    },
    "room":{
       "name":"My room",
+      "playState": "pause",
+      "currentTime": 207.141845,
+      "updatedAt": 1552039787472,
+      "updatedBy":{
+         "id":"fgwsvs674gf8dh2y47gh",
+         "name":"Kate"
+      }, 
       "users":[
          {
             "id":"qqffsfs8938dffsbdwwt",
@@ -100,6 +107,13 @@ Response to user `you_reconnected_to_room`
    },
    "room":{
       "name":"My room",
+      "playState": "pause",
+      "currentTime": 207.141845,
+      "updatedAt": 1552039787472,
+      "updatedBy":{
+         "id":"fgwsvs674gf8dh2y47gh",
+         "name":"Kate"
+      }, 
       "users":[
          {
             "id":"qqffsfs8938dffsbdwwt",
@@ -153,6 +167,13 @@ Response to user `you_joined_room`
    },
    "room":{
       "name":"My room",
+      "playState": "pause",
+      "currentTime": 207.141845,
+      "updatedAt": 1552039787472,
+      "updatedBy":{
+         "id":"fgwsvs674gf8dh2y47gh",
+         "name":"Kate"
+      }, 
       "users":[
          {
             "id":"qqffsfs8938dffsbdwwt",
@@ -252,121 +273,128 @@ Response to user `error_of_leaving_user_from_room`
 }
 ```
 
-## change_play_state_to_play
+## change_play_state
 
-This event allows setting play state to play for all users in the room
+This event allows changing play state for all users in the room
 
-Request body must be empty
+| Field       | Type    | Description              | Required |
+| ------------|---------| -------------------------| ---------|
+| playState   | string  | Current Play State       | yes      |
+| currentTime | number  | Current video time       | yes      |
+| seek        | boolean | If player should do seek | no       |
 
-#### Case 1 - The user in the room and is trying to set play state to play
+Available play states:
+- playing
+- pause
+- stop
 
-Response to the room `changed_play_state_to_play`
-
-```
-{
-   "user":{
-      "id":"qqffsfs8938dffsbdwwt",
-      "name":"John"
-   }
-}
-```
-
-#### Case 2 - The user is trying to set play state to play but is not in any room
-
-Response to user `error_of_changing_play_state_to_play`
-
-```
-{
-   "message":"You are not in any of the rooms"
-}
-```
-
-## change_play_state_to_pause
-
-This event allows setting play state to pause for all users in the room
-
-Request body must be empty
-
-#### Case 1 - The user in the room and is trying to set play state to pause
-
-Response to the room `changed_play_state_to_pause`
-
-```
-{
-   "user":{
-      "id":"qqffsfs8938dffsbdwwt",
-      "name":"John"
-   }
-}
-```
-
-#### Case 2 - The user is trying to set play state to pause but is not in any room
-
-Response to user `error_of_changing_play_state_to_pause`
-
-```
-{
-   "message":"You are not in any of the rooms"
-}
-```
-
-## change_play_state_to_stop
-
-This event allows setting play state to stop for all users in the room
-
-Request body must be empty
-
-#### Case 1 - The user in the room and is trying to set play state to stop
-
-Response to the room `changed_play_state_to_stop`
-
-```
-{
-   "user":{
-      "id":"qqffsfs8938dffsbdwwt",
-      "name":"John"
-   }
-}
-```
-
-#### Case 2 - The user is trying to set play state to stop but is not in any room
-
-Response to user `error_of_changing_play_state_to_stop`
-
-```
-{
-   "message":"You are not in any of the rooms"
-}
-```
-
-## change_play_state_time
-
-This event allows setting play state time for all users in the room
+#### Case 1 - The user in the room and is trying to change play state to playing
 
 Request:
+
 ```
 {
-   "currentTime": 207.141845
+   "playState": "playing",
+   "currentTime": 207.141845,
+   "seek": false
 }
 ```
 
-#### Case 1 - The user in the room and is trying to set play state time
-
-Response to the room `changed_play_state_time`
+Response to the room `changed_play_state`
 
 ```
 {
-   "user":{
+   "playState": "playing",
+   "currentTime": 207.141845,
+   "updatedBy":{
       "id":"qqffsfs8938dffsbdwwt",
       "name":"John"
-   },
-   "currentTime": 207.141845
+   }    
+   "seek": false
 }
 ```
 
-#### Case 2 - The user is passing invalid request
+#### Case 2 - The user in the room and is trying to change play state to pause
 
-Response to user `error_of_changing_play_state_time`
+Request:
+
+```
+{
+   "playState": "pause",
+   "currentTime": 207.141845,
+   "seek": false
+}
+```
+
+Response to the room `changed_play_state`
+
+```
+{
+   "playState": "pause",
+   "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }    
+   "seek": false
+}
+```
+
+#### Case 3 - The user in the room and is trying to change play state to stop
+
+Request:
+
+```
+{
+   "playState": "stop",
+   "currentTime": 207.141845,
+   "seek": false
+}
+```
+
+Response to the room `changed_play_state`
+
+```
+{
+   "playState": "stop",
+   "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }      
+   "seek": false
+}
+```
+
+#### Case 4 - The user in the room and is trying to change current time
+
+Request:
+
+```
+{
+   "playState": "playing",
+   "currentTime": 207.141845,
+   "seek": true
+}
+```
+
+Response to the room `changed_play_state`
+
+```
+{
+   "playState": "playing",
+   "currentTime": 207.141845,
+   "updatedBy":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }   
+   "seek": true
+}
+```
+
+#### Case 5 - The user is passing invalid request
+
+Response to user `error_of_changing_play_state`
 
 ```
 {
@@ -379,9 +407,9 @@ Response to user `error_of_changing_play_state_time`
 }
 ```
 
-#### Case 3 - The user is trying to set play state time but is not in any room
+#### Case 6 - The user is trying to change play state but is not in any room
 
-Response to user `error_of_changing_play_state_time`
+Response to user `error_of_changing_play_state`
 
 ```
 {

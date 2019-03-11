@@ -9,18 +9,9 @@ import {
     YOU_LEFT_ROOM,
     USER_LEFT_ROOM,
     ERROR_OF_LEAVING_USER_FROM_ROOM,
-    CHANGE_PLAY_STATE_TO_PLAY,
-    CHANGED_PLAY_STATE_TO_PLAY,
-    ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY,
-    CHANGE_PLAY_STATE_TO_PAUSE,
-    CHANGED_PLAY_STATE_TO_PAUSE,
-    ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE,
-    CHANGE_PLAY_STATE_TO_STOP,
-    CHANGED_PLAY_STATE_TO_STOP,
-    ERROR_OF_CHANGING_PLAY_STATE_TO_STOP,
-    CHANGE_PLAY_STATE_TIME,
-    CHANGED_PLAY_STATE_TIME,
-    ERROR_OF_CHANGING_PLAY_STATE_TIME
+    CHANGE_PLAY_STATE,
+    CHANGED_PLAY_STATE,
+    ERROR_OF_CHANGING_PLAY_STATE
 } from './constants';
 
 export default class WebSocketClient {
@@ -64,36 +55,12 @@ export default class WebSocketClient {
             this._subjectsManager.errorOfLeavingRoomSubject.publish(res);
         });
 
-        this._socket.on(CHANGED_PLAY_STATE_TO_PLAY, res => {
-            this._subjectsManager.changePlayStateToPlaySubject.publish(res);
+        this._socket.on(CHANGED_PLAY_STATE, res => {
+            this._subjectsManager.changedPlayStateSubject.publish(res);
         });
 
-        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_PLAY, res => {
-            this._subjectsManager.errorOfChangingPlayStateToPlaySubject.publish(res);
-        });
-
-        this._socket.on(CHANGED_PLAY_STATE_TO_PAUSE, res => {
-            this._subjectsManager.changedPlayStateToPauseSubject.publish(res);
-        });
-
-        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_PAUSE, res => {
-            this._subjectsManager.errorOfChangingPlayStateToPauseSubject.publish(res);
-        });
-
-        this._socket.on(CHANGED_PLAY_STATE_TO_STOP, res => {
-            this._subjectsManager.changedPlayStateToStopSubject.publish(res);
-        });
-
-        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TO_STOP, res => {
-            this._subjectsManager.errorOfChangingPlayStateToStopSubject.publish(res);
-        });
-
-        this._socket.on(CHANGED_PLAY_STATE_TIME, res => {
-            this._subjectsManager.changedPlayStateTimeSubject.publish(res);
-        });
-
-        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE_TIME, res => {
-            this._subjectsManager.errorOfChangingPlayStateTimeSubject.publish(res);
+        this._socket.on(ERROR_OF_CHANGING_PLAY_STATE, res => {
+            this._subjectsManager.errorOfChangingPlayStateSubject.publish(res);
         });
     }
 
@@ -108,19 +75,7 @@ export default class WebSocketClient {
         this._socket.emit(LEAVE_USER_FROM_ROOM);
     }
 
-    changePlayStateToPlay() {
-        this._socket.emit(CHANGE_PLAY_STATE_TO_PLAY);
-    }
-
-    changePlayStateToPause() {
-        this._socket.emit(CHANGE_PLAY_STATE_TO_PAUSE);
-    }
-
-    changePlayStateToStop() {
-        this._socket.emit(CHANGE_PLAY_STATE_TO_STOP);
-    }
-
-    changePlayStateTime(currentTime) {
-        this._socket.emit(CHANGE_PLAY_STATE_TIME, {currentTime});
+    changePlayState(playState) {
+        this._socket.emit(CHANGE_PLAY_STATE, playState);
     }
 }
