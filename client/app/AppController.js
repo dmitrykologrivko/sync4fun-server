@@ -11,7 +11,7 @@ import {
 
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
-import {convertBytesToMegabytes} from './utils';
+import {convertBytesToMegabytes, checkFilesEquals} from './utils';
 
 import './AppController.css';
 
@@ -115,14 +115,14 @@ export default class AppController {
                 currentTime: this._player.currentTime(),
                 seek: false
             });
-            this._addEventToList('You', 'Paused playing');
+            this._addUserEvent('You', 'Paused playing');
         } else {
             this._client.changePlayState({
                 playState: PLAY_STATE_PLAYING,
                 currentTime: this._player.currentTime(),
                 seek: false
             });
-            this._addEventToList('You', 'Started playing');
+            this._addUserEvent('You', 'Started playing');
         }
     }
 
@@ -135,7 +135,7 @@ export default class AppController {
                 currentTime: currentTime,
                 seek: true
             });
-            this._addEventToList('You', 'Changed time');
+            this._addUserEvent('You', 'Changed time');
 
             document.onmouseup = null;
         };
@@ -171,17 +171,27 @@ export default class AppController {
     _updateUsersList() {
         this._listUsers.empty();
 
+        const warningUsers = [];
+
         for (let user of this._room.users) {
+            const filesEquals = checkFilesEquals(this._user.file, user.file);
+            if (!filesEquals)
+                warningUsers.push(user.name);
+
             const name = user.id === this._user.id
                 ? `${user.name} (You)`
                 : user.name;
-            const fileSize = convertBytesToMegabytes(this._user.file.size);
+            const fileSize = convertBytesToMegabytes(user.file.size);
 
             this._listUsers.append(`
                 <li class="users-list__item">
                     <div class="users-list__user">${name}</div>
-                    <div class="users-list__file-name">${user.file.name}</div>
-                    <div class="users-list__file-size">Size: ${Number(fileSize).toFixed(2)}MB</div>
+                    <div class="users-list__file-name ${filesEquals ? '' : 'users-list__file-name_warning'}">
+                        ${user.file.name}
+                    </div>
+                    <div class="users-list__file-size ${filesEquals ? '' : 'users-list__file-size_warning'}">
+                        Size: ${Number(fileSize).toFixed(2)}MB
+                    </div>
                 </li>
             `);
         }
@@ -190,11 +200,14 @@ export default class AppController {
         this._buttonShowUsers.text(`
             ${this._room.users.length} ${this._room.users.length === 1 ? 'user' : 'users'} in room
         `);
+
+        if (warningUsers.length > 0)
+            this._addSystemEvent(`Next users have different files with you: ${warningUsers.join(', ')}`);
     }
 
     /* Events list */
 
-    _addEventToList(userName, message) {
+    _addUserEvent(userName, message) {
         this._listEvents.append(`
             <li class="events-list__item">
                 <div class="events-list__user">${userName}</div>
@@ -202,6 +215,21 @@ export default class AppController {
             </li>
         `);
 
+        this._scrollEventsListIfAvailable();
+    }
+
+    _addSystemEvent(message) {
+        this._listEvents.append(`
+            <li class="events-list__item">
+                <div class="events-list__system">System notification</div>
+                <div class="events-list__message events-list__message_warning">${message}</div>
+            </li>
+        `);
+
+        this._scrollEventsListIfAvailable();
+    }
+
+    _scrollEventsListIfAvailable() {
         const scrollPosition = this._listEvents.scrollTop();
         const scrollHeight = this._listEvents.prop("scrollHeight");
         const listHeight = this._listEvents.height();
@@ -220,28 +248,28 @@ export default class AppController {
     /* Socket events */
 
     _handleUserJoinedRoomEvent(res) {
-        this._addEventToList(res.user.name, 'Joined room');
+        this._addUserEvent(res.user.name, 'Joined room');
 
         this._room.users.push(res.user);
         this._updateUsersList();
     }
 
     _handleUserReconnectedToRoomEvent(res) {
-        this._addEventToList(res.user.name, 'Reconnected to room');
+        this._addUserEvent(res.user.name, 'Reconnected to room');
 
         this._room.users.push(res.user);
         this._updateUsersList();
     }
 
     _handleUserLeftRoomEvent(res) {
-        this._addEventToList(res.user.name, 'Left room');
+        this._addUserEvent(res.user.name, 'Left room');
 
         this._room.users = this._room.users.filter(user => res.user.id !== user.id);
         this._updateUsersList();
     }
 
     _handleYouLeftRoomEvent(res) {
-        this._addEventToList('You', 'Left room');
+        this._addUserEvent('You', 'Left room');
     }
 
     _handleErrorOfLeavingRoomObserver(res) {
@@ -255,25 +283,25 @@ export default class AppController {
         const updatedBy = res.updatedBy;
 
         if (seek) {
-            this._addEventToList(updatedBy.name, 'Changed time');
+            this._addUserEvent(updatedBy.name, 'Changed time');
             this._player.currentTime(currentTime);
             return;
         }
 
         if (playState === PLAY_STATE_PLAYING) {
-            this._addEventToList(updatedBy.name, 'Started playing');
+            this._addUserEvent(updatedBy.name, 'Started playing');
             this._player.play();
             return;
         }
 
         if (playState === PLAY_STATE_PAUSE) {
-            this._addEventToList(updatedBy.name, 'Paused playing');
+            this._addUserEvent(updatedBy.name, 'Paused playing');
             this._player.pause();
             return;
         }
 
         if (playState === PLAY_STATE_STOP) {
-            this._addEventToList(updatedBy.name, 'Stopped playing');
+            this._addUserEvent(updatedBy.name, 'Stopped playing');
             this._player.stop();
         }
     }
