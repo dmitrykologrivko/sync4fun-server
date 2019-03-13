@@ -61,8 +61,11 @@ export default class AppController {
 
         this._buttonShowUsers.on('click', this._showUsersButtonClick.bind(this));
 
+        document.addEventListener('mousedown', this._usersListOutsideClick.bind(this));
+
         this._linkLeaveRoom.on('click', this._leaveRoomLickClick.bind(this));
 
+        // Show dialog
         this._joinRoomDialog.showDialog();
     }
 
@@ -103,6 +106,68 @@ export default class AppController {
         });
     }
 
+    /* Player */
+
+    _playToggleButtonClick() {
+        if (this._player.paused()) {
+            this._client.changePlayState({
+                playState: PLAY_STATE_PAUSE,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
+            this._addEventToList('You', 'Paused playing');
+        } else {
+            this._client.changePlayState({
+                playState: PLAY_STATE_PLAYING,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
+            this._addEventToList('You', 'Started playing');
+        }
+    }
+
+    _videoSeeked() {
+        document.onmouseup = () => {
+            const currentTime = this._player.currentTime();
+
+            this._client.changePlayState({
+                playState: this._player.paused() ? PLAY_STATE_PAUSE : PLAY_STATE_PLAYING,
+                currentTime: currentTime,
+                seek: true
+            });
+            this._addEventToList('You', 'Changed time');
+
+            document.onmouseup = null;
+        };
+    }
+
+    /* Users list */
+
+    _showUsersList() {
+        this._listUsers.removeClass('d-none');
+        this._isUsersListVisible = true;
+    }
+
+    _hideUsersList() {
+        this._listUsers.addClass('d-none');
+        this._isUsersListVisible = false;
+    }
+
+    _showUsersButtonClick() {
+        if (this._isUsersListVisible)
+            this._hideUsersList();
+        else
+            this._showUsersList();
+    }
+
+    _usersListOutsideClick(event) {
+        if (event.target === this._buttonShowUsers[0])
+            return;
+
+        if (this._isUsersListVisible)
+            this._hideUsersList();
+    }
+
     _updateUsersList() {
         this._listUsers.empty();
 
@@ -127,6 +192,8 @@ export default class AppController {
         `);
     }
 
+    /* Events list */
+
     _addEventToList(userName, message) {
         this._listEvents.append(`
             <li class="events-list__item">
@@ -144,52 +211,13 @@ export default class AppController {
         }
     }
 
-    _videoSeeked() {
-        document.onmouseup = () => {
-            const currentTime = this._player.currentTime();
-
-            this._client.changePlayState({
-                playState: this._player.paused() ? PLAY_STATE_PAUSE : PLAY_STATE_PLAYING,
-                currentTime: currentTime,
-                seek: true
-            });
-            this._addEventToList('You', 'Changed time');
-
-            document.onmouseup = null;
-        };
-    }
-
-    _showUsersButtonClick() {
-        if (this._isUsersListVisible) {
-            this._listUsers.addClass('d-none');
-            this._isUsersListVisible = false;
-        } else {
-            this._listUsers.removeClass('d-none');
-            this._isUsersListVisible = true;
-        }
-    }
-
-    _playToggleButtonClick() {
-        if (this._player.paused()) {
-            this._client.changePlayState({
-                playState: PLAY_STATE_PAUSE,
-                currentTime: this._player.currentTime(),
-                seek: false
-            });
-            this._addEventToList('You', 'Paused playing');
-        } else {
-            this._client.changePlayState({
-                playState: PLAY_STATE_PLAYING,
-                currentTime: this._player.currentTime(),
-                seek: false
-            });
-            this._addEventToList('You', 'Started playing');
-        }
-    }
+    /* Room actions */
 
     _leaveRoomLickClick() {
         this._client.leaveUserFromRoom();
     }
+
+    /* Socket events */
 
     _handleUserJoinedRoomEvent(res) {
         this._addEventToList(res.user.name, 'Joined room');
