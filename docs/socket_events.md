@@ -430,6 +430,61 @@ Response to user `error_of_changing_play_state`
 }
 ```
 
+## send_message_to_room
+
+This event allows sending message for all users in the room
+
+| Field   | Type   | Description  | Required |
+| --------|--------| -------------| ---------|
+| message | string | Message      | yes      |
+
+#### Case 1 - The user in the room and is trying to send message
+
+Request:
+
+```
+{
+   "message": "Hi there!"
+}
+```
+
+Response to the room `received_message_to_room`
+
+```
+{
+   "message": "Hi there!"
+   "sender":{
+      "id":"qqffsfs8938dffsbdwwt",
+      "name":"John"
+   }
+}
+```
+
+#### Case 2 - The user is passing invalid request
+
+Response to user `error_of_sending_message_to_room`
+
+```
+{
+   "message":"Validation error",
+   "fields":{
+      "message": [
+         "Message must be of type string"
+      ],
+   }
+}
+```
+
+#### Case 3 - The user is trying to send message but is not in any room
+
+Response to user `error_of_sending_message_to_room`
+
+```
+{
+   "message":"You are not in any of the rooms"
+}
+```
+
 ## disconnect
 
 This automatic event happens when user closed socket connection
