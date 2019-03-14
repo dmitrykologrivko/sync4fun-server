@@ -90,7 +90,14 @@ export default class AppController {
 
             if (playState === PLAY_STATE_PLAYING) {
                 this._player.currentTime(currentTime);
-                this._player.play();
+                this._player.play().catch(error => {
+                    const duration = this._player.duration();
+
+                    if (currentTime >= duration) {
+                        this._player.currentTime(duration);
+                        this._addSystemEvent('Current playback time cannot be set because it is longer than your video');
+                    }
+                });
                 return;
             }
 
@@ -281,10 +288,25 @@ export default class AppController {
         const currentTime = res.currentTime;
         const seek = res.seek;
         const updatedBy = res.updatedBy;
+        const duration = this._player.duration();
+
+        if (currentTime >= duration) {
+            this._player.currentTime(duration);
+            this._addSystemEvent('Current playback time cannot be set because it is longer than your video');
+            return;
+        }
+
+        this._player.currentTime(currentTime);
 
         if (seek) {
+            if (playState === PLAY_STATE_PLAYING)
+                this._player.play();
+            if (playState === PLAY_STATE_PAUSE)
+                this._player.pause();
+            if (playState === PLAY_STATE_STOP)
+                this._player.stop();
+
             this._addUserEvent(updatedBy.name, 'Changed time');
-            this._player.currentTime(currentTime);
             return;
         }
 
