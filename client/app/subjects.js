@@ -60,3 +60,7 @@ export class ErrorOfLeavingRoomSubject extends BaseSubject {}
 export class ChangedPlayStateSubject extends BaseSubject {}
 
 export class ErrorOfChangingPlayStateSubject extends BaseSubject {}
+
+export class SentMessageToRoomSubject extends BaseSubject {}
+
+export class ErrorOfSendingMessageToRoomSubject extends BaseSubject {}

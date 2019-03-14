@@ -27,7 +27,10 @@ const {
     ERROR_OF_LEAVING_USER_FROM_ROOM,
     CHANGE_PLAY_STATE,
     CHANGED_PLAY_STATE,
-    ERROR_OF_CHANGING_PLAY_STATE
+    ERROR_OF_CHANGING_PLAY_STATE,
+    SEND_MESSAGE_TO_ROOM,
+    SENT_MESSAGE_TO_ROOM,
+    ERROR_OF_SENDING_MESSAGE_TO_ROOM
 } = require('./constants').events;
 
 const {
@@ -214,6 +217,40 @@ async function changePlayState(req, socket, roomManager) {
     return socket.to(room.name).emit(CHANGED_PLAY_STATE, await playStateSerializer.serialize(room, req.seek));
 }
 
+async function sendMessageToRoom(req, socket, roomManager) {
+    const constraints = {
+        'message': {
+            presence: true,
+            type: 'string',
+            length: {
+                minimum: 1,
+                maximum: 200
+            }
+        }
+    };
+
+    try {
+        await validate.async(req, constraints);
+    } catch (error) {
+        return socket.emit(ERROR_OF_SENDING_MESSAGE_TO_ROOM, {
+            message: 'Validation error',
+            fields: error
+        });
+    }
+
+    const user = roomManager.findUserById(socket.id);
+    if (!user) {
+        return socket.emit(ERROR_OF_SENDING_MESSAGE_TO_ROOM, {message: 'You are not in any of the rooms'});
+    }
+
+    const room = roomManager.findRoomByUser(user);
+
+    return socket.to(room.name).emit(SENT_MESSAGE_TO_ROOM, {
+        message: req.message,
+        sender: await userShortSerializer.serialize(user)
+    });
+}
+
 async function disconnect(socket, roomManager) {
     const user = roomManager.findUserById(socket.id);
     if (!user) {
@@ -236,6 +273,7 @@ module.exports = (io, roomManager) => {
         socket.on(JOIN_USER_TO_ROOM, req => (joinUserToRoom(req, socket, roomManager)));
         socket.on(LEAVE_USER_FROM_ROOM, req => (leaveUserFromRoom(req, socket, roomManager)));
         socket.on(CHANGE_PLAY_STATE, req => (changePlayState(req, socket, roomManager)));
+        socket.on(SEND_MESSAGE_TO_ROOM, req => (sendMessageToRoom(req, socket, roomManager)));
         socket.on(DISCONNECT, () => (disconnect(socket, roomManager)));
     });
 };

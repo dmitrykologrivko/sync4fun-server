@@ -16,7 +16,10 @@ const {
     USER_LEFT_ROOM,
     CHANGE_PLAY_STATE,
     CHANGED_PLAY_STATE,
-    ERROR_OF_CHANGING_PLAY_STATE
+    ERROR_OF_CHANGING_PLAY_STATE,
+    SEND_MESSAGE_TO_ROOM,
+    SENT_MESSAGE_TO_ROOM,
+    ERROR_OF_SENDING_MESSAGE_TO_ROOM
 } = require('../constants').events;
 
 const {
@@ -1143,6 +1146,153 @@ describe('Events test', () => {
                 assert.deepEqual(res, errorResponse);
 
                 done();
+            });
+        });
+    });
+
+    describe(`test requesting ${SEND_MESSAGE_TO_ROOM} event`, () => {
+        it('when request is empty', done => {
+            socketClient1.once(ERROR_OF_SENDING_MESSAGE_TO_ROOM, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'message': [
+                            "Message can't be blank"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(SEND_MESSAGE_TO_ROOM, {});
+        });
+
+        it('when request has incorrect types of fields', done => {
+            socketClient1.once(ERROR_OF_SENDING_MESSAGE_TO_ROOM, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'message': [
+                            "Message must be of type string",
+                            "Message has an incorrect length"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(SEND_MESSAGE_TO_ROOM, {message: 1});
+        });
+
+        it('when request has fields values less than minimum length', done => {
+            socketClient1.once(ERROR_OF_SENDING_MESSAGE_TO_ROOM, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'message': [
+                            "Message is too short (minimum is 1 characters)"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(SEND_MESSAGE_TO_ROOM, {message: ''});
+        });
+
+        it('when request has fields values more than maximum length', done => {
+            socketClient1.once(ERROR_OF_SENDING_MESSAGE_TO_ROOM, res => {
+                const errorResponse = {
+                    message: 'Validation error',
+                    fields: {
+                        'message': [
+                            "Message is too long (maximum is 200 characters)"
+                        ]
+                    }
+                };
+
+                assert.deepEqual(res, errorResponse);
+
+                done();
+            });
+
+            socketClient1.emit(SEND_MESSAGE_TO_ROOM, {
+                message: 'messagemessagemessagemessagemessagemessage' +
+                    'messagemessagemessagemessagemessagemessagemessage' +
+                    'messagemessagemessagemessagemessagemessagemessage' +
+                    'messageemessageemessageemessageemessageemessagee' +
+                    'messageemessageemessageemessageemessageemessage'
+            });
+        });
+
+        it('when user in the room and is trying to send message', done => {
+            const reqJoinUserToRoomClient1 = {
+                user: {
+                    name: 'John',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqJoinUserToRoomClient2 = {
+                user: {
+                    name: 'Kate',
+                    file: {
+                        name: 'rabbit.mp4',
+                        size: 145899989
+                    }
+                },
+                room: {
+                    name: 'My room'
+                }
+            };
+
+            const reqSendMessageToRoomClient1 = {
+                message: 'Hi there!'
+            };
+
+            const resSentMessageToRoomClient2 = {
+                message: 'Hi there!',
+                sender: {
+                    name: 'John'
+                }
+            };
+
+            // #1 - Connect John to "My room"
+            socketClient1.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient1);
+
+            // #2 - John connected to "My room"
+            socketClient1.once(YOU_JOINED_ROOM, res => {
+                // #3 - Connect Kate to "My room"
+                socketClient2.emit(JOIN_USER_TO_ROOM, reqJoinUserToRoomClient2);
+
+                // #4 - Kate connected to "My room"
+                socketClient2.once(YOU_JOINED_ROOM, res => {
+                    // #5 - Send message to room by John
+                    socketClient1.emit(SEND_MESSAGE_TO_ROOM, reqSendMessageToRoomClient1);
+
+                    // #6 - Kate got an event that John sent message to room
+                    socketClient2.once(SENT_MESSAGE_TO_ROOM, res => {
+                        assert.equal(res.message, resSentMessageToRoomClient2.message);
+                        assertEqualUserShort(res.sender, resSentMessageToRoomClient2.sender);
+
+                        done();
+                    });
+                });
             });
         });
     });
