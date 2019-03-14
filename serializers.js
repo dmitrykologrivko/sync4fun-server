@@ -78,7 +78,7 @@ class PlayStateSerializer extends BaseSerializer {
                     id: room.updatedBy.id,
                     name: room.updatedBy.name
                 },
-                seek: seek
+                seek: seek || false
             });
         }));
     }

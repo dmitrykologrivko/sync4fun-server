@@ -277,11 +277,12 @@ Response to user `error_of_leaving_user_from_room`
 
 This event allows changing play state for all users in the room
 
-| Field       | Type    | Description              | Required |
-| ------------|---------| -------------------------| ---------|
-| playState   | string  | Current Play State       | yes      |
-| currentTime | number  | Current video time       | yes      |
-| seek        | boolean | If player should do seek | no       |
+| Field       | Type    | Description                                               | Required |
+| ------------|---------| ----------------------------------------------------------| ---------|
+| playState   | string  | Current Play State                                        | yes      |
+| currentTime | number  | Current video time                                        | yes      |
+| seek        | boolean | If player should do seek                                  | no       |
+| sync        | boolean | Save current state without notify other users in the room | no       |
 
 Available play states:
 - playing
@@ -392,7 +393,19 @@ Response to the room `changed_play_state`
 }
 ```
 
-#### Case 5 - The user is passing invalid request
+#### Case 5 - The user in the room and video ended
+
+Request:
+
+```
+{
+   "playState": "pause",
+   "currentTime": 207.141845,
+   "sync": true
+}
+```
+
+#### Case 6 - The user is passing invalid request
 
 Response to user `error_of_changing_play_state`
 
@@ -407,7 +420,7 @@ Response to user `error_of_changing_play_state`
 }
 ```
 
-#### Case 6 - The user is trying to change play state but is not in any room
+#### Case 7 - The user is trying to change play state but is not in any room
 
 Response to user `error_of_changing_play_state`
 

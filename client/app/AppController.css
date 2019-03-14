@@ -74,9 +74,17 @@
     color: #979998;
 }
 
+.users-list__file-name_warning {
+    color: red !important;
+}
+
 .users-list__file-size {
     font-size: 12px;
     color: #979998;
+}
+
+.users-list__file-size_warning {
+    color: red !important;
 }
 
 /* Video Info */
@@ -116,6 +124,12 @@
 
 }
 
+.events-list__system {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    color: #979998;
+}
+
 .events-list__user {
     padding-top: 8px;
     padding-bottom: 8px;
@@ -129,4 +143,8 @@
     background-color: #010205;
     border: 2px solid #3c4046;
     border-radius: 10px;
+}
+
+.events-list__message_warning {
+    color: red !important;
 }

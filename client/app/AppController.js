@@ -11,7 +11,7 @@ import {
 
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
-import {convertBytesToMegabytes} from './utils';
+import {convertBytesToMegabytes, checkFilesEquals} from './utils';
 
 import './AppController.css';
 
@@ -59,10 +59,15 @@ export default class AppController {
         this._player.controlBar.progressControl.on('mousedown', this._videoSeeked.bind(this));
         this._player.controlBar.progressControl.seekBar.on('mousedown', this._videoSeeked.bind(this));
 
+        this._player.on('ended', this._videoEnded.bind(this));
+
         this._buttonShowUsers.on('click', this._showUsersButtonClick.bind(this));
+
+        document.addEventListener('mousedown', this._usersListOutsideClick.bind(this));
 
         this._linkLeaveRoom.on('click', this._leaveRoomLickClick.bind(this));
 
+        // Show dialog
         this._joinRoomDialog.showDialog();
     }
 
@@ -87,7 +92,14 @@ export default class AppController {
 
             if (playState === PLAY_STATE_PLAYING) {
                 this._player.currentTime(currentTime);
-                this._player.play();
+                this._player.play().catch(error => {
+                    const duration = this._player.duration();
+
+                    if (currentTime >= duration) {
+                        this._player.currentTime(duration);
+                        this._addSystemEvent('Current playback time cannot be set because it is longer than your video');
+                    }
+                });
                 return;
             }
 
@@ -103,44 +115,23 @@ export default class AppController {
         });
     }
 
-    _updateUsersList() {
-        this._listUsers.empty();
+    /* Player */
 
-        for (let user of this._room.users) {
-            const name = user.id === this._user.id
-                ? `${user.name} (You)`
-                : user.name;
-            const fileSize = convertBytesToMegabytes(this._user.file.size);
-
-            this._listUsers.append(`
-                <li class="users-list__item">
-                    <div class="users-list__user">${name}</div>
-                    <div class="users-list__file-name">${user.file.name}</div>
-                    <div class="users-list__file-size">Size: ${Number(fileSize).toFixed(2)}MB</div>
-                </li>
-            `);
-        }
-
-        this._buttonShowUsers.removeClass('d-none');
-        this._buttonShowUsers.text(`
-            ${this._room.users.length} ${this._room.users.length === 1 ? 'user' : 'users'} in room
-        `);
-    }
-
-    _addEventToList(userName, message) {
-        this._listEvents.append(`
-            <li class="events-list__item">
-                <div class="events-list__user">${userName}</div>
-                <div class="events-list__message">${message}</div>
-            </li>
-        `);
-
-        const scrollPosition = this._listEvents.scrollTop();
-        const scrollHeight = this._listEvents.prop("scrollHeight");
-        const listHeight = this._listEvents.height();
-
-        if ((scrollPosition + listHeight) > (scrollHeight - listHeight)) {
-            this._listEvents.animate({scrollTop: scrollHeight});
+    _playToggleButtonClick() {
+        if (this._player.paused()) {
+            this._client.changePlayState({
+                playState: PLAY_STATE_PAUSE,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
+            this._addUserEvent('You', 'Paused playing');
+        } else {
+            this._client.changePlayState({
+                playState: PLAY_STATE_PLAYING,
+                currentTime: this._player.currentTime(),
+                seek: false
+            });
+            this._addUserEvent('You', 'Started playing');
         }
     }
 
@@ -153,67 +144,149 @@ export default class AppController {
                 currentTime: currentTime,
                 seek: true
             });
-            this._addEventToList('You', 'Changed time');
+            this._addUserEvent('You', 'Changed time');
 
             document.onmouseup = null;
         };
     }
 
+    _videoEnded() {
+        this._client.changePlayState({
+            playState: PLAY_STATE_PAUSE,
+            currentTime: this._player.currentTime(),
+            sync: true
+        });
+    }
+
+    /* Users list */
+
+    _showUsersList() {
+        this._listUsers.removeClass('d-none');
+        this._isUsersListVisible = true;
+    }
+
+    _hideUsersList() {
+        this._listUsers.addClass('d-none');
+        this._isUsersListVisible = false;
+    }
+
     _showUsersButtonClick() {
-        if (this._isUsersListVisible) {
-            this._listUsers.addClass('d-none');
-            this._isUsersListVisible = false;
-        } else {
-            this._listUsers.removeClass('d-none');
-            this._isUsersListVisible = true;
+        if (this._isUsersListVisible)
+            this._hideUsersList();
+        else
+            this._showUsersList();
+    }
+
+    _usersListOutsideClick(event) {
+        if (event.target === this._buttonShowUsers[0])
+            return;
+
+        if (this._isUsersListVisible)
+            this._hideUsersList();
+    }
+
+    _updateUsersList() {
+        this._listUsers.empty();
+
+        const warningUsers = [];
+
+        for (let user of this._room.users) {
+            const filesEquals = checkFilesEquals(this._user.file, user.file);
+            if (!filesEquals)
+                warningUsers.push(user.name);
+
+            const name = user.id === this._user.id
+                ? `${user.name} (You)`
+                : user.name;
+            const fileSize = convertBytesToMegabytes(user.file.size);
+
+            this._listUsers.append(`
+                <li class="users-list__item">
+                    <div class="users-list__user">${name}</div>
+                    <div class="users-list__file-name ${filesEquals ? '' : 'users-list__file-name_warning'}">
+                        ${user.file.name}
+                    </div>
+                    <div class="users-list__file-size ${filesEquals ? '' : 'users-list__file-size_warning'}">
+                        Size: ${Number(fileSize).toFixed(2)}MB
+                    </div>
+                </li>
+            `);
+        }
+
+        this._buttonShowUsers.removeClass('d-none');
+        this._buttonShowUsers.text(`
+            ${this._room.users.length} ${this._room.users.length === 1 ? 'user' : 'users'} in room
+        `);
+
+        if (warningUsers.length > 0)
+            this._addSystemEvent(`Next users have different files with you: ${warningUsers.join(', ')}`);
+    }
+
+    /* Events list */
+
+    _addUserEvent(userName, message) {
+        this._listEvents.append(`
+            <li class="events-list__item">
+                <div class="events-list__user">${userName}</div>
+                <div class="events-list__message">${message}</div>
+            </li>
+        `);
+
+        this._scrollEventsListIfAvailable();
+    }
+
+    _addSystemEvent(message) {
+        this._listEvents.append(`
+            <li class="events-list__item">
+                <div class="events-list__system">System notification</div>
+                <div class="events-list__message events-list__message_warning">${message}</div>
+            </li>
+        `);
+
+        this._scrollEventsListIfAvailable();
+    }
+
+    _scrollEventsListIfAvailable() {
+        const scrollPosition = this._listEvents.scrollTop();
+        const scrollHeight = this._listEvents.prop("scrollHeight");
+        const listHeight = this._listEvents.height();
+
+        if ((scrollPosition + listHeight) > (scrollHeight - listHeight)) {
+            this._listEvents.animate({scrollTop: scrollHeight});
         }
     }
 
-    _playToggleButtonClick() {
-        if (this._player.paused()) {
-            this._client.changePlayState({
-                playState: PLAY_STATE_PAUSE,
-                currentTime: this._player.currentTime(),
-                seek: false
-            });
-            this._addEventToList('You', 'Paused playing');
-        } else {
-            this._client.changePlayState({
-                playState: PLAY_STATE_PLAYING,
-                currentTime: this._player.currentTime(),
-                seek: false
-            });
-            this._addEventToList('You', 'Started playing');
-        }
-    }
+    /* Room actions */
 
     _leaveRoomLickClick() {
         this._client.leaveUserFromRoom();
     }
 
+    /* Socket events */
+
     _handleUserJoinedRoomEvent(res) {
-        this._addEventToList(res.user.name, 'Joined room');
+        this._addUserEvent(res.user.name, 'Joined room');
 
         this._room.users.push(res.user);
         this._updateUsersList();
     }
 
     _handleUserReconnectedToRoomEvent(res) {
-        this._addEventToList(res.user.name, 'Reconnected to room');
+        this._addUserEvent(res.user.name, 'Reconnected to room');
 
         this._room.users.push(res.user);
         this._updateUsersList();
     }
 
     _handleUserLeftRoomEvent(res) {
-        this._addEventToList(res.user.name, 'Left room');
+        this._addUserEvent(res.user.name, 'Left room');
 
         this._room.users = this._room.users.filter(user => res.user.id !== user.id);
         this._updateUsersList();
     }
 
     _handleYouLeftRoomEvent(res) {
-        this._addEventToList('You', 'Left room');
+        this._addUserEvent('You', 'Left room');
     }
 
     _handleErrorOfLeavingRoomObserver(res) {
@@ -225,27 +298,42 @@ export default class AppController {
         const currentTime = res.currentTime;
         const seek = res.seek;
         const updatedBy = res.updatedBy;
+        const duration = this._player.duration();
+
+        if (currentTime >= duration) {
+            this._player.currentTime(duration);
+            this._addSystemEvent('Current playback time cannot be set because it is longer than your video');
+            return;
+        }
+
+        this._player.currentTime(currentTime);
 
         if (seek) {
-            this._addEventToList(updatedBy.name, 'Changed time');
-            this._player.currentTime(currentTime);
+            if (playState === PLAY_STATE_PLAYING)
+                this._player.play();
+            if (playState === PLAY_STATE_PAUSE)
+                this._player.pause();
+            if (playState === PLAY_STATE_STOP)
+                this._player.stop();
+
+            this._addUserEvent(updatedBy.name, 'Changed time');
             return;
         }
 
         if (playState === PLAY_STATE_PLAYING) {
-            this._addEventToList(updatedBy.name, 'Started playing');
+            this._addUserEvent(updatedBy.name, 'Started playing');
             this._player.play();
             return;
         }
 
         if (playState === PLAY_STATE_PAUSE) {
-            this._addEventToList(updatedBy.name, 'Paused playing');
+            this._addUserEvent(updatedBy.name, 'Paused playing');
             this._player.pause();
             return;
         }
 
         if (playState === PLAY_STATE_STOP) {
-            this._addEventToList(updatedBy.name, 'Stopped playing');
+            this._addUserEvent(updatedBy.name, 'Stopped playing');
             this._player.stop();
         }
     }

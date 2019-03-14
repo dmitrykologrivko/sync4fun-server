@@ -1,6 +1,6 @@
 const app = require('express')();
 const server = require('http').Server(app);
-const io = require('socket.io')(server, {pingTimeout: 60000});
+const io = require('socket.io')(server);
 const handlebars = require('express-handlebars');
 const {revManifest} = require('./middlewares');
 const RoomManager = require('./managers').RoomManager;
