@@ -448,7 +448,7 @@ Request:
 }
 ```
 
-Response to the room `received_message_to_room`
+Response to the room `sent_message_to_room`
 
 ```
 {

@@ -17,7 +17,11 @@ module.exports.events = {
 
     CHANGE_PLAY_STATE: 'change_play_state',
     CHANGED_PLAY_STATE: 'changed_play_state',
-    ERROR_OF_CHANGING_PLAY_STATE: 'error_of_changing_play_state'
+    ERROR_OF_CHANGING_PLAY_STATE: 'error_of_changing_play_state',
+
+    SEND_MESSAGE_TO_ROOM: 'send_message_to_room',
+    SENT_MESSAGE_TO_ROOM: 'sent_message_to_room',
+    ERROR_OF_SENDING_MESSAGE_TO_ROOM: 'error_of_sending_message_to_room'
 };
 
 module.exports.playStates = {
