@@ -11,7 +11,10 @@ import {
     ERROR_OF_LEAVING_USER_FROM_ROOM,
     CHANGE_PLAY_STATE,
     CHANGED_PLAY_STATE,
-    ERROR_OF_CHANGING_PLAY_STATE
+    ERROR_OF_CHANGING_PLAY_STATE,
+    SEND_MESSAGE_TO_ROOM,
+    SENT_MESSAGE_TO_ROOM,
+    ERROR_OF_SENDING_MESSAGE_TO_ROOM
 } from './constants';
 
 export default class WebSocketClient {
@@ -62,6 +65,14 @@ export default class WebSocketClient {
         this._socket.on(ERROR_OF_CHANGING_PLAY_STATE, res => {
             this._subjectsManager.errorOfChangingPlayStateSubject.publish(res);
         });
+
+        this._socket.on(SENT_MESSAGE_TO_ROOM, res => {
+            this._subjectsManager.sentMessageToRoomSubject.publish(res);
+        });
+
+        this._socket.on(ERROR_OF_SENDING_MESSAGE_TO_ROOM, res => {
+            this._subjectsManager.errorOfSendingMessageToRoomSubject.publish(res);
+        });
     }
 
     joinUserToRoom(user, room) {
@@ -77,5 +88,9 @@ export default class WebSocketClient {
 
     changePlayState(playState) {
         this._socket.emit(CHANGE_PLAY_STATE, playState);
+    }
+
+    sendMessageToRoom(message) {
+        this._socket.emit(SEND_MESSAGE_TO_ROOM, {message});
     }
 }

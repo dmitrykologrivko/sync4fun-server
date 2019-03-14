@@ -14,6 +14,10 @@ export const CHANGE_PLAY_STATE = 'change_play_state';
 export const CHANGED_PLAY_STATE = 'changed_play_state';
 export const ERROR_OF_CHANGING_PLAY_STATE = 'error_of_changing_play_state';
 
+export const SEND_MESSAGE_TO_ROOM = 'send_message_to_room';
+export const SENT_MESSAGE_TO_ROOM = 'sent_message_to_room';
+export const ERROR_OF_SENDING_MESSAGE_TO_ROOM = 'error_of_sending_message_to_room';
+
 export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
 
 export const PLAY_STATE_PLAYING = 'playing';

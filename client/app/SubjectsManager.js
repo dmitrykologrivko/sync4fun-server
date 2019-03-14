@@ -8,7 +8,9 @@ import {
     UserLeftRoomSubject,
     ErrorOfLeavingRoomSubject,
     ChangedPlayStateSubject,
-    ErrorOfChangingPlayStateSubject
+    ErrorOfChangingPlayStateSubject,
+    SentMessageToRoomSubject,
+    ErrorOfSendingMessageToRoomSubject
 } from './subjects';
 
 export default class SubjectsManager {
@@ -23,6 +25,8 @@ export default class SubjectsManager {
         this._errorOfLeavingRoomSubject = new ErrorOfLeavingRoomSubject();
         this._changedPlayStateSubject = new ChangedPlayStateSubject();
         this._errorOfChangingPlayStateSubject = new ErrorOfChangingPlayStateSubject();
+        this._sentMessageToRoomSubject = new SentMessageToRoomSubject();
+        this._errorOfSendingMessageToRoomSubject = new ErrorOfSendingMessageToRoomSubject();
     }
 
     get youJoinedRoomSubject() {
@@ -63,5 +67,13 @@ export default class SubjectsManager {
 
     get errorOfChangingPlayStateSubject() {
         return this._errorOfChangingPlayStateSubject;
+    }
+
+    get sentMessageToRoomSubject() {
+        return this._sentMessageToRoomSubject;
+    }
+
+    get errorOfSendingMessageToRoomSubject() {
+        return this._errorOfSendingMessageToRoomSubject;
     }
 }

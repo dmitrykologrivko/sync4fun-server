@@ -32,6 +32,7 @@ export default class AppController {
         this._buttonShowUsers = $('.room-info__show-users-button');
         this._listUsers = $('.users-list');
         this._listEvents = $('.events-list');
+        this._inputChat = $('.chat-input-box__input');
         this._linkLeaveRoom = $('.room-info__leave-link');
 
         // Subscribe observers on events
@@ -42,6 +43,8 @@ export default class AppController {
         this._errorOfLeavingRoomObserver = new Observer(this._handleErrorOfLeavingRoomObserver.bind(this));
         this._changedPlayStateObserver = new Observer(this._handleChangedPlayStateEvent.bind(this));
         this._errorOfChangingPlayStateObsever = new Observer(this._handleErrorOfChangingPlayStateEvent.bind(this));
+        this._sentMessaageToRoomObserver = new Observer(this._handleSentMessageToRoomEvent.bind(this));
+        this._errorOfSendingMessageToRoomObserver = new Observer(this._handleErrorOfSendingMessageToRoomEvent.bind(this));
 
         this._subjects.userJoinedRoomSubject.subscribe(this._userJoinedRoomObserver);
         this._subjects.userReconnectedToRoomSubject.subscribe(this._userReconnectedToRoomObserver);
@@ -50,6 +53,8 @@ export default class AppController {
         this._subjects.errorOfLeavingRoomSubject.subscribe(this._errorOfLeavingRoomObserver);
         this._subjects.changedPlayStateSubject.subscribe(this._changedPlayStateObserver);
         this._subjects.errorOfChangingPlayStateSubject.subscribe(this._errorOfChangingPlayStateObsever);
+        this._subjects.sentMessageToRoomSubject.subscribe(this._sentMessaageToRoomObserver);
+        this._subjects.errorOfSendingMessageToRoomSubject.subscribe(this._errorOfSendingMessageToRoomObserver);
 
         // Set listeners
         this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
@@ -65,6 +70,8 @@ export default class AppController {
 
         document.addEventListener('mousedown', this._usersListOutsideClick.bind(this));
 
+        this._inputChat.on('keyup paste', this._onChatInputChanged.bind(this));
+
         this._linkLeaveRoom.on('click', this._leaveRoomLickClick.bind(this));
 
         // Show dialog
@@ -79,6 +86,8 @@ export default class AppController {
         this._lableRoomName.html(`${this._room.name} <a class="room-info__leave-link" href="/">Leave</a>`);
         this._labelFileName.text(this._user.file.name);
         this._labelFileSize.text(`Size: ${Number(fileSize).toFixed(2)}MB`);
+
+        this._inputChat.removeClass('d-none');
 
         this._updateUsersList();
 
@@ -256,6 +265,25 @@ export default class AppController {
         }
     }
 
+    /* Chat input */
+
+    _onChatInputChanged(event) {
+        const MAX_LENGTH = 200;
+        const ENTER_KEY_CODE = 13;
+
+        let value = this._inputChat.val();
+        if (value.length > MAX_LENGTH) {
+            value = value.substr(0, MAX_LENGTH);
+            this._inputChat.val(value);
+        }
+
+        if (event.which === ENTER_KEY_CODE) {
+            this._client.sendMessageToRoom(value);
+            this._addUserEvent('You', value);
+            this._inputChat.val('');
+        }
+    }
+
     /* Room actions */
 
     _leaveRoomLickClick() {
@@ -290,6 +318,7 @@ export default class AppController {
     }
 
     _handleErrorOfLeavingRoomObserver(res) {
+        this._addSystemEvent(res.message);
         console.error(res);
     }
 
@@ -339,6 +368,16 @@ export default class AppController {
     }
 
     _handleErrorOfChangingPlayStateEvent(res) {
+        this._addSystemEvent(res.message);
+        console.error(res);
+    }
+
+    _handleSentMessageToRoomEvent(res) {
+        this._addUserEvent(res.sender.name, res.message);
+    }
+
+    _handleErrorOfSendingMessageToRoomEvent(res) {
+        this._addSystemEvent(res.message);
         console.error(res);
     }
 }
