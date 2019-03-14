@@ -207,6 +207,10 @@ async function changePlayState(req, socket, roomManager) {
 
     const room = roomManager.updatePlayState(req.playState, req.currentTime, user);
 
+    if (req.sync) {
+        return;
+    }
+
     return socket.to(room.name).emit(CHANGED_PLAY_STATE, await playStateSerializer.serialize(room, req.seek));
 }
 

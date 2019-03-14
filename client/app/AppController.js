@@ -59,6 +59,8 @@ export default class AppController {
         this._player.controlBar.progressControl.on('mousedown', this._videoSeeked.bind(this));
         this._player.controlBar.progressControl.seekBar.on('mousedown', this._videoSeeked.bind(this));
 
+        this._player.on('ended', this._videoEnded.bind(this));
+
         this._buttonShowUsers.on('click', this._showUsersButtonClick.bind(this));
 
         document.addEventListener('mousedown', this._usersListOutsideClick.bind(this));
@@ -146,6 +148,14 @@ export default class AppController {
 
             document.onmouseup = null;
         };
+    }
+
+    _videoEnded() {
+        this._client.changePlayState({
+            playState: PLAY_STATE_PAUSE,
+            currentTime: this._player.currentTime(),
+            sync: true
+        });
     }
 
     /* Users list */
