@@ -160,6 +160,9 @@ export default class AppController {
     }
 
     _videoEnded() {
+        if (this._room.currentTime > this._player.duration())
+            return;
+
         this._client.changePlayState({
             playState: PLAY_STATE_PAUSE,
             currentTime: this._player.currentTime(),
@@ -323,48 +326,40 @@ export default class AppController {
     }
 
     _handleChangedPlayStateEvent(res) {
-        const playState = res.playState;
-        const currentTime = res.currentTime;
+        const MESSAGES = {
+            PLAY_STATE_PLAYING: 'Started playing',
+            PLAY_STATE_PAUSE: 'Paused playing',
+            PLAY_STATE_STOP: 'Stopped playing'
+        };
+
+        this._room.playState = res.playState;
+        this._room.currentTime = res.currentTime;
+        this._room.updatedBy = res.updatedBy;
+
         const seek = res.seek;
-        const updatedBy = res.updatedBy;
         const duration = this._player.duration();
 
-        if (currentTime >= duration) {
+        if (this._room.currentTime >= duration) {
             this._player.currentTime(duration);
             this._addSystemEvent('Current playback time cannot be set because it is longer than your video');
             return;
         }
 
-        this._player.currentTime(currentTime);
+        this._player.currentTime(this._room.currentTime);
+
+        if (this._room.playState === PLAY_STATE_PLAYING)
+            this._player.play();
+        if (this._room.playState === PLAY_STATE_PAUSE)
+            this._player.pause();
+        if (this._room.playState === PLAY_STATE_STOP)
+            this._player.stop();
 
         if (seek) {
-            if (playState === PLAY_STATE_PLAYING)
-                this._player.play();
-            if (playState === PLAY_STATE_PAUSE)
-                this._player.pause();
-            if (playState === PLAY_STATE_STOP)
-                this._player.stop();
-
-            this._addUserEvent(updatedBy.name, 'Changed time');
+            this._addUserEvent(this._room.updatedBy.name, 'Changed time');
             return;
         }
 
-        if (playState === PLAY_STATE_PLAYING) {
-            this._addUserEvent(updatedBy.name, 'Started playing');
-            this._player.play();
-            return;
-        }
-
-        if (playState === PLAY_STATE_PAUSE) {
-            this._addUserEvent(updatedBy.name, 'Paused playing');
-            this._player.pause();
-            return;
-        }
-
-        if (playState === PLAY_STATE_STOP) {
-            this._addUserEvent(updatedBy.name, 'Stopped playing');
-            this._player.stop();
-        }
+        this._addUserEvent(this._room.updatedBy.name, MESSAGES[this._room.playState]);
     }
 
     _handleErrorOfChangingPlayStateEvent(res) {
