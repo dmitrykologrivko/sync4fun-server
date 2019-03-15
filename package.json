@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=11.0.0",
+    "node": ">=11.11.0",
     "npm": "^=6.4.1"
   },
   "description": "The very simple implementation of service for watching video content together at the same time.",
