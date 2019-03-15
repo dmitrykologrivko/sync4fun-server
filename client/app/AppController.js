@@ -327,9 +327,9 @@ export default class AppController {
 
     _handleChangedPlayStateEvent(res) {
         const MESSAGES = {
-            PLAY_STATE_PLAYING: 'Started playing',
-            PLAY_STATE_PAUSE: 'Paused playing',
-            PLAY_STATE_STOP: 'Stopped playing'
+            [PLAY_STATE_PLAYING]: 'Started playing',
+            [PLAY_STATE_PAUSE]: 'Paused playing',
+            [PLAY_STATE_STOP]: 'Stopped playing'
         };
 
         this._room.playState = res.playState;
