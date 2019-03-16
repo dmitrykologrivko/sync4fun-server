@@ -5,7 +5,7 @@ The very simple implementation of service for watching video content together at
 There is a server and client part included. The server part can be used separately with any other applications 
 that support connection via web sockets.
 
-# Demo
+## Demo
 
 ![](./docs/arts/main_page.jpg)
 
@@ -13,7 +13,7 @@ that support connection via web sockets.
 
 ![](./docs/arts/app_2.jpg)
 
-# Setting Up
+## Setting Up
 
 ### Install
 
@@ -27,30 +27,30 @@ $ npm install
 $ npm start
 ```
 
-# Tests
+## Tests
 
 ```
 $ npm test
 ```
 
-# Build client app
+## Build client app
 
 ```
 $ npm build
 ```
 
-# Start Webpack in watch mode
+## Start Webpack in watch mode
 
 ```
 $ npm watch
 ```
 
-# Start for development
+## Start for development
 
 ```
 $ npm start-dev
 ```
 
-# Socket events
+## Socket events
 
 You can find more about existing socket events [in separated documentation.](docs/socket_events.md)
