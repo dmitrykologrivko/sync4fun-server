@@ -1,4 +1,4 @@
-# sync4fun-server
+# sync4fun
 [![Codeship Status for dmitrykologrivko/sync4fun](https://app.codeship.com/projects/ff2dab20-0ead-0137-ccee-1e87ac5fd1a9/status?branch=master)](https://app.codeship.com/projects/326902)
 
 The very simple implementation of service for watching video content together at the same time. 
