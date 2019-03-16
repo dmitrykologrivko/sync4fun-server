@@ -54,3 +54,7 @@ $ npm start-dev
 ## Socket events
 
 You can find more about existing socket events [in separated documentation.](docs/socket_events.md)
+
+## Developed By
+
+Dmitry Kologrivko  - <dmitrykologrivko@gmail.com>
