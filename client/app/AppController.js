@@ -6,12 +6,17 @@ import 'video.js/dist/video-js.min.css';
 import {
     PLAY_STATE_PLAYING,
     PLAY_STATE_PAUSE,
-    PLAY_STATE_STOP
+    PLAY_STATE_STOP,
+    ROOM_NAME_PARAM
 } from './constants';
 
 import JoinRoomDialog from './JoinRoomDialog';
 import {Observer} from './subjects';
-import {convertBytesToMegabytes, checkFilesEquals} from './utils';
+import {
+    convertBytesToMegabytes,
+    checkFilesEquals,
+    copyToClipboard
+} from './utils';
 
 import './AppController.css';
 
@@ -32,14 +37,15 @@ export default class AppController {
         // Find elements
         this._player = videojs('videoPlayer');
         this._playerModal = null;
-        this._lableRoomName = $('.room-info__room-name');
+        this._labelRoomName = $('.room-info__room-name');
         this._labelFileName = $('.video-info__file-name');
         this._labelFileSize = $('.video-info__file-size');
         this._buttonShowUsers = $('.room-info__show-users-button');
         this._listUsers = $('.users-list');
         this._listEvents = $('.events-list');
         this._inputChat = $('.chat-input-box__input');
-        this._linkLeaveRoom = $('.room-info__leave-link');
+        this._linkShareRoom = $('.room-info__share');
+        this._linkLeaveRoom = $('.room-info__leave');
 
         // Subscribe observers on events
         this._youJoinedRoomObserver = new Observer(this._handleYouJoinedRoomEvent.bind(this));
@@ -86,7 +92,8 @@ export default class AppController {
 
         this._inputChat.on('keyup paste', this._onChatInputChanged.bind(this));
 
-        this._linkLeaveRoom.on('click', this._leaveRoomLickClick.bind(this));
+        this._linkShareRoom.on('click', this._shareRoomLinkClick.bind(this));
+        this._linkLeaveRoom.on('click', this._leaveRoomLinkClick.bind(this));
 
         // Show dialog
         this._joinRoomDialog.showDialog();
@@ -98,10 +105,12 @@ export default class AppController {
         this._file = selectedFile;
         const fileSize = convertBytesToMegabytes(this._user.file.size);
 
-        this._lableRoomName.html(`${this._room.name} <a class="room-info__leave-link" href="/">Leave</a>`);
+        this._labelRoomName.text(this._room.name);
         this._labelFileName.text(this._user.file.name);
         this._labelFileSize.text(`Size: ${Number(fileSize).toFixed(2)}MB`);
 
+        this._linkShareRoom.removeClass('d-none');
+        this._linkLeaveRoom.removeClass('d-none');
         this._inputChat.removeClass('d-none');
 
         this._updateUsersList();
@@ -190,9 +199,8 @@ export default class AppController {
     }
 
     _closePlayerModal() {
-        if (this._playerModal) {
+        if (this._playerModal)
             this._playerModal.close();
-        }
     }
 
     /* Users list */
@@ -314,7 +322,12 @@ export default class AppController {
 
     /* Room actions */
 
-    _leaveRoomLickClick() {
+    _shareRoomLinkClick() {
+        const url = `${window.location.origin}${window.location.pathname}`;
+        copyToClipboard(`${url}?${ROOM_NAME_PARAM}=${this._room.name}`);
+    }
+
+    _leaveRoomLinkClick() {
         this._client.leaveUserFromRoom();
     }
 

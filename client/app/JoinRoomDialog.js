@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
 import {Observer} from './subjects';
-import {ALLOWED_VIDEO_TYPES} from "./constants";
+import {ALLOWED_VIDEO_TYPES, ROOM_NAME_PARAM} from "./constants";
 
 export default class JoinRoomDialog {
     constructor(webSocketClient, subjectsManager, onSuccessCallback) {
@@ -43,6 +43,9 @@ export default class JoinRoomDialog {
             this._subjects.youReconnectedToRoomSubject.unsubscribe(this._youReconnectedRoomObserver);
             this._subjects.errorOfJoiningUserToRoomSubject.unsubscribe(this._errorOfJoiningUserToRoomObserver);
         });
+
+        // Set room name from search params
+        this._setRoomNameFromParams();
     }
 
     showDialog() {
@@ -51,6 +54,15 @@ export default class JoinRoomDialog {
 
     hideDialog() {
         this._root.modal('hide');
+    }
+
+    _setRoomNameFromParams() {
+        const url = new URL(window.location.href);
+        const roomName = url.searchParams.get(ROOM_NAME_PARAM);
+
+        if (roomName) {
+            this._inputRoomName.val(roomName);
+        }
     }
 
     _joinRoomButtonClick() {
@@ -119,6 +131,8 @@ export default class JoinRoomDialog {
         // Join user to room
         this._client.joinUserToRoom(user, room);
     }
+
+    /* Socket events */
 
     _handleYouJoinedRoomEvent(res) {
         this._onSuccessCallback(res, this._selectedFile);

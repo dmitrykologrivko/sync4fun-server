@@ -28,3 +28,5 @@ export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
 export const PLAY_STATE_PLAYING = 'playing';
 export const PLAY_STATE_PAUSE = 'pause';
 export const PLAY_STATE_STOP = 'stop';
+
+export const ROOM_NAME_PARAM = 'room';
