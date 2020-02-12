@@ -434,7 +434,6 @@ export default class AppController {
             this._subjects.youReconnectedToRoomSubject.subscribe(this._youReconnectedRoomObserver);
 
             this._client.joinUserToRoom(this._user, this._room);
-
         } else {
             this._joinRoomDialog.showDialog();
         }
