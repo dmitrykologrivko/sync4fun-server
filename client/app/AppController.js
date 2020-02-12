@@ -19,13 +19,19 @@ export default class AppController {
     constructor(webSocketClient, subjectsManager) {
         this._client = webSocketClient;
         this._subjects = subjectsManager;
-        this._joinRoomDialog = new JoinRoomDialog(this._client, this._subjects, this._onSuccessJoinToRoom.bind(this));
+        this._joinRoomDialog = new JoinRoomDialog(
+            this._client,
+            this._subjects,
+            this._onSuccessJoinToRoom.bind(this)
+        );
         this._user = {};
         this._room = {};
+        this._file = null;
         this._isUsersListVisible = false;
 
         // Find elements
         this._player = videojs('videoPlayer');
+        this._playerModal = null;
         this._lableRoomName = $('.room-info__room-name');
         this._labelFileName = $('.video-info__file-name');
         this._labelFileSize = $('.video-info__file-size');
@@ -36,6 +42,8 @@ export default class AppController {
         this._linkLeaveRoom = $('.room-info__leave-link');
 
         // Subscribe observers on events
+        this._youJoinedRoomObserver = new Observer(this._handleYouJoinedRoomEvent.bind(this));
+        this._youReconnectedRoomObserver = new Observer(this._handleYouReconnectedToRoomEvent.bind(this));
         this._userJoinedRoomObserver = new Observer(this._handleUserJoinedRoomEvent.bind(this));
         this._userReconnectedToRoomObserver = new Observer(this._handleUserReconnectedToRoomEvent.bind(this));
         this._userLeftRoomObserver = new Observer(this._handleUserLeftRoomEvent.bind(this));
@@ -45,6 +53,9 @@ export default class AppController {
         this._errorOfChangingPlayStateObsever = new Observer(this._handleErrorOfChangingPlayStateEvent.bind(this));
         this._sentMessaageToRoomObserver = new Observer(this._handleSentMessageToRoomEvent.bind(this));
         this._errorOfSendingMessageToRoomObserver = new Observer(this._handleErrorOfSendingMessageToRoomEvent.bind(this));
+        this._disconnectObserver = new Observer(this._handleDisconnect.bind(this));
+        this._reconnectingObserver = new Observer(this._handleReconnecting.bind(this));
+        this._reconnectObserver = new Observer(this._handleReconnect.bind(this));
 
         this._subjects.userJoinedRoomSubject.subscribe(this._userJoinedRoomObserver);
         this._subjects.userReconnectedToRoomSubject.subscribe(this._userReconnectedToRoomObserver);
@@ -55,6 +66,9 @@ export default class AppController {
         this._subjects.errorOfChangingPlayStateSubject.subscribe(this._errorOfChangingPlayStateObsever);
         this._subjects.sentMessageToRoomSubject.subscribe(this._sentMessaageToRoomObserver);
         this._subjects.errorOfSendingMessageToRoomSubject.subscribe(this._errorOfSendingMessageToRoomObserver);
+        this._subjects.disconnectSubject.subscribe(this._disconnectObserver);
+        this._subjects.reconnectingSubject.subscribe(this._reconnectingObserver);
+        this._subjects.reconnectSubject.subscribe(this._reconnectObserver);
 
         // Set listeners
         this._player.controlBar.playToggle.on('click', this._playToggleButtonClick.bind(this));
@@ -81,6 +95,7 @@ export default class AppController {
     _onSuccessJoinToRoom(res, selectedFile) {
         this._user = res.user;
         this._room = res.room;
+        this._file = selectedFile;
         const fileSize = convertBytesToMegabytes(this._user.file.size);
 
         this._lableRoomName.html(`${this._room.name} <a class="room-info__leave-link" href="/">Leave</a>`);
@@ -93,7 +108,7 @@ export default class AppController {
 
         this._player.src({
             type: selectedFile.type,
-            src: URL.createObjectURL(selectedFile)
+            src: URL.createObjectURL(this._file)
         });
         this._player.ready(() => {
             const playState = this._room.playState;
@@ -168,6 +183,16 @@ export default class AppController {
             currentTime: this._player.currentTime(),
             sync: true
         });
+    }
+
+    _showPlayerModal(content, options = {temporary: false, uncloseable: true}) {
+        this._playerModal = this._player.createModal(content, options);
+    }
+
+    _closePlayerModal() {
+        if (this._playerModal) {
+            this._playerModal.close();
+        }
     }
 
     /* Users list */
@@ -295,6 +320,20 @@ export default class AppController {
 
     /* Socket events */
 
+    _handleYouJoinedRoomEvent(res) {
+        this._onSuccessJoinToRoom(res, this._file);
+
+        this._subjects.youJoinedRoomSubject.unsubscribe(this._youJoinedRoomObserver);
+        this._subjects.youReconnectedToRoomSubject.unsubscribe(this._youReconnectedRoomObserver);
+    }
+
+    _handleYouReconnectedToRoomEvent(res) {
+        this._onSuccessJoinToRoom(res, this._file);
+
+        this._subjects.youJoinedRoomSubject.unsubscribe(this._youJoinedRoomObserver);
+        this._subjects.youReconnectedToRoomSubject.unsubscribe(this._youReconnectedRoomObserver);
+    }
+
     _handleUserJoinedRoomEvent(res) {
         this._addUserEvent(res.user.name, 'Joined room');
 
@@ -374,5 +413,30 @@ export default class AppController {
     _handleErrorOfSendingMessageToRoomEvent(res) {
         this._addSystemEvent(res.message);
         console.error(res);
+    }
+
+    _handleDisconnect(reason) {
+        const message = `Disconnected from the server: ${reason}`;
+        this._addSystemEvent(message);
+        this._showPlayerModal(message);
+    }
+
+    _handleReconnecting(attempt) {
+        this._addSystemEvent(`Trying to reconnect: ${attempt} attempt`);
+    }
+
+    _handleReconnect() {
+        this._addSystemEvent('Reconnected');
+        this._closePlayerModal();
+
+        if (this._user && this._room) {
+            this._subjects.youJoinedRoomSubject.subscribe(this._youJoinedRoomObserver);
+            this._subjects.youReconnectedToRoomSubject.subscribe(this._youReconnectedRoomObserver);
+
+            this._client.joinUserToRoom(this._user, this._room);
+
+        } else {
+            this._joinRoomDialog.showDialog();
+        }
     }
 }

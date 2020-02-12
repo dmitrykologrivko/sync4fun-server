@@ -18,6 +18,11 @@ export const SEND_MESSAGE_TO_ROOM = 'send_message_to_room';
 export const SENT_MESSAGE_TO_ROOM = 'sent_message_to_room';
 export const ERROR_OF_SENDING_MESSAGE_TO_ROOM = 'error_of_sending_message_to_room';
 
+export const DISCONNECT = 'disconnect';
+export const RECONNECT = 'reconnect';
+export const RECONNECTING = 'reconnecting';
+export const CLIENT_DISCONNECT = 'io client disconnect';
+
 export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
 
 export const PLAY_STATE_PLAYING = 'playing';

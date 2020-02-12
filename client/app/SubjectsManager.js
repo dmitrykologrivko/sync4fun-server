@@ -10,7 +10,10 @@ import {
     ChangedPlayStateSubject,
     ErrorOfChangingPlayStateSubject,
     SentMessageToRoomSubject,
-    ErrorOfSendingMessageToRoomSubject
+    ErrorOfSendingMessageToRoomSubject,
+    DisconnectSubject,
+    ReconnectingSubject,
+    ReconnectSubject
 } from './subjects';
 
 export default class SubjectsManager {
@@ -27,6 +30,9 @@ export default class SubjectsManager {
         this._errorOfChangingPlayStateSubject = new ErrorOfChangingPlayStateSubject();
         this._sentMessageToRoomSubject = new SentMessageToRoomSubject();
         this._errorOfSendingMessageToRoomSubject = new ErrorOfSendingMessageToRoomSubject();
+        this._disconnectSubject = new DisconnectSubject();
+        this._reconnectingSubject = new ReconnectingSubject();
+        this._reconnectSubject = new ReconnectSubject();
     }
 
     get youJoinedRoomSubject() {
@@ -75,5 +81,17 @@ export default class SubjectsManager {
 
     get errorOfSendingMessageToRoomSubject() {
         return this._errorOfSendingMessageToRoomSubject;
+    }
+
+    get disconnectSubject() {
+        return this._disconnectSubject;
+    }
+
+    get reconnectingSubject() {
+        return this._reconnectingSubject;
+    }
+
+    get reconnectSubject() {
+        return this._reconnectSubject;
     }
 }

@@ -1,3 +1,41 @@
+/* Dialogs */
+
+.app-dialog {
+}
+
+.app-dialog__content {
+    background: #3c4046;
+    color: #FFFFFF;
+}
+
+.app-dialog__form-control {
+    outline: none;
+}
+
+.app-dialog__form-control:focus {
+    border-color: #FFFFFF;
+}
+
+.app-dialog__btn-primary {
+    background: #242424;
+    border-color: #242424;
+}
+
+.app-dialog__btn-primary:hover,
+.app-dialog__btn-primary:focus,
+.app-dialog__btn-primary:active {
+    background: #0d1216 !important;
+    border-color: #0d1216 !important;
+    outline: none;
+    box-shadow: none !important;
+}
+
+/* Main */
+
+.main {
+    height: 100%;
+}
+
 /* Video JS */
 
 .video-js {
@@ -5,10 +43,18 @@
     height: 100%;
 }
 
-/* Main */
+/* Video Info */
 
-.main {
-    height: 100%;
+.video-info {
+    padding: 1rem;
+}
+
+.video-info__file-name {
+    color: #e6e8e7;
+}
+
+.video-info__file-size {
+    color: #e6e8e7;
 }
 
 /* Room Info */
@@ -41,6 +87,8 @@
 .room-info__show-users-button:focus {
     outline: 0;
 }
+
+/* Users List */
 
 .users-list {
     width: 90%;
@@ -87,20 +135,6 @@
     color: red !important;
 }
 
-/* Video Info */
-
-.video-info {
-    padding: 1rem;
-}
-
-.video-info__file-name {
-    color: #e6e8e7;
-}
-
-.video-info__file-size {
-    color: #e6e8e7;
-}
-
 /* Events */
 
 .events {
@@ -121,7 +155,6 @@
 }
 
 .events-list__item {
-
 }
 
 .events-list__system {

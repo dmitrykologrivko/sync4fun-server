@@ -3,8 +3,6 @@ import $ from 'jquery';
 import {Observer} from './subjects';
 import {ALLOWED_VIDEO_TYPES} from "./constants";
 
-import './JoinRoomDialog.css';
-
 export default class JoinRoomDialog {
     constructor(webSocketClient, subjectsManager, onSuccessCallback) {
         this._client = webSocketClient;

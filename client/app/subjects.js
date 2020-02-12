@@ -64,3 +64,9 @@ export class ErrorOfChangingPlayStateSubject extends BaseSubject {}
 export class SentMessageToRoomSubject extends BaseSubject {}
 
 export class ErrorOfSendingMessageToRoomSubject extends BaseSubject {}
+
+export class DisconnectSubject extends BaseSubject {}
+
+export class ReconnectingSubject extends BaseSubject {}
+
+export class ReconnectSubject extends BaseSubject {}
