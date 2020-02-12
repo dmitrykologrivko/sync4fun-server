@@ -13,54 +13,40 @@
 </head>
 <body>
 
-<!-- Modal -->
-<div id="modalJoinRoom"
-     class="modal fade"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="exampleModalCenterTitle"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered join-room-dialog" role="document">
-        <div class="modal-content join-room-dialog__content">
+<!-- Join Room Modal -->
+<div id="modalJoinRoom" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered app-dialog join-room-dialog" role="document">
+        <div class="modal-content app-dialog__content">
             <div class="modal-header">
-                <h5 class="modal-title join-room-dialog__title">Join Room</h5>
+                <h5 class="modal-title">Join Room</h5>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="form-group">
-                        <label for="inputUserName" class="col-form-label join-room-dialog__form-label">
+                        <label for="inputUserName" class="col-form-label">
                             Your name:
                         </label>
-                        <input type="text"
-                               class="form-control join-room-dialog__form-control"
-                               id="inputUserName">
+                        <input type="text" class="form-control" id="inputUserName">
                         <div class="invalid-feedback join-room-dialog__error-user-name"></div>
                     </div>
                     <div class="form-group">
-                        <label for="inputUserFile" class="col-form-label join-room-dialog__form-label">
+                        <label for="inputUserFile" class="col-form-label">
                             Media file
                         </label>
-                        <input type="file"
-                               class="form-control-file join-room-dialog__form-label join-room-dialog__form-control"
-                               id="inputUserFile">
+                        <input type="file" class="form-control-file app-dialog__form-control" id="inputUserFile">
                         <div class="invalid-feedback join-room-dialog__error-user-file"></div>
                     </div>
                     <div class="form-group">
-                        <label for="inputRoomName"
-                               class="col-form-label join-room-dialog__form-label">
+                        <label for="inputRoomName" class="col-form-label">
                             Room name:
                         </label>
-                        <input type="text"
-                               class="form-control join-room-dialog__form-control"
-                               id="inputRoomName">
+                        <input type="text" class="form-control" id="inputRoomName">
                         <div class="invalid-feedback join-room-dialog__error-room-name"></div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-primary join-room-dialog__btn-primary"
-                        id="buttonJoinRoom">
+                <button type="button" class="btn btn-primary app-dialog__btn-primary" id="buttonJoinRoom">
                     Join
                 </button>
             </div>

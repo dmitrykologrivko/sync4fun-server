@@ -14,7 +14,11 @@ import {
     ERROR_OF_CHANGING_PLAY_STATE,
     SEND_MESSAGE_TO_ROOM,
     SENT_MESSAGE_TO_ROOM,
-    ERROR_OF_SENDING_MESSAGE_TO_ROOM
+    ERROR_OF_SENDING_MESSAGE_TO_ROOM,
+    DISCONNECT,
+    CLIENT_DISCONNECT,
+    RECONNECT,
+    RECONNECTING
 } from './constants';
 
 export default class WebSocketClient {
@@ -72,6 +76,21 @@ export default class WebSocketClient {
 
         this._socket.on(ERROR_OF_SENDING_MESSAGE_TO_ROOM, res => {
             this._subjectsManager.errorOfSendingMessageToRoomSubject.publish(res);
+        });
+
+        this._socket.on(DISCONNECT, reason => {
+            if (reason === CLIENT_DISCONNECT)
+                return;
+
+            this._subjectsManager.disconnectSubject.publish(reason);
+        });
+
+        this._socket.on(RECONNECT, attempt => {
+            this._subjectsManager.reconnectSubject.publish(attempt);
+        });
+
+        this._socket.on(RECONNECTING, attempt => {
+            this._subjectsManager.reconnectingSubject.publish(attempt);
         });
     }
 
