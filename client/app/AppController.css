@@ -65,15 +65,26 @@
 }
 
 .room-info__room-name {
+    display: inline-block;
     color: #e6e8e7;
 }
 
-.room-info__leave-link {
-    color: #979998;
+.room-info__share,
+.room-info__leave {
+    display: inline-block;
+    background-repeat: no-repeat;
+    width: 25px;
+    height: 25px;
+    margin: 0 5px;
 }
 
-.room-info__leave-link:hover {
-    color: #979998;
+.room-info__share {
+    background-image: url("share.svg");
+    cursor: pointer;
+}
+
+.room-info__leave {
+    background-image: url("leave.svg");
 }
 
 .room-info__show-users-button {
